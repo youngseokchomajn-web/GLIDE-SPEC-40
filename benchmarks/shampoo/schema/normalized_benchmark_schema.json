@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NormalizedBenchmarkRecord",
+  "description": "Schema for normalized tabular benchmark records under benchmarks/shampoo/normalized/",
+  "type": "object",
+  "required": [
+    "source_file_hash",
+    "dataset_id",
+    "source_record_id",
+    "data_origin",
+    "schema_version",
+    "target_name",
+    "target_value"
+  ],
+  "properties": {
+    "source_file_hash": { "type": "string", "description": "SHA256 hash of original raw JSON file" },
+    "dataset_id": { "type": "string", "const": "NATURE_812_SHAMPOO_2024" },
+    "source_record_id": { "type": "integer" },
+    "data_origin": { "type": "string", "const": "PUBLIC_BENCHMARK" },
+    "schema_version": { "type": "string", "const": "1.0" },
+    "target_name": { "type": "string" },
+    "target_value": { "type": "number" },
+    "target_error": { "type": ["number", "null"] },
+    "target_unit": { "type": "string" },
+    "water_wt_pct": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "surfactant_total_wt_pct": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "surfactant_primary_ratio": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+    "polymer_total_wt_pct": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "thickener_total_wt_pct": { "type": "number", "minimum": 0.0, "maximum": 100.0 }
+  }
+}

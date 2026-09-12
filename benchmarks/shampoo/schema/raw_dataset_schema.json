@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RawLiquidFormulationsRecord",
+  "description": "Schema for records in LiquidFormulationsDataset_2023.json from Nature Scientific Data (2024)",
+  "type": "object",
+  "required": [
+    "ID",
+    "Stability_Test",
+    "Turbidity_NTU",
+    "Turbidity_Error",
+    "Viscosity",
+    "Rheology_Type",
+    "Rheology_Data"
+  ],
+  "properties": {
+    "ID": { "type": "integer", "minimum": 1, "maximum": 822 },
+    "Texapon SB 3 KC": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Plantapon ACG 50": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Plantapon LC 7": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Plantacare 818": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Plantacare 2000": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Dehyton MC": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Dehyton PK 45": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Dehyton ML": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Dehyton AB 30": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Plantapon Amino SCG-L": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Plantapon Amino KG-L": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Dehyquart A-CA": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Luviquat Excellence": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Dehyquart CC6": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Dehyquart CC7 Benz": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Salcare Super 7": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Arlypon F": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Arlypon TT": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+    "Stability_Test": { "type": "boolean" },
+    "Turbidity_NTU": { "type": ["number", "string"] },
+    "Turbidity_Error": { "type": ["integer", "string"] },
+    "Viscosity": { "type": "string", "enum": ["VERY-LOW", "LOW", "MEDIUM", "HIGH", "NA"] },
+    "Rheology_Type": { "type": "string", "enum": ["NEWTONIAN", "SHEAR-THIN", "OTHER", "NA"] },
+    "Rheology_Data": {
+      "type": ["array", "string"],
+      "description": "3-element list of dicts: [shear_rate, avg_viscosity, std_dev] or empty string if unstable"
+    }
+  }
+}
