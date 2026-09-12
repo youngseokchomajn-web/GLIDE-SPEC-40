@@ -113,6 +113,39 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         self.assertAlmostEqual(sil_item.charge_pct, 20.0, places=3)
         self.assertTrue(len(calc_result.carrier_offsets_applied) > 0)
 
+    def test_doe_ratios_resolve_blends_to_traceable_raw_materials(self):
+        """DOE ratios must replace blend placeholders, not require blend mocks."""
+        specs = dict(REV73_RAW_MATERIALS)
+        specs["MAT-MQ-01"] = RawMaterial(
+            material_id="MAT-MQ-01", inci="MQ Resin", trade_name="MQ-60",
+            supplier="Supplier", grade="Cosmetic", material_type=MaterialType.RESIN,
+            active_pct=60.0, carrier="Dimethicone", carrier_pct=40.0,
+            status=MaterialStatus.VERIFIED,
+        )
+        trial = AdvancedDOEEngine.generate_full_doe_design()[8]
+        result = ManufacturingCalculator.generate_manufacturing_formula(
+            active_formula=REV73_TARGET_ACTIVE_FORMULA,
+            material_specs=specs,
+            batch_size_kg=1.0,
+            component_ratios={
+                "MAT-WAX-SYSTEM": {
+                    "MAT-WAX-SYN-01": trial.synthetic_wax_pct,
+                    "MAT-WAX-CAN-01": trial.candelilla_wax_pct,
+                },
+                "MAT-SIL-SYSTEM": {
+                    "MAT-SIL-DIM-01": trial.dimethicone_pct,
+                    "MAT-SIL-CAP-01": trial.caprylyl_methicone_pct,
+                },
+            },
+        )
+        self.assertTrue(result.is_valid)
+        ids = {item.material_id for item in result.items}
+        self.assertNotIn("MAT-WAX-SYSTEM", ids)
+        self.assertNotIn("MAT-SIL-SYSTEM", ids)
+        self.assertIn("MAT-WAX-SYN-01", ids)
+        dim = next(item for item in result.items if item.material_id == "MAT-SIL-DIM-01")
+        self.assertAlmostEqual(dim.charge_pct, 9.0, places=3)
+
     def test_advanced_doe_matrix_constraints(self):
         """Validates that Advanced DOE Engine adheres to mixture boundaries."""
         trials = AdvancedDOEEngine.generate_full_doe_design()

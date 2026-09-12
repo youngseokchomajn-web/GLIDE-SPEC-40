@@ -4,7 +4,7 @@ Implements active-to-manufacturing conversion, carrier solvent offsetting,
 batch weight scaling, and specification completeness gating.
 """
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from src.materials.master import RawMaterial, MaterialStatus
@@ -72,13 +72,57 @@ class ManufacturingCalculator:
             raise ValueError(f"Raw material active % must be positive, got {raw_active_pct}")
         return target_active_pct / (raw_active_pct / 100.0)
 
+    COMPOSITE_COMPONENTS = {
+        "MAT-WAX-SYSTEM": ("MAT-WAX-SYN-01", "MAT-WAX-CAN-01"),
+        "MAT-SIL-SYSTEM": ("MAT-SIL-DIM-01", "MAT-SIL-CAP-01"),
+    }
+
+    @classmethod
+    def _resolve_components(
+        cls,
+        active_formula: FormulaMaster,
+        component_ratios: Optional[Dict[str, Dict[str, float]]],
+    ) -> List[FormulaComponent]:
+        """Expand formula blend placeholders into traceable raw-material lines.
+
+        Ratio values are absolute target-active percentages and must add up to
+        the blend percentage in the locked active formula.
+        """
+        resolved: List[FormulaComponent] = []
+        for component in active_formula.components:
+            child_ids = cls.COMPOSITE_COMPONENTS.get(component.material_id)
+            if not child_ids:
+                resolved.append(component)
+                continue
+            ratios = (component_ratios or {}).get(component.material_id)
+            if not ratios:
+                resolved.append(component)
+                continue
+            unexpected = set(ratios) - set(child_ids)
+            missing = set(child_ids) - set(ratios)
+            ratio_total = sum(ratios.values())
+            if unexpected or missing or abs(ratio_total - component.target_active_pct) > 0.001:
+                raise ValueError(
+                    f"Invalid ratios for {component.material_id}: expected {list(child_ids)} "
+                    f"to total {component.target_active_pct:.3f}%, got {ratios}."
+                )
+            for material_id in child_ids:
+                resolved.append(FormulaComponent(
+                    material_id=material_id,
+                    material_name=material_id,
+                    target_active_pct=ratios[material_id],
+                    notes=f"Resolved from {component.material_name}: {component.notes or ''}",
+                ))
+        return resolved
+
     @classmethod
     def generate_manufacturing_formula(
         cls,
         active_formula: FormulaMaster,
         material_specs: Dict[str, RawMaterial],
         batch_size_kg: float,
-        offset_carrier: bool = True
+        offset_carrier: bool = True,
+        component_ratios: Optional[Dict[str, Dict[str, float]]] = None,
     ) -> ManufacturingCalculationResult:
         missing_specs: List[str] = []
         warnings: List[str] = []
@@ -89,9 +133,19 @@ class ManufacturingCalculator:
         if abs(total_target - 100.0) > 0.001:
             warnings.append(f"Target active formula total is {total_target:.2f}%, expected 100.0%")
 
+        try:
+            resolved_components = cls._resolve_components(active_formula, component_ratios)
+        except ValueError as error:
+            return ManufacturingCalculationResult(
+                is_valid=False, formula_id=f"MFG-{active_formula.formula_id}",
+                revision=active_formula.revision, batch_size_kg=batch_size_kg,
+                total_charge_pct=0.0, items=[], missing_specs=[str(error)],
+                carrier_offsets_applied=[], warnings=warnings,
+            )
+
         # First pass: check specs and compute nominal charges
         nominal_charges: Dict[str, float] = {}
-        for comp in active_formula.components:
+        for comp in resolved_components:
             mat = material_specs.get(comp.material_id)
             if not mat:
                 missing_specs.append(f"Material {comp.material_id} ({comp.material_name}) missing from Raw Material Master.")
@@ -120,7 +174,7 @@ class ManufacturingCalculator:
         # Second pass: Carrier Solvent Offsetting (e.g. MQ Resin carrier offset against Silicone carrier pool)
         final_charges = dict(nominal_charges)
         if offset_carrier:
-            for comp in active_formula.components:
+            for comp in resolved_components:
                 mat = material_specs[comp.material_id]
                 # If raw material is a solution/premix with a known carrier
                 if mat.active_pct < 100.0 and mat.carrier and mat.carrier != "TBD":
@@ -130,6 +184,11 @@ class ManufacturingCalculator:
                     # Look for corresponding carrier recipient in formula (e.g., silicone blend)
                     carrier_recipient_id = None
                     if "dimethicone" in mat.carrier.lower() or "silicone" in mat.carrier.lower():
+                        carrier_recipient_id = "MAT-SIL-DIM-01"
+
+                    # Backward compatibility for legacy callers that still
+                    # supply a pre-blended silicone mock instead of ratios.
+                    if carrier_recipient_id not in final_charges and "MAT-SIL-SYSTEM" in final_charges:
                         carrier_recipient_id = "MAT-SIL-SYSTEM"
 
                     if carrier_recipient_id and carrier_recipient_id in final_charges:
@@ -146,7 +205,7 @@ class ManufacturingCalculator:
         total_cost: float = 0.0
         has_cost_data = True
 
-        for comp in active_formula.components:
+        for comp in resolved_components:
             mat = material_specs[comp.material_id]
             charge_pct = final_charges[comp.material_id]
             weight_kg = (batch_size_kg * charge_pct) / 100.0
