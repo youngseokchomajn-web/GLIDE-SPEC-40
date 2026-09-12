@@ -1,0 +1,5 @@
+feature_name,mathematical_definition,typical_value_range,gs40_significance,citation
+T_gel_sol_crossover,"Temperature where G'(T) = G''(T) during heating (tan delta = 1.0)",66.0 - 86.5 °C,Upper bound of structural stick stability under thermal stress,Gels (2021) 10.3390/gels7030097
+thermal_hysteresis_c,"Delta T = T_gel_sol (heating) - T_sol_gel (cooling) at 1°C/min",11.0 - 13.5 °C,Quantifies nucleation lag and supercooling required for mold crystallization,Gels (2021) 10.3390/gels7030097
+plateau_modulus_ratio,"G'(25°C) / G''(25°C) in LVR",5.5 - 8.8,Indicator of elastic solid dominance over viscous dissipation,Gels (2021) 10.3390/gels7030097
+payoff_modulus_exponent,"d ln(Payoff) / d ln(G')",-0.78 ± 0.09,Power-law scaling relationship between shear storage modulus and transfer mass,Gels (2021) 10.3390/gels7030097

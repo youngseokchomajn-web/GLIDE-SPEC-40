@@ -1,0 +1,10 @@
+dataset_id,sample_id,cooling_rate_c_min,cooling_regime,crystal_morphology,mean_crystal_size_um,birefringent_area_pct,storage_modulus_gprime_20c_mpa,yield_strain_pct,citation,doi,notes
+RSC2026_THERM,Lip-A,0.1,Slow_Annealing,Coarse_Spherulitic_Plates,18.5,42.0,2.65,0.012,Soft Matter (2026),10.1039/D5SM01032B,Slow cooling permits large crystalline domains with lower defect density
+RSC2026_THERM,Lip-A,1.0,Standard_Ambient_Cooling,Intermediate_Needle_Network,8.2,56.5,3.85,0.008,Soft Matter (2026),10.1039/D5SM01032B,Balanced crystalline scaffolding typical of cosmetic mold release
+RSC2026_THERM,Lip-A,10.0,Rapid_Quenching,Fine_Microcrystallite_Mesh,2.4,68.0,5.12,0.004,Soft Matter (2026),10.1039/D5SM01032B,High supercooling creates fine dense crystal network with highest initial rigidity
+RSC2026_THERM,Lip-B,0.1,Slow_Annealing,Coarse_Plates,22.0,36.0,1.80,0.015,Soft Matter (2026),10.1039/D5SM01032B,Lower solid fraction softer base
+RSC2026_THERM,Lip-B,1.0,Standard_Ambient_Cooling,Intermediate_Needles,9.5,48.0,2.45,0.010,Soft Matter (2026),10.1039/D5SM01032B,Nominal baseline cooling
+RSC2026_THERM,Lip-B,10.0,Rapid_Quenching,Fine_Dispersed_Crystals,3.1,60.5,3.60,0.006,Soft Matter (2026),10.1039/D5SM01032B,Rapid quenching boosts firmness but narrows yield strain
+RSC2026_THERM,Lip-C,0.1,Slow_Annealing,Coarse_Plates,16.0,46.0,3.40,0.011,Soft Matter (2026),10.1039/D5SM01032B,High wax high hardness formulation
+RSC2026_THERM,Lip-C,1.0,Standard_Ambient_Cooling,Dense_Interlocking_Mesh,7.0,62.0,4.90,0.007,Soft Matter (2026),10.1039/D5SM01032B,High structural rigidity
+RSC2026_THERM,Lip-C,10.0,Rapid_Quenching,Ultra_Fine_Microcrystallites,2.0,74.0,6.45,0.003,Soft Matter (2026),10.1039/D5SM01032B,Maximum stiffness risk of brittleness

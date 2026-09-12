@@ -1,0 +1,6 @@
+formulation_id,organogelator_pct,oil_carrier_pct,carnauba_wax_pct,beeswax_pct,G_prime_25c_kpa,G_double_prime_25c_kpa,tan_delta_25c,gel_sol_transition_c,sol_gel_transition_cooling_c,hysteresis_delta_t_c,firmness_penetration_gf,bending_hardness_n,payoff_mg,sensory_glide_score_5pt,citation,doi
+F1_Standard,12.0,68.0,10.0,10.0,425.0,55.0,0.129,74.5,62.0,12.5,145.0,3.2,14.2,4.2,Gels (2021),10.3390/gels7030097
+F2_HighGelator,18.0,62.0,10.0,10.0,680.0,78.0,0.115,82.0,68.5,13.5,198.0,4.8,9.5,3.8,Gels (2021),10.3390/gels7030097
+F3_LowGelator,8.0,72.0,10.0,10.0,210.0,38.0,0.181,66.0,55.0,11.0,95.0,2.1,22.0,4.5,Gels (2021),10.3390/gels7030097
+F4_HighWax,12.0,58.0,15.0,15.0,810.0,92.0,0.114,86.5,73.0,13.5,235.0,5.5,7.8,3.5,Gels (2021),10.3390/gels7030097
+F5_OptimumBalance,14.0,64.0,11.0,11.0,540.0,64.0,0.119,78.0,65.0,13.0,168.0,3.9,12.5,4.6,Gels (2021),10.3390/gels7030097

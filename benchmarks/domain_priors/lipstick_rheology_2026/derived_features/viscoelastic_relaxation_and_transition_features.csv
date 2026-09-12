@@ -1,0 +1,5 @@
+formulation_id,G_prime_20c_mpa,tan_delta_20c,yield_stress_pa,relaxation_time_tau1_s,cooling_sensitivity_exponent,thermal_softening_onset_c,sol_transition_temperature_c,notes
+Lip-A,3.85,0.109,192.5,10.2,0.142,54.5,68.0,Balanced commercial benchmark with dual-relaxation timescale
+Lip-B,2.45,0.127,122.5,9.8,0.150,51.0,63.5,Higher emollient ratio faster stress dissipation
+Lip-C,4.90,0.104,245.0,10.6,0.138,58.0,72.5,High structural firmness long-term creep resistance
+GS40_PRIOR_TARGET,4.20,0.112,210.0,10.0,0.145,56.0,69.5,Estimated GS-40 viscoelastic target domain derived from Lip-A/Lip-C envelope
