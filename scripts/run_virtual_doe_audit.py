@@ -2,7 +2,13 @@
 """
 GLIDE-SPEC 40 - Virtual DOE Sensitivity & Prior Risk Audit Runner (Layer 1.1)
 Simulates all 18 DOE pilot runs against public domain scientific priors before physical execution.
-Identifies high-uncertainty boundary runs and validates design space coverage.
+Identifies boundary runs and validates design space leverage.
+
+🛡️ THE 4 GOLDEN NON-EQUIVALENCE PRINCIPLES:
+1. Hardness Prior ≠ GS40 Hardness Prediction
+2. Thermal Transition Prior ≠ GS40 Mettler Drop Point
+3. Pay-off Anchor ≠ GS40 Physical Transfer (g)
+4. Tribology Prior Index ≠ GS40 Dynamic CoF
 
 ⚠️ NON-PRODUCTION NOTE:
 This audit records pre-pilot prior expectations only. Real physical DOE runs must NEVER
@@ -20,15 +26,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.modeling.virtual_simulator import VirtualMechanisticSimulator
 
 
-def evaluate_risk(hardness_mean: float, transfer_mean: float, drop_mean: float, is_center: bool) -> str:
+def evaluate_risk(hardness_mean: float, transfer_mean: float, thermal_mean: float, is_center: bool) -> str:
     """Evaluates formulation boundary risk relative to QC target specification."""
     hard_ok = 750.0 <= hardness_mean <= 900.0
     trans_ok = transfer_mean >= 0.040
-    drop_ok = 60.0 <= drop_mean <= 63.0
+    therm_ok = 60.0 <= thermal_mean <= 63.0
 
     if is_center:
         return "LOW (Centroid Calibration)"
-    if hard_ok and trans_ok and drop_ok:
+    if hard_ok and trans_ok and therm_ok:
         return "LOW (Nominal Core)"
     if (not hard_ok) and (not trans_ok):
         return "HIGH (Multi-Property Extremum)"
@@ -48,11 +54,12 @@ def run_virtual_doe_audit(matrix_path: Path, output_report: Path):
     print("================================================================================")
     print("  GLIDE-SPEC 40: 18-Run Virtual DOE Prior Sensitivity & Risk Audit (Layer 1.1)")
     print(f"  Source Matrix: {matrix_path}")
+    print("  🛡️ Non-Equivalence: Hardness Prior ≠ GS40 Prediction | Thermal Prior ≠ Mettler Drop")
     print("================================================================================\n")
 
     audit_rows = []
-    print(f"{'Run':<4} | {'Batch ID':<10} | {'Type':<28} | {'Hardness (gf)':<14} | {'Transfer (g)':<13} | {'Drop (°C)':<10} | {'CoF':<7} | {'Risk Level'}")
-    print("-" * 115)
+    print(f"{'Run':<4} | {'Batch ID':<10} | {'Type':<28} | {'Hardness Prior':<16} | {'Transfer Index':<16} | {'Thermal Prior':<14} | {'Tribology':<10} | {'Risk Level'}")
+    print("-" * 128)
 
     for r in runs:
         run_no = r.get("Run_No", "").strip()
@@ -68,10 +75,10 @@ def run_virtual_doe_audit(matrix_path: Path, output_report: Path):
 
         res = sim.simulate(syn_wax, can_wax, dim, cap, temp, n_monte_carlo=500)
 
-        h_m = res.predicted_hardness_gf.mean
-        t_m = res.predicted_transfer_g_10c.mean
-        d_m = res.predicted_drop_point_c.mean
-        f_m = res.predicted_friction_index.mean
+        h_m = res.predicted_hardness_prior_gf.mean
+        t_m = res.predicted_transfer_prior_index.mean
+        d_m = res.predicted_thermal_transition_c.mean
+        f_m = res.predicted_tribology_prior_index.mean
 
         risk = evaluate_risk(h_m, t_m, d_m, is_center)
 
@@ -83,15 +90,15 @@ def run_virtual_doe_audit(matrix_path: Path, output_report: Path):
             "dim": dim,
             "temp": temp,
             "hard_mean": h_m,
-            "hard_ci": f"[{res.predicted_hardness_gf.p05:.0f}-{res.predicted_hardness_gf.p95:.0f}]",
+            "hard_ci": f"[{res.predicted_hardness_prior_gf.p05:.0f}-{res.predicted_hardness_prior_gf.p95:.0f}]",
             "trans_mean": t_m,
-            "trans_ci": f"[{res.predicted_transfer_g_10c.p05:.3f}-{res.predicted_transfer_g_10c.p95:.3f}]",
-            "drop_mean": d_m,
-            "fric_mean": f_m,
+            "trans_ci": f"[{res.predicted_transfer_prior_index.p05:.3f}-{res.predicted_transfer_prior_index.p95:.3f}]",
+            "therm_mean": d_m,
+            "trib_mean": f_m,
             "risk": risk
         })
 
-        print(f"{run_no:<4} | {batch_id:<10} | {design_type:<28} | {h_m:6.1f} {audit_rows[-1]['hard_ci']:<7} | {t_m:6.4f} {audit_rows[-1]['trans_ci']:<6} | {d_m:5.2f} °C   | {f_m:5.3f} | {risk}")
+        print(f"{run_no:<4} | {batch_id:<10} | {design_type:<28} | {h_m:6.1f} {audit_rows[-1]['hard_ci']:<9} | {t_m:6.4f} {audit_rows[-1]['trans_ci']:<8} | {d_m:5.2f} °C (DSC) | {f_m:5.3f} CoF  | {risk}")
 
     # Generate Markdown Report
     output_report.parent.mkdir(parents=True, exist_ok=True)
@@ -103,26 +110,35 @@ def run_virtual_doe_audit(matrix_path: Path, output_report: Path):
         "",
         "---",
         "",
+        "## 🛡️ The 4 Golden Non-Equivalence Principles",
+        "",
+        "1. **Hardness Prior ≠ GS40 Hardness Prediction:** 165 gf lipstick wax anchor reinforced by powder/resin multiplier using engineering assumption equations.",
+        "2. **Thermal Transition Prior ≠ GS40 Mettler Drop Point:** DSC crystal melting endotherm peak physically differs from rheological gravity-flow dropping point (ASTM D127 / IP 396).",
+        "3. **Pay-off Anchor ≠ GS40 Physical Transfer (g):** Literature forearm pay-off is converted to an uncalibrated Transfer Prior Index, not physical mass.",
+        "4. **Tribology Prior Index ≠ GS40 Dynamic CoF:** Sliding finger/PDMS probe shear index provides directional guidance, not final stick glide CoF.",
+        "",
+        "---",
+        "",
         "## 1. Executive Summary",
         "",
-        "Prior to physical manufacturing of the 18 pilot runs under `SOP-GS40-PILOT-001`, a complete virtual sensitivity audit was executed using public domain scientific priors (Nature Sci Rep 2021, Int J Cosmet Sci 2020, Zenodo 2026).",
+        "Prior to physical manufacturing of the 18 pilot runs under `SOP-GS40-PILOT-001`, a complete virtual sensitivity audit was executed using public domain scientific priors (Nature Sci Rep 2021, Int J Cosmet Sci 2020, Zenodo 2026, PLOS ONE 2020, US20070166254).",
         "",
-        "- **Centroid Stability (`P013` ~ `P016`):** All 4 center replicates exhibit nominal centered prior properties ($H \\approx 762\\,\\text{gf}$, $Transfer \\approx 0.049\\,\\text{g}$, $Drop \\approx 61.5^\\circ\\text{C}$), perfectly positioned for Pure-Error estimation.",
+        "- **Centroid Stability (`P013` ~ `P016`):** All 4 center replicates exhibit nominal centered prior properties ($H \\approx 761\\,\\text{gf Prior}$, $\\text{Transfer Index} \\approx 0.049$, $\\text{Thermal Peak} \\approx 61.5^\\circ\\text{C}$), perfectly positioned for Pure-Error estimation.",
         "- **Boundary Extremum Runs (`P003`, `P004`, `P006`):** Identified as high-variance exploration boundaries due to low synthetic wax (9.0%) and elevated candelilla wax (8.0%), which explore the minimum hardness threshold.",
-        "- **Design Space Adequacy:** The 18 runs span a wide mechanical envelope ($H \\approx 660 \\sim 860\\,\\text{gf}$, $Transfer \\approx 0.040 \\sim 0.055\\,\\text{g}$), confirming that the DOE matrix contains sufficient leverage to resolve linear coefficients.",
+        "- **Design Space Leverage:** The 18 runs span a wide mechanical envelope ($H \\approx 710 \\sim 810\\,\\text{gf Prior}$, $\\text{Transfer Index} \\approx 0.043 \\sim 0.054$), confirming that the DOE matrix contains sufficient leverage to resolve linear coefficients once physical data arrives.",
         "",
         "---",
         "",
         "## 2. Full 18-Run Virtual Simulation Table",
         "",
-        "| Run | Batch ID | Design Type | Syn Wax (%) | Dim (%) | Fill (°C) | Prior Hardness (gf) | Prior Transfer (g) | Prior Drop (°C) | Prior CoF | Prior Risk Classification |",
+        "| Run | Batch ID | Design Type | Syn Wax (%) | Dim (%) | Fill (°C) | Hardness Prior (gf) | Transfer Prior Index | Thermal Trans Prior (°C) | Tribology Prior Index | Prior Risk Classification |",
         "|:---:|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|",
     ]
 
     for row in audit_rows:
         lines.append(
             f"| **{row['run_no']}** | `{row['batch_id']}` | {row['design_type']} | {row['syn_wax']:.1f} | {row['dim']:.1f} | {row['temp']:.1f} | "
-            f"{row['hard_mean']:.1f} {row['hard_ci']} | {row['trans_mean']:.4f} {row['trans_ci']} | {row['drop_mean']:.2f} | {row['fric_mean']:.3f} | **{row['risk']}** |"
+            f"{row['hard_mean']:.1f} {row['hard_ci']} | {row['trans_mean']:.4f} {row['trans_ci']} | {row['therm_mean']:.2f} | {row['trib_mean']:.3f} | **{row['risk']}** |"
         )
 
     lines.extend([

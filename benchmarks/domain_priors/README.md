@@ -1,66 +1,100 @@
-# GLIDE-SPEC 40 - Domain Priors & Mechanistic Datasets (Layer 0)
+# GLIDE-SPEC 40 - Public Domain Priors & Scientific Benchmark Base (Layer 0)
 
-This directory contains public domain scientific benchmark datasets and raw measurement tables for solid sticks, wax-oil lubricants, anhydrous powder-in-sticks, and natural wax batch variability.
-
-## 🛡️ Strict Qualification Firewall Rule
-
-All data residing in `benchmarks/domain_priors/` is tagged as `DataOrigin.PUBLIC_BENCHMARK`.  
-It is **STRICTLY PROHIBITED** from qualifying or training the final GS-40 production model.  
-Production qualification is governed solely by `SOP-GS40-PILOT-001` (`DataOrigin.REAL_PILOT`).
-
-These datasets serve exclusively as **Layer 0 Domain Priors** to inform the **Layer 1 Virtual Mechanistic Simulator** before physical pilot data arrives.
+This directory houses the curated scientific datasets, patent matrices, and raw rheological measurements used as **Layer 0 Domain Priors** to guide the **Layer 1 Virtual Mechanistic Simulator** prior to physical GS-40 pilot manufacturing.
 
 ---
 
-## 1. Inventory of Domain Prior Datasets (5 Scientific Assets)
+## 🛡️ Strict Qualification Firewall & Non-Equivalence Principles
 
-### A. Imperial College London — Wax-Oil Lubricants (Nature Sci. Rep. 2021)
-- **Directory:** `benchmarks/domain_priors/imperial_friction/`
-- **File:** `wax_oil_friction_data.csv`
-- **Source:** *Wax-oil lubricants to reduce the shear between skin and PPE*, *Nature Sci. Rep.* 11, 11756 (2021). [PMC8173004](https://pmc.ncbi.nlm.nih.gov/articles/PMC8173004/)
-- **Target Metrics:**
-  - In-vivo human skin vs. PDMS dynamic coefficient of friction (CoF @ 2000 Hz)
-  - Instantaneous CoF vs. 4-hour sustained wear CoF
-  - Wax ratio ($0 \sim 30\%$) and oil polarity (polar triglyceride vs. non-polar mineral hydrocarbon)
-- **GS-40 Role:** Calibrates the virtual slip & dynamic friction model at the skin interface.
+All records in `benchmarks/domain_priors/` are tagged as `DataOrigin.PUBLIC_BENCHMARK`.  
+They are **STRICTLY PROHIBITED** from qualifying, training, or modifying the production M4 empirical model. Production qualification is governed solely by `SOP-GS40-PILOT-001` (`DataOrigin.REAL_PILOT`).
 
-### B. 17% Wax System Cosmetic Stick Benchmark (Int. J. Cosmet. Sci. 2020)
-- **Directory:** `benchmarks/domain_priors/lipstick_17pct_anchor/`
-- **File:** `lipstick_17pct_wax_benchmark.csv`
-- **Source:** *Evaluation of alkenones, a renewably sourced, plant-derived wax as a structuring agent for lipsticks*, *Int. J. Cosmet. Sci.* 42, 292–302 (2020). [PMC9291794](https://pmc.ncbi.nlm.nih.gov/articles/PMC9291794/)
-- **Target Metrics:**
-  - Wax matrix total: **Exact 17.0 wt%** (Microcrystalline 3.5%, Ozokerite 3.5%, Candelilla 7.0%, Carnauba 3.0%)
-  - Thermal Drop Point (DSC peak): **$60.3^\circ\text{C}$**
-  - Pay-off to human skin: **$14 \pm 2\,\text{mg}$** (3 strokes)
-  - Pay-off to fabric: **$61 \pm 3\,\text{mg}$**
-  - Needle penetration firmness ($gf$) & 3-point bending hardness
-- **GS-40 Role:** Serves as the primary physical reference anchor for the 17% wax formulation space.
+### The 4 Golden Non-Equivalence Principles:
+1. **Hardness Prior ≠ GS40 Hardness Prediction**  
+   (Wax/powder base scaled by engineering transformation; not a calibrated physical test value).
+2. **Thermal Transition Prior ≠ GS40 Mettler Drop Point**  
+   (Thermodynamic DSC melting endotherm peak is physical-chemically distinct from gravity dripping flow under ASTM D127 / IP 396).
+3. **Pay-off Anchor ≠ GS40 Physical Transfer (g)**  
+   (Literature stroke, substrate, load, and ambient temperature differ from GS-40 SOP-001 10°C synthetic skin protocol).
+4. **Tribology Prior Index ≠ GS40 Dynamic CoF**  
+   (Friction index reflects external PDMS-skin shear trends, not direct GS-40 stick surface friction).
 
-### C. TU Berlin — Natural Wax Batch-to-Batch Variability (Zenodo 2026)
-- **Directory:** `benchmarks/domain_priors/tuberlin_wax_variability/`
-- **Files:** `natural_wax_batch_variability_summary.csv`, `Rheology.xlsx`, `LC_mass_percentages.xlsx`
-- **Source:** *Natural wax batch-to-batch variability – Implications for oleogel application*, TU Berlin. [DOI: 10.5281/zenodo.18458747](https://doi.org/10.5281/zenodo.18458747)
-- **Target Metrics:**
-  - Candelilla wax (CLX), Beeswax (BWX), Carnauba (CRX), Rice Bran (RBX) supplier lot variability
-  - Complex shear modulus ($G^*_{\max}$ at $5^\circ\text{C}$) and gelation temperatures ($T_{\text{gel start}}$, $T_{\text{gel end}}$)
-  - Chemical constituent distributions (alkanes, wax esters, free fatty acids)
-- **GS-40 Role:** Supplies real-world coefficient of variation ($\text{CV} \approx 15 \sim 25\%$) for the Monte Carlo raw material tolerance simulator.
+---
 
-### D. Anhydrous Powder-in-Stick Formulation Matrix (US Patent 20070166254)
-- **Directory:** `benchmarks/domain_priors/anhydrous_stick_patents/`
-- **File:** `us20070166254_anhydrous_powder_stick.csv`
-- **Source:** *Anhydrous antiperspirant stick composition*, US Patent 20070166254A1 (Procter & Gamble / Gillette).
-- **Target Metrics:**
-  - 11 formulations combining solidifying waxes (Castor wax, stearyl alcohol, PE wax, 21~24%), volatile silicone (cyclomethicone, 8~30%), Dimethicone (50 cSt, 1%), C12-15 Alkyl Benzoate (5~31%), and **high particulate powder loading (20~25% AAZG, Talc, Silica)**.
-  - Penetration hardness ($mm$ and $gf$), 4-stroke pay-off weight loss ($cg = 10\,\text{mg}$), and fabric whiteness transfer.
-- **GS-40 Role:** Provides real formulation $\rightarrow$ hardness & transfer curves for 20~25% powder-loaded anhydrous sticks with volatile silicone and C12-15 alkyl benzoate.
+## 🏛️ Public Domain Prior 4-Category Architecture
 
-### E. Commercial Lip Balm Structural Lipid Architecture (MDPI Cosmetics 2024)
-- **Directory:** `benchmarks/domain_priors/commercial_stick_benchmark/`
-- **File:** `mdpi_commercial_lipbalm_texture_sla.csv`
-- **Source:** *Beyond Brand Popularity: Decoding Lip Balm Performance Through Lipid Structural Architecture*, *Cosmetics* 13(4), 200 (2024). [DOI: 10.3390/cosmetics13040200](https://doi.org/10.3390/cosmetics13040200)
-- **Target Metrics:**
-  - 7 commercial benchmark sticks analyzed by Brookfield CT3 texture analyzer.
-  - Hardness-mechanical work correlation ($r = 0.950, p = 0.001$).
-  - Structural failure rates (76.9% consumer fracture rate in single-wax systems vs. superior cohesion in complementary multi-wax systems).
-- **GS-40 Role:** Validates that multi-wax systems (Synthetic Wax + Candelilla) are structurally necessary to prevent shear fracture.
+```text
+PUBLIC DOMAIN
+│
+├── A. FORMULATION → RESPONSE
+│   ├── P&G Anhydrous Powder Stick (US20070166254: 20-25% powder, silicone, wax)
+│   ├── Lipstick 17% Wax Benchmark (Huynh et al. 2020: 17% wax, DSC, pay-off)
+│   └── Commercial Lip Balm SLA (Cosmetics 2024: 7 stick texture benchmark)
+│
+├── B. TRIBOLOGY
+│   ├── Imperial Wax-Oil Friction (Yap et al. 2021: wax-oil skin CoF 0.16-0.29)
+│   └── Silicone & Powder Skin Tribology (Masen et al. 2020: Dimethicone CoF 0.20, Talc CoF 0.22)
+│
+├── C. RAW MATERIAL VARIABILITY
+│   └── TU Berlin Wax Lots (Zenodo 2026: Candelilla G* CV 20.4%)
+│
+└── D. GENERAL FORMULATION ML QA
+    └── Nature Shampoo 812 (Nature 2023: ML benchmark)
+```
+
+---
+
+## 1. Category A: Formulation → Response Benchmarks
+
+### 1. P&G Anhydrous Powder-in-Stick (US Patent 20070166254)
+- **Path:** `benchmarks/domain_priors/anhydrous_stick_patents/us20070166254_anhydrous_powder_stick.csv`
+- **Citation:** US Patent 20070166254A1 (Procter & Gamble / Gillette).
+- **Key Metrics:** 11 formulations combining 21~24% waxes, volatile silicone (cyclomethicone 8~30%), Dimethicone 50 cSt, C12-15 Alkyl Benzoate, and **20~25% particulate powder (AAZG, Talc, Silica)**.
+- **GS-40 Role:** Formulation-space nearest neighbor providing empirical evidence for particulate-induced stiffening (~1.8-2.2x) and pay-off control.
+
+### 2. 17% Wax System Cosmetic Stick Anchor (Int. J. Cosmet. Sci. 2020)
+- **Path:** `benchmarks/domain_priors/lipstick_17pct_anchor/lipstick_17pct_wax_benchmark.csv`
+- **Citation:** Huynh et al., *Int. J. Cosmet. Sci.* 42, 292–302 (2020). [PMC9291794](https://pmc.ncbi.nlm.nih.gov/articles/PMC9291794/)
+- **Key Metrics:** **Exact 17.0 wt% wax** matrix, DSC melting peak at **$60.3^\circ\text{C}$**, human skin pay-off **$14 \pm 2\,\text{mg}$**, base wax needle firmness 165 gf.
+- **GS-40 Role:** Physical reference anchor for the 17% wax backbone.
+
+### 3. Commercial Lip Balm Structural Lipid Architecture (MDPI Cosmetics 2024)
+- **Path:** `benchmarks/domain_priors/commercial_stick_benchmark/mdpi_commercial_lipbalm_texture_sla.csv`
+- **Citation:** *Cosmetics* 13(4), 200 (2024). [DOI: 10.3390/cosmetics13040200](https://doi.org/10.3390/cosmetics13040200)
+- **Key Metrics:** 7 commercial benchmark sticks analyzed by Brookfield CT3 texture analyzer ($r = 0.950$ work-hardness correlation).
+- **GS-40 Role:** External commercial reality benchmark confirming multi-wax synergy (Synthetic Wax + Candelilla).
+
+---
+
+## 2. Category B: Tribology Benchmarks
+
+### 1. Imperial College Wax-Oil Skin Tribology (Nature Sci. Rep. 2021)
+- **Path:** `benchmarks/domain_priors/imperial_friction/wax_oil_friction_data.csv`
+- **Citation:** Yap et al., *Nature Sci. Rep.* 11, 11756 (2021). [PMC8173004](https://pmc.ncbi.nlm.nih.gov/articles/PMC8173004/)
+- **Key Metrics:** In-vivo human skin vs. PDMS dynamic friction ($\text{CoF} \approx 0.16 \sim 0.29$), 4-hour durability.
+- **GS-40 Role:** Boundary lubrication model for wax-oil skin contact.
+
+### 2. Silicone & Powder Skin Tribology (PLOS ONE 2020 / Southampton 2024)
+- **Path:** `benchmarks/domain_priors/silicone_skin_tribology/silicone_powder_skin_tribology_benchmark.csv`
+- **Citation:** Masen et al., *PLOS ONE* 15(9), e0239363 (2020) [PMC7514078](https://pmc.ncbi.nlm.nih.gov/articles/PMC7514078/) & Carr et al., *Proc. Inst. Mech. Eng. H* (2024) [PMC11318204](https://pmc.ncbi.nlm.nih.gov/articles/PMC11318204/).
+- **Key Metrics:** In-vivo human skin friction under Dimethicone/Dimethiconol lube ($\text{CoF} \approx 0.20$), Talcum powder ($\text{CoF} \approx 0.22$), and silicone barrier films ($\text{CoF} \approx 0.38 \sim 0.55$) vs. unlubricated skin ($\text{CoF} \approx 0.92$).
+- **GS-40 Role:** Bridges the silicone fluid and inorganic powder tribological lubrication mechanism directly to human skin.
+
+---
+
+## 3. Category C: Raw Material Lot Variability
+
+### 1. TU Berlin Natural Wax Lot-to-Lot Variability (Zenodo 2026)
+- **Path:** `benchmarks/domain_priors/tuberlin_wax_variability/`
+- **Citation:** TU Berlin (2026). [DOI: 10.5281/zenodo.18458747](https://doi.org/10.5281/zenodo.18458747)
+- **Key Metrics:** Candelilla wax Lot-to-Lot shear modulus variability ($\text{CV} \approx 20.4\%$).
+- **GS-40 Role:** Supplies raw material lot variance prior, transmitted hierarchically through the composite wax-powder-resin network.
+
+---
+
+## 4. Category D: General Formulation ML QA
+
+### 1. Nature Shampoo 812 ML Benchmark
+- **Path:** `benchmarks/shampoo/`
+- **Citation:** *Nature Machine Intelligence* (2023).
+- **GS-40 Role:** Mathematical regression engine qualification and ANOVA lack-of-fit validation testing ground.

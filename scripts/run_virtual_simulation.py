@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """
-GLIDE-SPEC 40 - Virtual Simulation & Provenance Audit Runner (Layer 1)
+GLIDE-SPEC 40 - Virtual Simulation & Provenance Audit Runner (Layer 1.1)
 Evaluates prior-informed property derivations and displays end-to-end scientific provenance.
+
+🛡️ THE 4 GOLDEN NON-EQUIVALENCE PRINCIPLES:
+1. Hardness Prior ≠ GS40 Hardness Prediction
+2. Thermal Transition Prior ≠ GS40 Mettler Drop Point
+3. Pay-off Anchor ≠ GS40 Physical Transfer (g)
+4. Tribology Prior Index ≠ GS40 Dynamic CoF
 
 Usage:
   python3 scripts/run_virtual_simulation.py [--syn-wax 12.0] [--dimethicone 17.0] [--temp 80.0]
@@ -18,7 +24,7 @@ from src.modeling.virtual_simulator import VirtualMechanisticSimulator
 
 
 def run_cli():
-    parser = argparse.ArgumentParser(description="GLIDE-SPEC 40 Layer 1 Virtual Mechanistic Simulator")
+    parser = argparse.ArgumentParser(description="GLIDE-SPEC 40 Layer 1.1 Virtual Mechanistic Simulator")
     parser.add_argument("--syn-wax", type=float, default=12.0, help="Synthetic Wax %% (out of 17%% Wax System)")
     parser.add_argument("--dimethicone", type=float, default=17.0, help="Dimethicone %% (out of 28%% Silicone System)")
     parser.add_argument("--temp", type=float, default=80.0, help="Fill Temperature (°C)")
@@ -43,7 +49,7 @@ def run_cli():
     )
 
     print("================================================================================")
-    print("  GLIDE-SPEC 40: Layer 1 Virtual Mechanistic Prior Simulation & Provenance Audit")
+    print("  GLIDE-SPEC 40: Layer 1.1 Virtual Mechanistic Prior Simulation & Provenance Audit")
     print("================================================================================\n")
 
     print("[1. FORMULATION INPUTS]")
@@ -53,27 +59,41 @@ def run_cli():
     print(f"  • Caprylyl Methicone: {caprylyl:5.1f} %  (1 - v1 = {caprylyl / 28.0:.3f})")
     print(f"  • Fill Temperature:   {args.temp:5.1f} °C (dT = {args.temp - 80.0:+.1f}°C from 80°C baseline)\n")
 
-    print("[2. SCIENTIFIC PRIOR SOURCES & MATHEMATICAL DERIVATIONS]")
+    print("[2. SCIENTIFIC PRIOR SOURCES, ANCHORS & ENGINEERING TRANSFORMATIONS]")
     props = [
-        ("Hardness @ 25°C", res.predicted_hardness_gf),
-        ("Transfer @ 10°C", res.predicted_transfer_g_10c),
-        ("Drop Point", res.predicted_drop_point_c),
-        ("Friction Index", res.predicted_friction_index)
+        ("Hardness Prior", res.predicted_hardness_prior_gf),
+        ("Transfer Prior Index", res.predicted_transfer_prior_index),
+        ("Thermal Transition Prior", res.predicted_thermal_transition_c),
+        ("Tribology Prior Index", res.predicted_tribology_prior_index)
     ]
     for label, dist in props:
         prov = dist.provenance
         print(f"  [{label.upper()}]")
-        print(f"    ├─ Primary Source:     {prov.source_name}")
-        print(f"    ├─ Publication / DOI:  {prov.citation} (DOI: {prov.doi})")
-        print(f"    ├─ Empirical Anchor:   {prov.anchor_measurement}")
-        print(f"    └─ Derivation Formula: {prov.derivation_logic}")
+        print(f"    ├─ Primary Source:       {prov.source_name}")
+        print(f"    ├─ Citation & DOI:       {prov.citation} (DOI: {prov.doi})")
+        print(f"    ├─ Empirical Anchor:     {prov.anchor_measurement}")
+        print(f"    ├─ Transformation Type:  {prov.transformation_type}")
+        print(f"    ├─ Coefficient Source:   {prov.coefficient_source}")
+        print(f"    ├─ Derivation Formula:   {prov.formula_derivation}")
+        print(f"    ├─ Scientific Caveat:    {prov.scientific_caveat}")
+        print(f"    └─ ⚠️ Non-Equivalence:   {prov.golden_principle_warning}")
 
-    print("\n[3. MONTE CARLO PRIOR DISTRIBUTIONS (Uncertainty & Variability Bounds)]")
+    print("\n[3. MONTE CARLO PRIOR DISTRIBUTIONS (Uncertainty & Tolerance Bounds)]")
     for label, dist in props:
-        print(f"  • {label:<17}: {dist.mean:7.2f} {dist.unit:<9} "
+        print(f"  • {label:<26}: {dist.mean:7.3f} {dist.unit:<18} "
               f"| 90% CI: [{dist.p05:6.2f}, {dist.p95:6.2f}] | SD: {dist.sd:5.2f} | Min/Max: [{dist.min_val:.1f}, {dist.max_val:.1f}]")
 
-    print(f"\n[*] Uncertainty Driver: {res.simulation_notes}")
+    print("\n[4. HIERARCHICAL UNCERTAINTY TRANSMISSION BREAKDOWN (Hardness Prior)]")
+    bd = res.hierarchical_uncertainty_breakdown
+    print(f"  • Level 1 Raw Candelilla Lot CV (TU Berlin): {bd.get('level1_candelilla_raw_cv_pct', 0.0):5.2f} %")
+    print(f"  • Level 2 Wax Network Composite CV:          {bd.get('level2_wax_network_cv_pct', 0.0):5.2f} %")
+    print(f"  • Level 3 Particulate / Resin Damped CV:     {bd.get('level3_powder_damped_cv_pct', 0.0):5.2f} %")
+    print(f"  • Level 4 Thermal Process CV:                {bd.get('level4_thermal_process_cv_pct', 0.0):5.2f} %")
+    print(f"  • Level 4 Gauge Repeatability CV:            {bd.get('level4_gauge_repeatability_cv_pct', 0.0):5.2f} %")
+    print(f"  ──────────────────────────────────────────────────────────────────────────")
+    print(f"  • Total Composite Hardness Prior CV:         {bd.get('composite_total_hardness_cv_pct', 0.0):5.2f} %  (SD = ±{bd.get('composite_hardness_sd_gf', 0.0):.1f} gf)")
+
+    print(f"\n[*] Uncertainty Driver Notes: {res.simulation_notes}")
     print("\n--------------------------------------------------------------------------------")
     print(f"⚠️  STATUS: {res.status_label}")
     print(f"    {res.warning_notice}")
