@@ -31,6 +31,7 @@ PUBLIC DOMAIN
 ├── B. MULTIMODAL RHEOLOGY & TRIBOLOGY
 │   ├── 2026 Lipstick Multimodal Rheology (Soft Matter 2026: SAOS, LAOS, creep, relaxation, cooling rate)
 │   ├── 2021 Organogel Lipstick (MDPI Gels 2021: G'/G'' thermal ramp, gel-sol crossover)
+│   ├── Powder Particulate Mechanics (28% Powder specs, Aerosil R 972 thixotropy, PMSSQ ball-bearing slip)
 │   ├── Imperial Wax-Oil Friction (Yap et al. 2021: wax-oil skin CoF 0.16-0.29)
 │   └── Silicone & Powder Skin Tribology (Masen et al. 2020: Dimethicone CoF 0.20, Talc CoF 0.22)
 │
@@ -61,5 +62,6 @@ Tier 4: DERIVED_FEATURE   ──▶ Crossover temps (T_gel-sol), relaxation time
 | `lipstick_rheology_2026/` | *Soft Matter* (2026), 10.1039/D5SM01032B | **CC BY-NC 3.0** | Research, feature extraction & physical prior only. No commercial distribution. |
 | `organogel_lipstick_2021/` | *Gels* (2021), 10.3390/gels7030097 | **CC BY 4.0** | Unrestricted open access for academic & commercial development. |
 | `lipstick_384/` | *Int. J. Cosmet. Sci.* (2020), 10.1111/ics.12597 | **CC BY-NC-ND 4.0** | Non-commercial prior benchmarking & feature extraction. |
+| `powder_particulate_mechanics/` | Curated Supplier Specs & Literature Biotribology | **Open Prior** | 28% multi-powder mechanics, fumed silica Bingham suspension modeling. |
 | `wax_oleogel_hardness/` | *Food Hydrocolloids* (2022), 10.1016/j.foodhyd.2022.107794 | Open Archive | Concentration regression & modulus scaling. |
 | `silicone_skin_tribology/` | *PLOS ONE* (2020), 10.1371/journal.pone.0239363 | **CC BY 4.0** | Open access biotribology benchmark. |

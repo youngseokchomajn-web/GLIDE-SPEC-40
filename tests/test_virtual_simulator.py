@@ -131,6 +131,65 @@ class TestVirtualSimulator(unittest.TestCase):
         # Should execute cleanly without error
         run_comparison(matrix_csv, baseline_csv, mock_mode=True)
 
+    def test_powder_particulate_mechanics_and_raw_materials_db(self):
+        root_dir = Path(__file__).resolve().parent.parent
+        powder_dir = root_dir / "benchmarks" / "domain_priors" / "powder_particulate_mechanics"
+        raw_mat_csv = root_dir / "data" / "raw_materials" / "gs40_raw_material_property_db.csv"
+        exec_sheet_csv = root_dir / "data" / "doe" / "pilot_process_execution_sheet_template.csv"
+
+        # 1. Powder specs & rheology
+        specs_csv = powder_dir / "powder_system_specs_and_rheology.csv"
+        self.assertTrue(specs_csv.exists(), "powder_system_specs_and_rheology.csv must exist")
+        with open(specs_csv, mode="r", encoding="utf-8") as f:
+            specs = list(csv.DictReader(f))
+        self.assertGreaterEqual(len(specs), 5)
+        powder_ids = {r["powder_id"] for r in specs}
+        gs40_powders = {"POW-BN-01", "POW-SIL-POR-01", "POW-SIL-FUM-01", "POW-PMSSQ-01", "POW-ZNO-TR-01"}
+        self.assertTrue(gs40_powders.issubset(powder_ids))
+        total_powder_wt = sum(float(r["gs40_target_wt_pct"]) for r in specs if r["powder_id"] in gs40_powders)
+        self.assertAlmostEqual(total_powder_wt, 28.0, places=2)
+
+        # 2. Fumed silica thixotropic yield stress
+        thixo_csv = powder_dir / "fumed_silica_thixotropic_yield_stress.csv"
+        self.assertTrue(thixo_csv.exists(), "fumed_silica_thixotropic_yield_stress.csv must exist")
+        with open(thixo_csv, mode="r", encoding="utf-8") as f:
+            thixo = list(csv.DictReader(f))
+        self.assertGreaterEqual(len(thixo), 10)
+        # Check 2.0% Aerosil R 972 at 80°C hot fill
+        target_run = [r for r in thixo if float(r["fumed_silica_wt_pct"]) == 2.0 and float(r["temperature_c"]) == 80.0][0]
+        self.assertGreater(float(target_run["bingham_yield_stress_pa"]), 5.0)
+        self.assertEqual(float(target_run["zno_settling_velocity_um_min"]), 0.0)
+        self.assertEqual(target_run["anti_settling_stability_30min_hot_hold"], "STABLE_SUSPENSION")
+
+        # 3. Powder friction & slip benchmarks
+        fric_csv = powder_dir / "powder_friction_and_slip_benchmarks.csv"
+        self.assertTrue(fric_csv.exists(), "powder_friction_and_slip_benchmarks.csv must exist")
+        with open(fric_csv, mode="r", encoding="utf-8") as f:
+            frics = list(csv.DictReader(f))
+        self.assertGreaterEqual(len(frics), 8)
+        bn_run = [r for r in frics if "BN" in r["powder_trade_name"] and "Bioskin" in r["test_substrate"]][0]
+        self.assertLess(float(bn_run["dynamic_friction_cof"]), 0.15)
+
+        # 4. Raw Material Property DB
+        self.assertTrue(raw_mat_csv.exists(), "gs40_raw_material_property_db.csv must exist")
+        with open(raw_mat_csv, mode="r", encoding="utf-8") as f:
+            materials = list(csv.DictReader(f))
+        self.assertEqual(len(materials), 15)
+        for mat in materials:
+            self.assertEqual(mat["status"], "SPEC_LOCKED")
+            self.assertIn("crystallization_enthalpy_j_g", mat)
+            self.assertIn("cooling_behavior", mat)
+            self.assertIn("surface_area_bet_m2_g", mat)
+            self.assertIn("yield_stress_contribution_pa", mat)
+            self.assertIn("neat_dynamic_cof", mat)
+
+        # 5. Pilot process execution sheet template
+        self.assertTrue(exec_sheet_csv.exists(), "pilot_process_execution_sheet_template.csv must exist")
+        with open(exec_sheet_csv, mode="r", encoding="utf-8") as f:
+            exec_rows = list(csv.DictReader(f))
+        self.assertEqual(len(exec_rows), 18)
+
 
 if __name__ == "__main__":
     unittest.main()
+
