@@ -3,7 +3,7 @@
 **제정 일자:** 2026-09-12  
 **적용 대상:** GLIDE-SPEC 40 파일럿 제조, QC 시험실, 제형 연구원 및 생산 현장 작업자  
 **제품 규격:** 20g Anhydrous Powder-in-Balm Solid Stick (Rev.7.3 기준)  
-**목적:** M4 다변량 처방 회귀 모델의 실험적 적격성(Qualification) 획득을 위한 18개 파일럿 배치 제조 및 QC 실측 데이터 수집 표준 지침
+**목적:** M4 다변량 처방 회귀 모델의 실험적 적격성(Qualification) 획득을 위한 16개 핵심 Primary Pilot DOE + 2개 공정 감도 보완 배치 제조 및 QC 실측 데이터 수집 표준 지침
 
 ---
 
@@ -13,8 +13,12 @@
 
 ### 🛡️ 핵심 원칙 (Non-negotiable Rules)
 1. **Strict Rule #6 (No Synthetic Substitution):** 모델 적격성 평가에는 오직 실제 파일럿 제조(`REAL_PILOT`) 및 실측 QC 데이터만 사용합니다. 가상값이나 시뮬레이션 예측값의 임의 대입은 엄격히 금지됩니다.
-2. **Pure-Error Replicates (3D 물리 중심점):** 실험 오차(Pure Error)와 모델 결함(Lack-of-Fit)을 통계적으로 분리하기 위해, **동일한 중심점 좌표(Synthetic Wax 12.0%, Dimethicone 17.0%, Fill Temp 80.0°C)**에서 최소 3회 이상(본 프로토콜은 4회)의 **독립적인 배치 제조 및 측정**을 수행합니다.
-3. **End-to-End Lineage Traceability:** 모든 QC 레코드는 반드시 실존하는 `DOETrial`과 `ManufacturingBatch`를 참조해야 하며, 사용된 원료의 입고 Lot 및 CoA 정보가 결합되어야 합니다.
+2. **True Independent Pure-Error Replicates (3D 물리 중심점):** 실험 오차(Pure Error)와 모델 결함(Lack-of-Fit)을 통계적으로 분리하기 위해, **동일한 중심점 좌표(Synthetic Wax 12.0%, Dimethicone 17.0%, Fill Temp 80.0°C)**에서 반드시 **독립된 1.0 kg 배치로 최소 3회 이상(본 프로토콜은 4회) 개별 계량 및 제조**를 수행합니다. (동일 배치를 4개로 소분하는 행위는 순수 오차 검증을 무효화하므로 엄격히 금지됨)
+3. **Primary DOE vs. Supplemental Sensitivity Runs 분리:**
+   - **Primary Pilot DOE (16 Runs, `GS40-P001` ~ `GS40-P016`):** OLS 다변량 회귀 모델 적합의 기준이 되는 16개 핵심 설계 매트릭스.
+   - **Supplemental Process Sensitivity (2 Runs, `GS40-P017` @ 78°C, `GS40-P018` @ 82°C):** 중심점 처방의 충진 온도 민감도 검증용 보완 실험.
+   - *주의: 진짜 확인 실험(True Confirmation Runs)은 M4 모델 적합 완료 후, 모델이 추천하는 최적 후보 처방으로 별도 제조하여 예측치와 실측치를 비교 평가합니다.*
+4. **End-to-End Lineage Traceability:** 모든 QC 레코드는 반드시 실존하는 `DOETrial`과 `ManufacturingBatch`를 참조해야 하며, 사용된 원료의 입고 Lot 및 CoA 정보가 결합되어야 합니다.
 
 ---
 
@@ -29,7 +33,7 @@
 | **MAT-WAX-PEG-01** | PEG-8 Beeswax | 100.0% | - | Gattefossé | *기록 요망* | ₩35,000 | 워시오프 기능성 |
 | **MAT-SIL-DIM-01** | Dimethicone (100 cSt) | 100.0% | - | Dow Corning | *기록 요망* | ₩14,000 | 베이스 실리콘 |
 | **MAT-SIL-CAP-01** | Caprylyl Methicone | 100.0% | - | Siltech | *기록 요망* | ₩28,000 | 휘발성 유사 슬립 |
-| **MAT-MQ-01** | Trimethylsiloxysilicate Solution | 60.0% | Dimethicone 40% | Shin-Etsu | *기록 요망* | ₩65,000 | **고형분 환산 필수** |
+| **MAT-MQ-01** | Trimethylsiloxysilicate Solution | 60.0% | Dimethicone 40% | Shin-Etsu | *기록 요망* | ₩65,000 | **CoA 확인 필수** |
 | **MAT-OIL-C1215-01** | C12-15 Alkyl Benzoate | 100.0% | - | Innospec | *기록 요망* | ₩12,000 | 분산제 / 가소제 |
 | **MAT-POW-BN-01** | Boron Nitride (Grade CC6004) | 100.0% | - | 3M / Momentive | *기록 요망* | ₩120,000 | 고윤활 슬립 파우더 |
 | **MAT-POW-SIL-01** | Porous Spherical Silica (Sunsil-130) | 100.0% | - | Sunjin Beauty | *기록 요망* | ₩45,000 | 오일/땀 흡착 |
@@ -40,15 +44,21 @@
 | **MAT-ACT-SOOTH-01** | Soothing Blend (Bisabolol+Tocopherol) | 100.0% | - | BASF / DSM | *기록 요망* | ₩95,000 | 산패 방지 & 피부 진정 |
 
 > [!IMPORTANT]
-> **MQ Resin 투입량 환산 주의:**  
-> `Target Active Formula`의 MQ Resin 유효성분은 **12.0%**입니다. 원료가 60% 솔루션(`Dimethicone 40%`)인 경우 실제 투입량은 **20.0%**이며, 이때 동반 투입되는 8.0%의 Dimethicone은 실리콘 오일 투입량에서 **자동 차감(Offset)**되어 제조 계산됩니다.
+> **MQ Resin 실제 CoA 확인 및 투입량 확정 원칙:**  
+> 본 프로토콜의 계산(200.0g 투입 시 Dimethicone 80.0g Offset)은 공급사 공칭 규격(60% 고형분 / 40% Dimethicone 용매) 기준입니다.  
+> 실제 제조 전 **입고된 MQ Resin Lot의 시험 성적서(CoA)**를 반드시 대조하여:
+> 1. 실제 고형분 순도 (Solids %)
+> 2. 캐리어 용매 종류 (Dimethicone 확인)
+> 3. 비중/밀도  
+> 를 확인한 후 최종 실 투입량과 순수 Dimethicone 오일의 차감량을 확정해야 합니다.
 
 ---
 
 ## 3. 표준 파일럿 제조 공정 절차 (Pilot Manufacturing SOP)
 
 - **표준 배치 크기:** **1.0 kg (1,000.0 g)** / Run (20g 스틱 약 50개 생산)
-- **QC 시편 소요량:** Run당 15개 (경도 5개, 전이량 5개, 적점 2개, 예비/보관 3개)
+- **QC 시편 소요량:** Run당 15개 (경도 5개, 전이량 5개, 적점 2개, 보관용 3개)
+- **제조 순서 랜덤화 (Randomization):** 시간대/온습도/작업자 피로도에 따른 체계적 오차(Confounding)를 방지하기 위해, Batch ID 순서가 아닌 **지정된 무작위 제조 순서(Execution Order)**에 따라 제조합니다.
 
 ```
 [Phase A: 왁스 용융]
@@ -81,67 +91,69 @@ Phase A(용융 왁스)에 Phase C(파우더-실리콘 슬러리) 투입
 
 모든 Run은 독립된 1.0 kg 배치로 개별 제조됩니다.
 
-| Run No | Batch ID | DOE Trial ID | 설계 유형 | Center Point | Syn Wax (%) | Can Wax (%) | Dimethicone (%) | Caprylyl (%) | Fill Temp (°C) | 제조 상태 | 작업자 서명 |
+| Run No | Batch ID | DOE Trial ID | 구분 및 설계 유형 | Center Point | Syn Wax (%) | Can Wax (%) | Dimethicone (%) | Caprylyl (%) | Fill Temp (°C) | 권장 제조순서 | 작업자 서명 |
 |:---:|:---:|:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **01** | `GS40-P001` | `DOE-EXP-001` | Vertex_HighSyn_HighDim | **FALSE** | 15.0 | 2.0 | 22.0 | 6.0 | **80.0** | 대기 | |
-| **02** | `GS40-P002` | `DOE-EXP-002` | Vertex_HighSyn_LowDim_Tmin | **FALSE** | 15.0 | 2.0 | 12.0 | 16.0 | **75.0** | 대기 | |
-| **03** | `GS40-P003` | `DOE-EXP-003` | Vertex_LowSyn_HighDim_Tmax | **FALSE** | 9.0 | 8.0 | 22.0 | 6.0 | **85.0** | 대기 | |
-| **04** | `GS40-P004` | `DOE-EXP-004` | Vertex_LowSyn_LowDim | **FALSE** | 9.0 | 8.0 | 12.0 | 16.0 | **80.0** | 대기 | |
-| **05** | `GS40-P005` | `DOE-EXP-005` | Axial_WaxMax | **FALSE** | 15.0 | 2.0 | 17.0 | 11.0 | **75.0** | 대기 | |
-| **06** | `GS40-P006` | `DOE-EXP-006` | Axial_WaxMin | **FALSE** | 9.0 | 8.0 | 17.0 | 11.0 | **85.0** | 대기 | |
-| **07** | `GS40-P007` | `DOE-EXP-007` | Axial_SilMax | **FALSE** | 12.0 | 5.0 | 22.0 | 6.0 | **75.0** | 대기 | |
-| **08** | `GS40-P008` | `DOE-EXP-008` | Axial_SilMin | **FALSE** | 12.0 | 5.0 | 12.0 | 16.0 | **85.0** | 대기 | |
-| **09** | `GS40-P009` | `DOE-EXP-009` | Axial_TempMin | **FALSE** | 12.0 | 5.0 | 17.0 | 11.0 | **75.0** | 대기 | |
-| **10** | `GS40-P010` | `DOE-EXP-010` | Axial_TempMax | **FALSE** | 12.0 | 5.0 | 17.0 | 11.0 | **85.0** | 대기 | |
-| **11** | `GS40-P011` | `DOE-EXP-011` | Interior_Low | **FALSE** | 10.5 | 6.5 | 14.5 | 13.5 | **80.0** | 대기 | |
-| **12** | `GS40-P012` | `DOE-EXP-012` | Interior_High | **FALSE** | 13.5 | 3.5 | 19.5 | 8.5 | **80.0** | 대기 | |
-| **13** | `GS40-P013` | `DOE-EXP-013` | **Centroid_Replicate_1** | **TRUE** | **12.0** | **5.0** | **17.0** | **11.0** | **80.0** | 대기 | |
-| **14** | `GS40-P014` | `DOE-EXP-014` | **Centroid_Replicate_2** | **TRUE** | **12.0** | **5.0** | **17.0** | **11.0** | **80.0** | 대기 | |
-| **15** | `GS40-P015` | `DOE-EXP-015` | **Centroid_Replicate_3** | **TRUE** | **12.0** | **5.0** | **17.0** | **11.0** | **80.0** | 대기 | |
-| **16** | `GS40-P016` | `DOE-EXP-016` | **Centroid_Replicate_4** | **TRUE** | **12.0** | **5.0** | **17.0** | **11.0** | **80.0** | 대기 | |
-| **17** | `GS40-P017` | `DOE-EXP-017` | Confirmation_Run_1 | **FALSE** | 12.0 | 5.0 | 17.0 | 11.0 | **78.0** | 대기 | |
-| **18** | `GS40-P018` | `DOE-EXP-018` | Confirmation_Run_2 | **FALSE** | 12.0 | 5.0 | 17.0 | 11.0 | **82.0** | 대기 | |
+| **01** | `GS40-P001` | `DOE-EXP-001` | [Primary] Vertex_HighSyn_HighDim | **FALSE** | 15.0 | 2.0 | 22.0 | 6.0 | **80.0** | **#14** | |
+| **02** | `GS40-P002` | `DOE-EXP-002` | [Primary] Vertex_HighSyn_LowDim_Tmin | **FALSE** | 15.0 | 2.0 | 12.0 | 16.0 | **75.0** | **#13** | |
+| **03** | `GS40-P003` | `DOE-EXP-003` | [Primary] Vertex_LowSyn_HighDim_Tmax | **FALSE** | 9.0 | 8.0 | 22.0 | 6.0 | **85.0** | **#05** | |
+| **04** | `GS40-P004` | `DOE-EXP-004` | [Primary] Vertex_LowSyn_LowDim | **FALSE** | 9.0 | 8.0 | 12.0 | 16.0 | **80.0** | **#10** | |
+| **05** | `GS40-P005` | `DOE-EXP-005` | [Primary] Axial_WaxMax | **FALSE** | 15.0 | 2.0 | 17.0 | 11.0 | **75.0** | **#06** | |
+| **06** | `GS40-P006` | `DOE-EXP-006` | [Primary] Axial_WaxMin | **FALSE** | 9.0 | 8.0 | 17.0 | 11.0 | **85.0** | **#08** | |
+| **07** | `GS40-P007` | `DOE-EXP-007` | [Primary] Axial_SilMax | **FALSE** | 12.0 | 5.0 | 22.0 | 6.0 | **75.0** | **#17** | |
+| **08** | `GS40-P008` | `DOE-EXP-008` | [Primary] Axial_SilMin | **FALSE** | 12.0 | 5.0 | 12.0 | 16.0 | **85.0** | **#07** | |
+| **09** | `GS40-P009` | `DOE-EXP-009` | [Primary] Axial_TempMin | **FALSE** | 12.0 | 5.0 | 17.0 | 11.0 | **75.0** | **#11** | |
+| **10** | `GS40-P010` | `DOE-EXP-010` | [Primary] Axial_TempMax | **FALSE** | 12.0 | 5.0 | 17.0 | 11.0 | **85.0** | **#16** | |
+| **11** | `GS40-P011` | `DOE-EXP-011` | [Primary] Interior_Low | **FALSE** | 10.5 | 6.5 | 14.5 | 13.5 | **80.0** | **#02** | |
+| **12** | `GS40-P012` | `DOE-EXP-012` | [Primary] Interior_High | **FALSE** | 13.5 | 3.5 | 19.5 | 8.5 | **80.0** | **#12** | |
+| **13** | `GS40-P013` | `DOE-EXP-013` | **[Primary] Centroid_Replicate_1** | **TRUE** | **12.0** | **5.0** | **17.0** | **11.0** | **80.0** | **#03** | |
+| **14** | `GS40-P014` | `DOE-EXP-014` | **[Primary] Centroid_Replicate_2** | **TRUE** | **12.0** | **5.0** | **17.0** | **11.0** | **80.0** | **#15** | |
+| **15** | `GS40-P015` | `DOE-EXP-015` | **[Primary] Centroid_Replicate_3** | **TRUE** | **12.0** | **5.0** | **17.0** | **11.0** | **80.0** | **#18** | |
+| **16** | `GS40-P016` | `DOE-EXP-016` | **[Primary] Centroid_Replicate_4** | **TRUE** | **12.0** | **5.0** | **17.0** | **11.0** | **80.0** | **#09** | |
+| **17** | `GS40-P017` | `DOE-EXP-017` | [Supplemental] Temp_Sens_78C | **FALSE** | 12.0 | 5.0 | 17.0 | 11.0 | **78.0** | **#01** | |
+| **18** | `GS40-P018` | `DOE-EXP-018` | [Supplemental] Temp_Sens_82C | **FALSE** | 12.0 | 5.0 | 17.0 | 11.0 | **82.0** | **#04** | |
 
 > [!NOTE]
-> - **불변 혼합비 조건(Mixture Invariants):** 모든 Run에서 Wax 합계는 **17.0%**, Silicone 합계는 **28.0%**로 고정됩니다.
-> - **중심점 반복(Pure Error Replicates):** Run 13, 14, 15, 16번은 동일 처방/조건이지만 **반드시 서로 다른 날짜/교반기에서 완전히 독립된 4개 배치로 개별 제조**해야 합니다. (동일 배치를 나누어 담는 행위는 순수 오차 검증을 무효화함)
+> - **불변 혼합비 조건(Mixture Invariants):** 모든 Run에서 Wax 합계는 **17.0% (170.0g)**, Silicone 합계는 **28.0% (280.0g)**로 엄격히 고정됩니다.
+> - **중심점 4회 분산 배치:** 위 랜덤 순서를 보면 중심점(`P013` ~ `P016`)이 제조 초기(#03), 중기(#09), 후기(#15, #18)에 고르게 배치되어 시간 경과에 따른 공정 드리프트를 효과적으로 분리합니다.
 
 ---
 
 ## 5. 1.0 kg 배치 실 투입 중량표 (Batch Weight Sheet)
 
-Run별 고정 원료 및 가변 원료의 1,000.0g 투입 레시피입니다. (단위: g)
+Run별 고정 원료 및 가변 원료의 1,000.0g 정밀 투입 레시피입니다. (단위: g)
 
-### ① 모든 Run 공통 고정 원료 (총 550.0 g)
+### ① 모든 Run 공통 고정 성분 및 MQ Resin Solution (총 630.0 g / 63.0%)
 - `MAT-POW-BN-01` (Boron Nitride): **30.0 g** (3.0%)
 - `MAT-POW-SIL-01` (Porous Spherical Silica): **100.0 g** (10.0%)
 - `MAT-POW-AER-01` (Aerosil R972): **20.0 g** (2.0%)
 - `MAT-POW-PMS-01` (Tospearl PMSSQ): **80.0 g** (8.0%)
 - `MAT-ACT-ZNO-01` (Treated Zinc Oxide): **50.0 g** (5.0%)
 - `MAT-WAX-PEG-01` (PEG-8 Beeswax): **30.0 g** (3.0%)
-- `MAT-MQ-01` (MQ Resin 60% Solution): **200.0 g** (20.0% 투입 ➔ Active 12.0% + Carrier Dimethicone 8.0%)
+- `MAT-MQ-01` (MQ Resin 60% Solution): **200.0 g** (20.0% 투입 ➔ Active 120.0g + Carrier Dimethicone 80.0g)
 - `MAT-OIL-C1215-01` (C12-15 Alkyl Benzoate): **95.0 g** (9.5%)
 - `MAT-ACT-EHG-01` (Ethylhexylglycerin): **5.0 g** (0.5%)
 - `MAT-ACT-SOOTH-01` (Soothing Blend): **20.0 g** (2.0%)
+*➔ 소계: 30 + 100 + 20 + 80 + 50 + 30 + 200 + 95 + 5 + 20 = **630.0 g***
 
-### ② 가변 원료 투입량 (총 450.0 g) — Carrier Offset 차감 반영
-*MQ Resin 200g에서 이미 80.0g의 Dimethicone이 투입되므로, 순수 Dimethicone 오일 투입량은 `(목표 Dimethicone % - 8.0%) × 10`으로 계산됩니다.*
+### ② 가변 원료 투입량 (총 370.0 g / 37.0%) — Carrier Offset 차감 반영
+*MQ Resin 200g에서 이미 80.0g의 Dimethicone이 공급되므로, 순수 Dimethicone 오일 투입량은 `(목표 Dimethicone % - 8.0%) × 10`으로 계산됩니다.*  
+*전체 1.0 kg 배치 총량: **고정 630.0 g + 가변 370.0 g = 1,000.0 g (100.0%)***
 
-| Run 그룹 | Syn Wax 투입(g) | Candelilla Wax 투입(g) | 순수 Dimethicone 투입(g) | Caprylyl Methicone 투입(g) | 가변 소계 (g) |
-|:---|:---:|:---:|:---:|:---:|:---:|
-| **01 (Vertex High/High)** | 150.0 | 20.0 | 140.0 (22.0-8.0) | 60.0 | **370.0** + 80.0(수지캐리어) = 450.0 |
-| **02 (Vertex High/Low)** | 150.0 | 20.0 | 40.0 (12.0-8.0) | 160.0 | **370.0** + 80.0(수지캐리어) = 450.0 |
-| **03 (Vertex Low/High)** | 90.0 | 80.0 | 140.0 (22.0-8.0) | 60.0 | **370.0** + 80.0(수지캐리어) = 450.0 |
-| **04 (Vertex Low/Low)** | 90.0 | 80.0 | 40.0 (12.0-8.0) | 160.0 | **370.0** + 80.0(수지캐리어) = 450.0 |
-| **05 (Axial WaxMax)** | 150.0 | 20.0 | 90.0 (17.0-8.0) | 110.0 | **370.0** + 80.0(수지캐리어) = 450.0 |
-| **06 (Axial WaxMin)** | 90.0 | 80.0 | 90.0 (17.0-8.0) | 110.0 | **370.0** + 80.0(수지캐리어) = 450.0 |
-| **07 (Axial SilMax)** | 120.0 | 50.0 | 140.0 (22.0-8.0) | 60.0 | **370.0** + 80.0(수지캐리어) = 450.0 |
-| **08 (Axial SilMin)** | 120.0 | 50.0 | 40.0 (12.0-8.0) | 160.0 | **370.0** + 80.0(수지캐리어) = 450.0 |
-| **09~10 (Axial Temp)** | 120.0 | 50.0 | 90.0 (17.0-8.0) | 110.0 | **370.0** + 80.0(수지캐리어) = 450.0 |
-| **11 (Interior Low)** | 105.0 | 65.0 | 65.0 (14.5-8.0) | 135.0 | **370.0** + 80.0(수지캐리어) = 450.0 |
-| **12 (Interior High)** | 135.0 | 35.0 | 115.0 (19.5-8.0) | 85.0 | **370.0** + 80.0(수지캐리어) = 450.0 |
-| **13~16 (Centroid CP)** | **120.0** | **50.0** | **90.0 (17.0-8.0)** | **110.0** | **370.0** + 80.0(수지캐리어) = 450.0 |
-| **17~18 (Confirmation)** | **120.0** | **50.0** | **90.0 (17.0-8.0)** | **110.0** | **370.0** + 80.0(수지캐리어) = 450.0 |
+| Run 그룹 | Syn Wax 투입(g) | Candelilla Wax 투입(g) | 순수 Dimethicone 투입(g) | Caprylyl Methicone 투입(g) | 가변 투입 소계 (g) | 총 배치 중량 (g) |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **01 (Vertex High/High)** | 150.0 | 20.0 | 140.0 (22.0-8.0) | 60.0 | **370.0 g** | **1,000.0 g** |
+| **02 (Vertex High/Low)** | 150.0 | 20.0 | 40.0 (12.0-8.0) | 160.0 | **370.0 g** | **1,000.0 g** |
+| **03 (Vertex Low/High)** | 90.0 | 80.0 | 140.0 (22.0-8.0) | 60.0 | **370.0 g** | **1,000.0 g** |
+| **04 (Vertex Low/Low)** | 90.0 | 80.0 | 40.0 (12.0-8.0) | 160.0 | **370.0 g** | **1,000.0 g** |
+| **05 (Axial WaxMax)** | 150.0 | 20.0 | 90.0 (17.0-8.0) | 110.0 | **370.0 g** | **1,000.0 g** |
+| **06 (Axial WaxMin)** | 90.0 | 80.0 | 90.0 (17.0-8.0) | 110.0 | **370.0 g** | **1,000.0 g** |
+| **07 (Axial SilMax)** | 120.0 | 50.0 | 140.0 (22.0-8.0) | 60.0 | **370.0 g** | **1,000.0 g** |
+| **08 (Axial SilMin)** | 120.0 | 50.0 | 40.0 (12.0-8.0) | 160.0 | **370.0 g** | **1,000.0 g** |
+| **09~10 (Axial Temp)** | 120.0 | 50.0 | 90.0 (17.0-8.0) | 110.0 | **370.0 g** | **1,000.0 g** |
+| **11 (Interior Low)** | 105.0 | 65.0 | 65.0 (14.5-8.0) | 135.0 | **370.0 g** | **1,000.0 g** |
+| **12 (Interior High)** | 135.0 | 35.0 | 115.0 (19.5-8.0) | 85.0 | **370.0 g** | **1,000.0 g** |
+| **13~16 (Centroid CP)** | **120.0** | **50.0** | **90.0 (17.0-8.0)** | **110.0** | **370.0 g** | **1,000.0 g** |
+| **17~18 (Supplemental)** | **120.0** | **50.0** | **90.0 (17.0-8.0)** | **110.0** | **370.0 g** | **1,000.0 g** |
 
 ---
 
@@ -175,7 +187,7 @@ Run별 고정 원료 및 가변 원료의 1,000.0g 투입 레시피입니다. (�
 - **시험 규격:** `ASTM D127` 또는 Mettler FP83 Drop Point Apparatus
 - **시험 조건:** 승온 속도 **1.0°C/min**
 - **목표 기준:** **60.0 ~ 63.0°C**
-- *주의: 장비 사정상 미측정 시 임의의 상수를 입력하지 말고 비워둡니다 (Null 유지).*
+- *주의: 장비 사정상 미측정 시 임의의 가짜 숫자를 채우지 말고 비워둡니다 (Null 유지).*
 
 ---
 
@@ -202,20 +214,21 @@ Run별 고정 원료 및 가변 원료의 1,000.0g 투입 레시피입니다. (�
 - [ ] 4. 사용된 원료의 입고 Lot No. 및 CoA 점검이 완료되었는지 확인
 - [ ] 5. 경도 SOP(프로브 2mm, 침투 2mm, 속도 1mm/s, 25°C)가 완전히 기록되었는지 확인
 - [ ] 6. 전이량 SOP(인공피부, 500g, 3초, Two-stroke, 10°C)가 완전히 기록되었는지 확인
-- [ ] 7. **중심점 좌표 일치 확인:** `GS40-P013 ~ P016`의 실측 좌표가 `SynWax 12.0±0.2%`, `Dim 17.0±0.2%`, `FillTemp 80.0±1.0°C` 내에 존재하는지 독립 검증
+- [ ] 7. **중심점 독립 배치 및 좌표 일치 확인:** `GS40-P013 ~ P016`이 각각 독립 제조된 배치이며, 실측 좌표가 `SynWax 12.0±0.2%`, `Dim 17.0±0.2%`, `FillTemp 80.0±1.0°C` 내에 존재하는지 독립 검증
 
 ---
 
-## 8. M4 통계적 적격성 판정 기준 (Statistical Acceptance Criteria)
+## 8. M4 통계적 적격성 종합 평가 지침 (Comprehensive Qualification Guidelines)
 
-18개 유효 파일럿 레코드가 인입되면, 시뮬레이터가 OLS 회귀 모델 적합 및 통계 검증을 수행합니다.
+16개 Primary DOE 및 2개 보완 레코드가 인입되면, 시뮬레이터가 OLS 회귀 모델 적합 및 통계 검증을 수행합니다.  
+**중요:** $R^2 \ge 0.85$나 $p > 0.05$와 같은 단일 수치만으로 모델을 자동 합격 처리하지 않으며, 아래 4개 차원을 종합적으로 검토합니다.
 
-### ① 모델 적합성 지표 기준
-- **결정계수 ($R^2$):** $\ge 0.85$ (물성 분산의 85% 이상 설명)
+### ① 모델 적합성 및 교차 검증 (Goodness of Fit & LOOCV)
+- **참고 결정계수 ($R^2$):** $\ge 0.85$ 목표 (물성 분산의 85% 이상 설명)
 - **LOOCV RMSE (Leave-One-Out Cross-Validation):**
   - Hardness: $\le 30.0\text{ gf}$
   - Transfer: $\le 0.003\text{ g}$
-- **잔차 정규성 및 등분산성:** 잔차 플롯 상 특정 패턴이 없어야 함.
+- **잔차 진단:** 잔차 대 예측값 플롯 상 불균일한 깔때기 모양(이분산성)이나 곡선 패턴(비선형성)이 없어야 함.
 
 ### ② 중심점 기반 순수 오차(Pure Error) 및 적합 결여(Lack-of-Fit) 분리 검정
 4개의 독립 중심점(`GS40-P013` ~ `GS40-P016`)으로부터 순수 실험 분산을 산출합니다:
@@ -225,17 +238,22 @@ SS_{PE} = \sum_{i=1}^{n_{cp}} (y_{cp, i} - \bar{y}_{cp})^2, \quad df_{PE} = n_{c
 \[
 MS_{PE} = \frac{SS_{PE}}{3} \quad (\text{순수 오차 분산})
 \]
-모델의 잔차 제곱합($SS_E$)에서 순수 오차를 감하여 적합 결여($SS_{LOF}$)를 산출:
+모델 잔차 제곱합($SS_E$)에서 순수 오차를 감하여 적합 결여($SS_{LOF}$)를 분리 산출:
 \[
 SS_{LOF} = SS_E - SS_{PE}, \quad df_{LOF} = df_E - df_{PE}
 \]
 \[
 F_{LOF} = \frac{MS_{LOF}}{MS_{PE}}
 \]
-- **판정 기준:** $p\text{-value} > 0.05$ (적합 결여가 유의하지 않아야 함 ➔ 1차 다변량 혼합 회귀 모델이 물리 현상을 왜곡 없이 타당하게 설명함을 증명).
+- **판정 기준:** $p\text{-value} > 0.05$ (적합 결여가 유의하지 않음 ➔ 1차 다변량 혼합 모델이 물리적 반응을 편향 없이 건전하게 반영함).
+- 만약 $p \le 0.05$ (Lack-of-Fit 유의): 모델에 고차 곡률(Curvature)이나 교호작용이 존재함을 의미하므로, 억지로 합격시키지 않고 Phase 3B(2차 다항 반응표면 모델) 확장을 검토함.
 
-### ③ 최종 확인 실험 (Confirmation Runs)
-Run 17, 18번(`GS40-P017`, `GS40-P018`)의 실제 측정값이 M4 모델이 제시한 **95% 예측 신뢰 구간(Prediction Interval) 내에 안착**하면, 비로소:
+### ③ 모델 기반 독립 확인 실험 (True Confirmation Runs)
+M4 모델이 통계적 검토를 통과하면, 모델이 추천하는 1~2개 최적 처방 좌표를 도출하여 **별도의 확인 배치(Confirmation Batch)**를 제조합니다:
+\[
+|\text{Actual QC} - \text{Predicted Value}| \le 1.96 \times \text{Prediction Standard Error}
+\]
+확인 실험 결과가 95% 예측 구간 내에 일치하는 것이 입증되어야 비로소:
 > **`M4 Production Model: OFFICIALLY QUALIFIED`**
 
-로 공식 승격 판정을 내리고, 다음 단계인 **M5 다목적 파레토 프론티어(NSGA-II) 최적화기** 개발로 전환합니다.
+판정을 부여하고, **M5 다목적 파레토 프론티어(NSGA-II) 최적화기** 개발 단계로 진입합니다.
