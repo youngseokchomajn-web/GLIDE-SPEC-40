@@ -1,0 +1,15 @@
+formulation_id,wax_type,wax_wt_pct,oil_type,oil_wt_pct,oil_polarity,instantaneous_cof_mean,instantaneous_cof_sd,sustained_4h_cof_mean,sustained_4h_cof_sd,notes
+UNLUBRICATED,None,0.0,None,0.0,None,0.61,0.08,0.61,0.08,Baseline unlubricated skin-PDMS interface
+00BW_100OO,Beeswax,0.0,Olive Oil,100.0,Polar,0.28,0.04,,,Pure vegetable triglyceride oil
+00BW_100MO,Beeswax,0.0,Mineral Oil,100.0,Non-polar,0.27,0.03,,,Pure hydrocarbon mineral oil
+10BW_90OO,Beeswax,10.0,Olive Oil,90.0,Polar,0.21,0.03,,,
+15BW_85OO,Beeswax,15.0,Olive Oil,85.0,Polar,0.17,0.02,0.38,0.05,Peak instantaneous lubricity in polar oil
+20BW_80OO,Beeswax,20.0,Olive Oil,80.0,Polar,0.22,0.03,,,
+30BW_70OO,Beeswax,30.0,Olive Oil,70.0,Polar,0.29,0.04,,,Higher wax causes viscosity/shear drag increase
+10BW_90MO,Beeswax,10.0,Mineral Oil,90.0,Non-polar,0.20,0.02,,,
+15BW_85MO,Beeswax,15.0,Mineral Oil,85.0,Non-polar,0.19,0.03,,,
+20BW_80MO,Beeswax,20.0,Mineral Oil,80.0,Non-polar,0.16,0.02,0.52,0.06,Rapid drying over 4h due to low oil polarity
+30BW_70MO,Beeswax,30.0,Mineral Oil,70.0,Non-polar,0.26,0.03,,,
+20PW_80OO,Paraffin,20.0,Olive Oil,80.0,Polar,0.25,0.03,,,Linear alkane paraffin wax
+20PW_80MO,Paraffin,20.0,Mineral Oil,80.0,Non-polar,0.24,0.03,,,
+20BW_40OO_40MO,Beeswax,20.0,Olive+Mineral,80.0,Hybrid,0.18,0.02,0.29,0.04,Best long-term PPE anti-shear performance

@@ -1,0 +1,7 @@
+formulation_id,wax_system_total_pct,microcrystalline_wax_pct,ozokerite_pct,candelilla_wax_pct,carnauba_wax_pct,alkenones_substitute_pct,oil_system_pct,pigment_filler_pct,melting_peak_c,melting_range_low_c,melting_range_high_c,payoff_fabric_mg_mean,payoff_fabric_mg_sd,payoff_skin_mg_mean,payoff_skin_mg_sd,notes
+L1_CONTROL,17.0,3.5,3.5,7.0,3.0,0.0,68.8,13.0,60.3,35.9,85.2,61.0,3.0,14.0,2.0,Exact 17% wax control benchmark (GS40 17% target anchor)
+L2_ALKENONE_OZO,17.0,3.5,0.0,7.0,3.0,3.5,68.8,13.0,53.2,44.8,86.3,77.0,4.0,19.0,1.0,Alkenones substitute for ozokerite
+L3_ALKENONE_MICRO,17.0,0.0,3.5,7.0,3.0,3.5,68.8,13.0,50.6,38.6,82.6,75.0,2.0,16.0,1.0,Alkenones substitute for microcrystalline
+L4_ALKENONE_CAN,17.0,3.5,3.5,0.0,3.0,7.0,68.8,13.0,53.5,39.7,85.3,57.0,2.0,10.0,1.0,Alkenones substitute for candelilla
+COMMERCIAL_C1,TBD,0.0,0.0,0.0,0.0,0.0,TBD,TBD,57.5,44.4,76.6,71.0,4.0,10.0,2.0,Commercial lipstick benchmark 1
+COMMERCIAL_C2,TBD,0.0,0.0,0.0,0.0,0.0,TBD,TBD,59.4,36.6,88.5,61.0,3.0,7.0,1.0,Commercial lipstick benchmark 2
