@@ -339,12 +339,25 @@ class FormulationDatabase:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-            INSERT OR REPLACE INTO doe_trials (
+            INSERT INTO doe_trials (
                 trial_id, design_type, synthetic_wax_pct, candelilla_wax_pct,
                 dimethicone_pct, caprylyl_methicone_pct, c12_15_alkyl_benzoate_pct,
                 fill_temperature_c, shear_speed_rpm, mixing_time_min,
                 cooling_profile, status, notes
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(trial_id) DO UPDATE SET
+                design_type = excluded.design_type,
+                synthetic_wax_pct = excluded.synthetic_wax_pct,
+                candelilla_wax_pct = excluded.candelilla_wax_pct,
+                dimethicone_pct = excluded.dimethicone_pct,
+                caprylyl_methicone_pct = excluded.caprylyl_methicone_pct,
+                c12_15_alkyl_benzoate_pct = excluded.c12_15_alkyl_benzoate_pct,
+                fill_temperature_c = excluded.fill_temperature_c,
+                shear_speed_rpm = excluded.shear_speed_rpm,
+                mixing_time_min = excluded.mixing_time_min,
+                cooling_profile = excluded.cooling_profile,
+                status = excluded.status,
+                notes = excluded.notes
             """, (
                 trial.trial_id, trial.design_type, trial.synthetic_wax_pct, trial.candelilla_wax_pct,
                 trial.dimethicone_pct, trial.caprylyl_methicone_pct, trial.c12_15_alkyl_benzoate_pct,
@@ -398,12 +411,30 @@ class FormulationDatabase:
             calc_time = batch.calculated_at or datetime.now().isoformat()
 
             cursor.execute("""
-            INSERT OR REPLACE INTO manufacturing_batches (
+            INSERT INTO manufacturing_batches (
                 batch_id, trial_id, formula_id, revision, created_date, operator,
                 batch_size_kg, total_charge_pct, items_json, process_conditions_json,
                 total_raw_material_cost, cost_per_20g_stick, target_cogs_per_stick,
                 cogs_basis, material_price_source, quote_status, calculated_at, notes
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(batch_id) DO UPDATE SET
+                trial_id = excluded.trial_id,
+                formula_id = excluded.formula_id,
+                revision = excluded.revision,
+                created_date = excluded.created_date,
+                operator = excluded.operator,
+                batch_size_kg = excluded.batch_size_kg,
+                total_charge_pct = excluded.total_charge_pct,
+                items_json = excluded.items_json,
+                process_conditions_json = excluded.process_conditions_json,
+                total_raw_material_cost = excluded.total_raw_material_cost,
+                cost_per_20g_stick = excluded.cost_per_20g_stick,
+                target_cogs_per_stick = excluded.target_cogs_per_stick,
+                cogs_basis = excluded.cogs_basis,
+                material_price_source = excluded.material_price_source,
+                quote_status = excluded.quote_status,
+                calculated_at = excluded.calculated_at,
+                notes = excluded.notes
             """, (
                 batch.batch_id, batch.trial_id, batch.formula_id, batch.revision,
                 batch.created_date, batch.operator, batch.batch_size_kg, batch.total_charge_pct,
@@ -481,13 +512,34 @@ class FormulationDatabase:
                     )
 
             cursor.execute("""
-            INSERT OR REPLACE INTO qc_records (
+            INSERT INTO qc_records (
                 batch_id, formula_id, revision, test_date, operator, hardness_gf,
                 transfer_g_10c, density_g_cm3, drop_point_c, hardness_probe,
                 transfer_substrate, powder_bloom, white_cast_score, sweating_syneresis,
                 notes, hardness_sop_json, transfer_sop_json, sop_complete,
                 trial_id, data_origin, process_conditions_json
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(batch_id) DO UPDATE SET
+                formula_id = excluded.formula_id,
+                revision = excluded.revision,
+                test_date = excluded.test_date,
+                operator = excluded.operator,
+                hardness_gf = excluded.hardness_gf,
+                transfer_g_10c = excluded.transfer_g_10c,
+                density_g_cm3 = excluded.density_g_cm3,
+                drop_point_c = excluded.drop_point_c,
+                hardness_probe = excluded.hardness_probe,
+                transfer_substrate = excluded.transfer_substrate,
+                powder_bloom = excluded.powder_bloom,
+                white_cast_score = excluded.white_cast_score,
+                sweating_syneresis = excluded.sweating_syneresis,
+                notes = excluded.notes,
+                hardness_sop_json = excluded.hardness_sop_json,
+                transfer_sop_json = excluded.transfer_sop_json,
+                sop_complete = excluded.sop_complete,
+                trial_id = excluded.trial_id,
+                data_origin = excluded.data_origin,
+                process_conditions_json = excluded.process_conditions_json
             """, (
                 record.batch_id,
                 record.formula_id,
@@ -587,10 +639,16 @@ class FormulationDatabase:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-            INSERT OR REPLACE INTO revision_history (
+            INSERT INTO revision_history (
                 revision_id, release_date, status, change_summary,
                 changes_json, active_formula_json, created_at
             ) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+            ON CONFLICT(revision_id) DO UPDATE SET
+                release_date = excluded.release_date,
+                status = excluded.status,
+                change_summary = excluded.change_summary,
+                changes_json = excluded.changes_json,
+                active_formula_json = excluded.active_formula_json
             """, (
                 revision_id,
                 release_date,
