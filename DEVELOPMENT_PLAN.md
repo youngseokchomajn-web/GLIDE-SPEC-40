@@ -18,7 +18,10 @@
 | 4 | M5 Optimizer (H2/H3) | ✅ Baseline Optimizer Implemented — SLSQP constrained weighted-loss search bounded to empirical training range across 3 scenarios (NSGA-II Pareto optimizer deferred until M4 is empirically qualified) |
 | 5 | DOE engine generalization (H4) | ✅ Complete — Parameterized DOE with pure-error center replicates (>= 16 runs) |
 | 6 | Revision Tracker persistence (M1) | ✅ Complete — Schema v4 revision_history DB table & Rev.7.3 8-point baseline |
-| **v1.0** | **Framework Baseline** | **🛡️ Qualification Framework Complete / Production Model Pending Real Pilot Data (26/26 Tests Passing)** |
+| **B** | **Public Benchmark Layer (Nature 812 Shampoo)** | **✅ Complete — Model A/B/C mathematical comparison, raw SHA-256 verification, strict qualification firewall (`benchmarks/shampoo/`)** |
+| **C** | **Physical Pilot Execution (SOP-GS40-PILOT-001)** | **⏳ IN PROGRESS — 18-Run batch manufacture & CoA verification (`Execution_Order #01~#18`). Statistical qualification pending real QC data.** |
+| **D** | **Production Model Confirmation & Lock** | **⏳ PENDING PHASE C — Independent confirmation run required after initial qualification.** |
+| **Current** | **Project Baseline (Commit `e71f2b0`)** | **🛡️ Engineering Framework Frozen; Qualification Engine Operational (31/31 Tests Passing)** |
 
 ---
 
