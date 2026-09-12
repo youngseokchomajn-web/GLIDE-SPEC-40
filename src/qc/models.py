@@ -97,14 +97,18 @@ class BatchQCRecord(BaseModel):
             transfer.test_method != "TBD",
         ])
 
-    def is_training_eligible(self, verified_raw_materials: bool = True) -> bool:
+    def is_training_eligible(
+        self,
+        verified_raw_materials: bool = True,
+        raw_materials_catalog: Optional[Dict[str, Any]] = None
+    ) -> bool:
         """
         Phase 2A Data Contract Gate:
         A record is eligible for model training ONLY if:
         1. It is genuine real pilot data (synthetic data strictly excluded).
         2. trial_id is linked (full lineage to DOE specification required).
         3. SOP is complete without any missing parameters.
-        4. Raw material specifications are verified.
+        4. Raw material specifications are verified (if catalog passed, all specs must not be TBD).
         5. Core measured properties (hardness & transfer) are non-null and positive.
         6. Process conditions are within controlled pilot screening bounds (e.g. 70~90°C fill).
         """
@@ -114,8 +118,15 @@ class BatchQCRecord(BaseModel):
             return False
         if not self.is_sop_complete():
             return False
-        if not verified_raw_materials:
+
+        # Verify raw material completeness against actual catalog if provided
+        if raw_materials_catalog is not None:
+            for mat in raw_materials_catalog.values():
+                if hasattr(mat, "status") and str(mat.status).endswith("TBD"):
+                    return False
+        elif not verified_raw_materials:
             return False
+
         if self.hardness_gf is None or self.hardness_gf <= 0:
             return False
         if self.transfer_g_10c is None or self.transfer_g_10c <= 0:

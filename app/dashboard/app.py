@@ -14,7 +14,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 from src.materials.master import RawMaterial, MaterialType, MaterialStatus, REV73_RAW_MATERIALS
 from src.formulas.master import REV73_TARGET_ACTIVE_FORMULA
 from src.manufacturing.calculator import ManufacturingCalculator, STANDARD_BATCH_SIZES
-from src.qc.models import BatchQCRecord, QCStatus, HardnessSOP, TransferSOP
+from src.manufacturing.models import ManufacturingBatch
+from src.qc.models import BatchQCRecord, QCStatus, HardnessSOP, TransferSOP, DataOrigin, ProcessCondition
 from src.doe.engine import AdvancedDOEEngine
 from src.modeling.predictor import FormulationPredictor, ModelState
 from src.optimization.optimizer import MultiObjectiveOptimizer
@@ -229,6 +230,48 @@ elif menu == "3. Manufacturing Calculator & COGS":
 
         df_items = pd.DataFrame(items_data)
         st.dataframe(df_items, use_container_width=True, hide_index=True)
+
+        st.markdown("---")
+        st.markdown("### 💾 Commit Calculation to Manufacturing Batch Record (Phase 2A)")
+        with st.form("commit_batch_form"):
+            cb1, cb2, cb3 = st.columns(3)
+            with cb1:
+                new_batch_id = st.text_input("New Batch ID to Commit", value=f"BATCH-MFG-{preset_spec.batch_name.split()[0]}-001")
+            with cb2:
+                batch_operator = st.text_input("Production / Pilot Lead", value="Chief Compounder")
+            with cb3:
+                all_trials_mfg = db.get_all_doe_trials()
+                mfg_trial_opts = ["None (Standard Scale-up)"] + [t.trial_id for t in all_trials_mfg]
+                sel_mfg_trial = st.selectbox("Associated DOE Trial ID", mfg_trial_opts, index=0)
+                actual_mfg_trial_id = None if sel_mfg_trial.startswith("None") else sel_mfg_trial
+
+            batch_commit_btn = st.form_submit_button("Commit & Persist Manufacturing Batch")
+            if batch_commit_btn:
+                # Resolve process condition from trial or standard
+                batch_proc = ProcessCondition()
+                if actual_mfg_trial_id:
+                    trial_found = db.get_doe_trial(actual_mfg_trial_id)
+                    if trial_found:
+                        batch_proc = trial_found.to_process_condition()
+
+                mfg_batch_record = ManufacturingBatch(
+                    batch_id=new_batch_id,
+                    trial_id=actual_mfg_trial_id,
+                    formula_id=calc_res.formula_id,
+                    revision=calc_res.revision,
+                    created_date="2026-09-12",
+                    operator=batch_operator,
+                    batch_size_kg=calc_res.batch_size_kg,
+                    total_charge_pct=calc_res.total_charge_pct,
+                    items=calc_res.items,
+                    process_conditions=batch_proc,
+                    total_raw_material_cost=calc_res.total_raw_material_cost,
+                    cost_per_20g_stick=calc_res.cost_per_20g_stick,
+                    target_cogs_per_stick=calc_res.target_cogs_per_stick,
+                    notes=f"Generated from {batch_preset} preset ({batch_weight_kg} kg)."
+                )
+                db.save_manufacturing_batch(mfg_batch_record)
+                st.success(f"✅ Manufacturing Batch '{new_batch_id}' successfully saved to SQLite database with full material & cost snapshots!")
 
 # ==============================================================================
 # 4. DOE Mixture Matrix
