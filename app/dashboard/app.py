@@ -1,0 +1,370 @@
+"""
+GLIDE-SPEC 40 - Formulation Simulator Interactive Dashboard (M6)
+Runs via: streamlit run app/dashboard/app.py
+"""
+
+import sys
+import os
+import streamlit as st
+import pandas as pd
+
+# Add project root to path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
+from src.materials.master import RawMaterial, MaterialType, MaterialStatus, REV73_RAW_MATERIALS
+from src.formulas.master import REV73_TARGET_ACTIVE_FORMULA
+from src.manufacturing.calculator import ManufacturingCalculator, STANDARD_BATCH_SIZES
+from src.qc.models import BatchQCRecord, QCStatus, HardnessSOP, TransferSOP
+from src.doe.engine import AdvancedDOEEngine
+from src.modeling.predictor import FormulationPredictor, ModelState
+from src.optimization.optimizer import MultiObjectiveOptimizer
+from src.revision.tracker import get_rev73_revision_master
+from src.storage.db import FormulationDatabase
+
+# Page config
+st.set_page_config(
+    page_title="GLIDE-SPEC 40 Simulator",
+    page_icon="🧪",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Custom header
+st.markdown("""
+<div style="background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); padding: 22px; border-radius: 10px; color: white; margin-bottom: 25px;">
+    <h1 style="margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 0.5px;">GLIDE-SPEC 40 : Formulation Digital Twin</h1>
+    <p style="margin: 5px 0 0 0; opacity: 0.85; font-size: 15px;">Rev.7.3 Development Baseline | 20g Technical Solid Anti-Chafing Stick</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Initialize DB and Session State
+db = FormulationDatabase()
+if "materials" not in st.session_state:
+    st.session_state.materials = db.load_materials_catalog()
+
+# Sidebar Navigation
+st.sidebar.title("Navigation")
+menu = st.sidebar.radio(
+    "Modules",
+    [
+        "1. Target Active Formula",
+        "2. Raw Material Master (TBD Gate)",
+        "3. Manufacturing Calculator & COGS",
+        "4. DOE Mixture Matrix",
+        "5. QC & SOP Test Station",
+        "6. Optimizer & Revision Tracker"
+    ]
+)
+
+st.sidebar.markdown("---")
+st.sidebar.info("💡 **Core Principle:** Never finalize manufacturing formulas without verified raw material CoA. Prediction requires real QC data.")
+
+# ==============================================================================
+# 1. Target Active Formula
+# ==============================================================================
+if menu == "1. Target Active Formula":
+    st.subheader("🎯 Rev.7.3 Target Active Formula (Locked Baseline)")
+    st.caption("유효 활성 성분 100% 기준 개발 목표선. 임의 변경이 불가하며 실험 결과에 의해서만 다음 Revision으로 진화합니다.")
+
+    comps = REV73_TARGET_ACTIVE_FORMULA.components
+    data = [{
+        "Material ID": c.material_id,
+        "Component Name": c.material_name,
+        "Target Active %": f"{c.target_active_pct:.1f}%",
+        "Engineering Role / Notes": c.notes
+    } for c in comps]
+
+    df_formula = pd.DataFrame(data)
+    st.dataframe(df_formula, use_container_width=True, hide_index=True)
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Total Target Active", "100.0%", "Balanced")
+    with col2:
+        st.metric("Powder System Loading", "28.0%", "BN + Silicas + PMSSQ + ZnO")
+    with col3:
+        st.metric("Carrier + Resin Matrix", "40.0%", "Silicone (28%) + MQ Resin (12%)")
+
+# ==============================================================================
+# 2. Raw Material Master (TBD Gate)
+# ==============================================================================
+elif menu == "2. Raw Material Master (TBD Gate)":
+    st.subheader("📋 Raw Material Master & Specification Gatekeeper")
+    st.write("공급사 성적서(TDS/CoA)를 통해 확인된 원료 스펙을 관리합니다. 필수 값이 `TBD` 상태인 원료는 생산 배합 계산에서 자동 차단됩니다.")
+
+    materials = st.session_state.materials
+
+    # Quick summary metric
+    total_mats = len(materials)
+    verified_mats = sum(1 for m in materials.values() if m.status == MaterialStatus.VERIFIED)
+    tbd_mats = sum(1 for m in materials.values() if m.status == MaterialStatus.TBD)
+
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Total Raw Materials", total_mats)
+    m2.metric("Verified Specs (Ready)", verified_mats)
+    m3.metric("Pending Specs (TBD Gate Blocked)", tbd_mats)
+
+    st.markdown("### Material Specification Catalog")
+    table_rows = []
+    for mid, m in materials.items():
+        table_rows.append({
+            "ID": m.material_id,
+            "INCI": m.inci,
+            "Trade Name": m.trade_name,
+            "Supplier": m.supplier,
+            "Active %": f"{m.active_pct:.1f}%" if m.active_pct is not None else "TBD",
+            "Carrier": m.carrier,
+            "Cost/kg (KRW)": f"{m.cost_per_kg:,.0f}" if m.cost_per_kg else "TBD",
+            "Status": m.status.value
+        })
+    st.dataframe(pd.DataFrame(table_rows), use_container_width=True, hide_index=True)
+
+    st.markdown("---")
+    st.markdown("### Update Material Spec (Simulate Supplier CoA Input)")
+    with st.form("update_material_form"):
+        sel_mat_id = st.selectbox("Select Material ID to Update", list(materials.keys()))
+        current_mat = materials[sel_mat_id]
+
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            new_trade = st.text_input("Trade Name", current_mat.trade_name or "TBD")
+            new_supplier = st.text_input("Supplier", current_mat.supplier or "TBD")
+        with c2:
+            new_active = st.number_input("Active %", min_value=1.0, max_value=100.0, value=float(current_mat.active_pct or 100.0))
+            new_carrier = st.text_input("Carrier / Solvent", current_mat.carrier or "None")
+        with c3:
+            new_cost = st.number_input("Cost per kg (KRW)", min_value=0.0, value=float(current_mat.cost_per_kg or 0.0), step=1000.0)
+            new_status = st.selectbox("Status", [s.value for s in MaterialStatus], index=2 if current_mat.status == MaterialStatus.VERIFIED else 0)
+
+        submitted = st.form_submit_button("Save Material Specification")
+        if submitted:
+            current_mat.trade_name = new_trade
+            current_mat.supplier = new_supplier
+            current_mat.active_pct = new_active
+            current_mat.carrier = new_carrier
+            current_mat.cost_per_kg = new_cost if new_cost > 0 else None
+            current_mat.status = MaterialStatus(new_status)
+            materials[sel_mat_id] = current_mat
+            st.session_state.materials = materials
+            db.save_materials_catalog(materials)
+            st.success(f"Updated {sel_mat_id} successfully!")
+            st.rerun()
+
+# ==============================================================================
+# 3. Manufacturing Calculator & COGS
+# ==============================================================================
+elif menu == "3. Manufacturing Calculator & COGS":
+    st.subheader("⚙️ Manufacturing Formula & Batch Scaler (M1)")
+    st.write("Active Formula로부터 원료별 실제 투입 비율(Charge %)과 배치 중량을 역산하고 캐리어 용매를 상계 처리합니다.")
+
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        batch_preset = st.selectbox("Batch Scale Preset", list(STANDARD_BATCH_SIZES.keys()), index=6)
+        preset_spec = STANDARD_BATCH_SIZES[batch_preset]
+        batch_weight_kg = st.number_input("Batch Size (kg)", min_value=0.01, max_value=500.0, value=float(preset_spec.target_weight_kg), step=1.0)
+    with c2:
+        offset_carrier = st.toggle("Enable Carrier Offsetting", value=True, help="MQ Resin 등에 포함된 실리콘 용매를 메인 실리콘 캐리어(28%)에서 자동 차감")
+        use_sample_mock = st.toggle("Simulate with Confirmed Specs (Demo Mode)", value=True, help="TBD 원료를 모의 확정 스펙으로 채워 계산기 동작 시연")
+
+    working_materials = dict(st.session_state.materials)
+    if use_sample_mock:
+        # Provide sample verified specs
+        working_materials["MAT-MQ-01"] = RawMaterial(
+            material_id="MAT-MQ-01",
+            inci="Trimethylsiloxysilicate (and) Dimethicone",
+            trade_name="MQ-60-D",
+            supplier="Shin-Etsu",
+            grade="Resin Premix",
+            material_type=MaterialType.RESIN,
+            active_pct=60.0,
+            carrier="Dimethicone",
+            carrier_pct=40.0,
+            cost_per_kg=65000.0,
+            status=MaterialStatus.VERIFIED
+        )
+        working_materials["MAT-WAX-SYN-01"].cost_per_kg = 18000.0
+        working_materials["MAT-WAX-CAN-01"].cost_per_kg = 28000.0
+        working_materials["MAT-BN-01"].cost_per_kg = 120000.0
+        working_materials["MAT-SILICA-01"].cost_per_kg = 45000.0
+        working_materials["MAT-SIL-DIM-01"].cost_per_kg = 15000.0
+        working_materials["MAT-EMO-AB-01"].cost_per_kg = 16000.0
+
+    calc_res = ManufacturingCalculator.generate_manufacturing_formula(
+        active_formula=REV73_TARGET_ACTIVE_FORMULA,
+        material_specs=working_materials,
+        batch_size_kg=batch_weight_kg,
+        offset_carrier=offset_carrier
+    )
+
+    if not calc_res.is_valid:
+        st.error("🚫 Manufacturing Formula Generation Blocked by Gatekeeper")
+        st.write("**Missing or Incomplete Raw Material Specifications:**")
+        for miss in calc_res.missing_specs:
+            st.warning(f"• {miss}")
+    else:
+        st.success(f"✅ Manufacturing Formula Calculated for {batch_weight_kg:.2f} kg Batch")
+
+        # Metric cards
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Total Charge %", f"{calc_res.total_charge_pct:.2f}%")
+        m2.metric("Total Batch Weight", f"{batch_weight_kg:.2f} kg")
+        if calc_res.cost_per_20g_stick:
+            m3.metric("Bulk Cost (20g Stick)", f"₩{calc_res.cost_per_20g_stick:,.1f}")
+            m4.metric("COGS Budget Utilization", f"{calc_res.cogs_budget_pct:.1f}%", delta=f"Target: ₩2,950")
+
+        if calc_res.carrier_offsets_applied:
+            st.info("🔄 **Carrier Offsetting Applied:** " + " | ".join(calc_res.carrier_offsets_applied))
+
+        # Items table
+        items_data = [{
+            "Material": item.material_name,
+            "INCI": item.inci,
+            "Target Active %": f"{item.active_contribution_pct:.1f}%",
+            "Charge %": f"{item.charge_pct:.2f}%",
+            "Weight (kg)": f"{item.charge_weight_kg:.3f}",
+            "Weight (g)": f"{item.charge_weight_g:.1f}",
+            "Cost/kg (KRW)": f"₩{item.cost_per_kg:,.0f}" if item.cost_per_kg else "-",
+            "Item Total (KRW)": f"₩{item.item_total_cost:,.0f}" if item.item_total_cost else "-"
+        } for item in calc_res.items]
+
+        df_items = pd.DataFrame(items_data)
+        st.dataframe(df_items, use_container_width=True, hide_index=True)
+
+# ==============================================================================
+# 4. DOE Mixture Matrix
+# ==============================================================================
+elif menu == "4. DOE Mixture Matrix":
+    st.subheader("🧪 Advanced Constrained Mixture DOE Engine (M2)")
+    st.write("왁스 시스템(17%)과 실리콘 시스템(28%)의 미확정 세부 비율 및 충전 공정 후보값(75~85°C)을 탐색하기 위한 직교 파일럿 실험 계획입니다.")
+
+    trials = AdvancedDOEEngine.generate_full_doe_design()
+    df_doe = AdvancedDOEEngine.export_to_dataframe(trials)
+
+    st.write(f"Generated **{len(trials)} Orthogonal Pilot Experimental Runs**:")
+    st.dataframe(df_doe, use_container_width=True, hide_index=True)
+
+    csv_data = df_doe.to_csv(index=False).encode('utf-8-sig')
+    st.download_button(
+        label="📥 Download DOE Matrix as CSV",
+        data=csv_data,
+        file_name="GLIDE_SPEC_40_Rev7.3_Pilot_DOE_Matrix.csv",
+        mime="text/csv"
+    )
+
+# ==============================================================================
+# 5. QC & SOP Test Station
+# ==============================================================================
+elif menu == "5. QC & SOP Test Station":
+    st.subheader("🔬 QC Test Station & Laboratory SOP Records (M3)")
+    st.write("동일한 수치라도 시험 방법(SOP)이 다르면 QC로 인정하지 않습니다. 측정값과 시험 장비/환경 조건을 함께 기록합니다.")
+
+    with st.form("qc_entry_form"):
+        st.markdown("#### 1. Batch Identification")
+        b1, b2, b3 = st.columns(3)
+        with b1:
+            batch_id = st.text_input("Batch ID", value="BATCH-PILOT-001")
+        with b2:
+            formula_id = st.text_input("Formula ID", value="FORM-GLIDE40-REV7.3")
+        with b3:
+            operator = st.text_input("Operator / Lab Engineer", value="Lead Chemist")
+
+        st.markdown("#### 2. Core QC Measurements & Mandatory SOP Tracking")
+        q1, q2 = st.columns(2)
+        with q1:
+            meas_hardness = st.number_input("Hardness @ 25°C (gf) [Target: 750~900]", min_value=0.0, max_value=2000.0, value=820.0)
+            probe_type = st.selectbox("Hardness Probe Type", ["2mm Cylindrical Needle", "45 deg Conical", "10mm Sphere"])
+            depth_mm = st.number_input("Penetration Depth (mm)", value=2.0)
+        with q2:
+            meas_transfer = st.number_input("Pay-off / Transfer @ 10°C (g) [Target: >= 0.040]", min_value=0.0, max_value=1.0, value=0.048, format="%.3f")
+            substrate = st.selectbox("Transfer Substrate", ["Artificial Collagen Skin", "Textured Polyurethane Leather", "Human Forearm"])
+            pressure_g = st.number_input("Applied Contact Pressure (g)", value=500.0)
+
+        q3, q4 = st.columns(2)
+        with q3:
+            meas_density = st.number_input("Density (g/cm³) [Target: 1.04~1.12]", min_value=0.5, max_value=2.0, value=1.08, format="%.2f")
+        with q4:
+            meas_drop_point = st.number_input("Drop Point (°C) [Target: 60.0~63.0]", min_value=30.0, max_value=100.0, value=61.8)
+
+        qc_notes = st.text_area("Lab Observations (Powder Bloom, White Cast, Stick Glide etc.)", "Smooth pay-off, zero chalking on black fabric, no syneresis observed.")
+
+        qc_submit = st.form_submit_button("Record QC Laboratory Result")
+        if qc_submit:
+            new_record = BatchQCRecord(
+                batch_id=batch_id,
+                formula_id=formula_id,
+                revision="Rev.7.3",
+                test_date="2026-09-12",
+                operator=operator,
+                hardness_gf=meas_hardness,
+                transfer_g_10c=meas_transfer,
+                density_g_cm3=meas_density,
+                drop_point_c=meas_drop_point,
+                hardness_sop=HardnessSOP(probe_type=probe_type, penetration_depth_mm=depth_mm),
+                transfer_sop=TransferSOP(substrate_type=substrate, applied_pressure_g=pressure_g),
+                notes=qc_notes
+            )
+            db.save_qc_record(new_record)
+            st.success(f"QC Record for {batch_id} successfully persisted!")
+
+    st.markdown("---")
+    st.markdown("### QC Test History & Target Pass/Fail Analysis")
+    all_qc = db.get_all_qc_records()
+    if all_qc:
+        eval_list = []
+        for r in all_qc:
+            evals = r.evaluate_targets()
+            eval_list.append({
+                "Batch ID": r.batch_id,
+                "Date": r.test_date,
+                "Hardness": f"{r.hardness_gf:.0f} gf ({evals['hardness'].status.value})",
+                "Transfer": f"{r.transfer_g_10c:.3f} g ({evals['transfer'].status.value})",
+                "Density": f"{r.density_g_cm3:.2f} ({evals['density'].status.value})",
+                "Drop Point": f"{r.drop_point_c:.1f}°C ({evals['drop_point'].status.value})",
+                "Probe / Substrate SOP": f"{r.hardness_sop.probe_type} / {r.transfer_sop.substrate_type}",
+                "Notes": r.notes
+            })
+        st.dataframe(pd.DataFrame(eval_list), use_container_width=True, hide_index=True)
+    else:
+        st.info("No QC test records currently logged in database.")
+
+# ==============================================================================
+# 6. Optimizer & Revision Tracker
+# ==============================================================================
+elif menu == "6. Optimizer & Revision Tracker":
+    st.subheader("🔮 Multi-Objective Optimizer & Revision History (M5)")
+
+    predictor = FormulationPredictor()
+    all_qc = db.get_all_qc_records()
+    predictor.fit(all_qc)
+
+    st.write(f"**ML Property Predictor State:** `{predictor.state.value}`")
+    if predictor.state == ModelState.AWAITING_PILOT_DATA:
+        st.warning("⚠️ [RULE #6 ACTIVE] Model is currently waiting for $\ge 5$ verified Pilot QC datasets. Rule-based candidate generation is applied instead of blind AI guessing.")
+
+    optimizer = MultiObjectiveOptimizer(predictor=predictor)
+    candidates = optimizer.generate_candidates(top_n=3)
+
+    st.markdown("#### Candidate Formulations for Next Pilot (Rev.7.4 Candidates)")
+    cand_data = [{
+        "Candidate ID": c.candidate_id,
+        "Syn Wax %": f"{c.synthetic_wax_pct:.1f}%",
+        "Can Wax %": f"{c.candelilla_wax_pct:.1f}%",
+        "Dimethicone %": f"{c.dimethicone_pct:.1f}%",
+        "Caprylyl %": f"{c.caprylyl_methicone_pct:.1f}%",
+        "Desirability Score": f"{c.desirability_score:.2f}",
+        "Strategy / Rationale": c.notes
+    } for c in candidates]
+    st.dataframe(pd.DataFrame(cand_data), use_container_width=True, hide_index=True)
+
+    st.markdown("---")
+    st.markdown("#### 📜 Rev.7.3 Formal Revision Audit Trail")
+    rev_master = get_rev73_revision_master()
+    rev_data = [{
+        "Change ID": ch.change_id,
+        "Type": ch.change_type.value,
+        "Item": ch.item,
+        "Previous Value": ch.previous_value,
+        "New Baseline Value": ch.new_value,
+        "Engineering Reason": ch.reason
+    } for ch in rev_master.changes]
+    st.dataframe(pd.DataFrame(rev_data), use_container_width=True, hide_index=True)

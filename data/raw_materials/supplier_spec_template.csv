@@ -1,0 +1,15 @@
+material_id,inci,trade_name,supplier,grade,active_pct,carrier,carrier_pct,viscosity_cst,d50_um,moisture_pct,cost_per_kg_krw,status,notes
+MAT-BN-01,Boron Nitride,TBD,TBD,Platelet h-BN,100.0,None,0.0,None,10.0,0.1,TBD,TBD,D50 <= 10um
+MAT-SILICA-01,Silica,TBD,TBD,Porous Spherical,100.0,None,0.0,None,10.0,0.2,TBD,TBD,Oil absorption check
+MAT-FUMED-01,Silica Dimethyl Silylate,TBD,TBD,Hydrophobic Fumed,100.0,None,0.0,None,None,0.1,TBD,TBD,Thixotropy
+MAT-PMSSQ-01,Polymethylsilsesquioxane,TBD,TBD,Spherical Elastic,100.0,None,0.0,None,10.0,0.1,TBD,TBD,Micro ball-bearing
+MAT-ZNO-01,Zinc Oxide (and) Triethoxycaprylylsilane,TBD,TBD,Silane Coated,96.0,None,0.0,None,10.0,0.1,TBD,TBD,ZnO active % check
+MAT-WAX-SYN-01,Synthetic Wax,TBD,TBD,High Melt Synthetic,100.0,None,0.0,None,None,0.0,TBD,TBD,Drop point check
+MAT-WAX-CAN-01,Euphorbia Cerifera (Candelilla) Wax,TBD,TBD,Deodorized,100.0,None,0.0,None,None,0.0,TBD,TBD,Odorless
+MAT-PEG8-01,PEG-8 Beeswax,TBD,TBD,Functional Wax,100.0,None,0.0,None,None,0.1,TBD,TBD,Wash-off switch
+MAT-SIL-DIM-01,Dimethicone,TBD,TBD,Linear Silicone,100.0,None,0.0,TBD,None,0.0,TBD,TBD,Confirm cSt (2 or 5 cSt)
+MAT-SIL-CAP-01,Caprylyl Methicone,TBD,TBD,Alkyl Methicone,100.0,None,0.0,None,None,0.0,TBD,TBD,D4/D5/D6 Free
+MAT-MQ-01,Trimethylsiloxysilicate,TBD,TBD,MQ Resin Solution,TBD,TBD,TBD,None,None,0.0,TBD,TBD,Confirm active% and carrier
+MAT-EMO-AB-01,C12-15 Alkyl Benzoate,TBD,TBD,Cosmetic Ester,100.0,None,0.0,None,None,0.0,TBD,TBD,Powder wetting
+MAT-EHG-01,Ethylhexylglycerin,TBD,TBD,Deo booster,100.0,None,0.0,None,None,0.0,TBD,TBD,Gram+ defense
+MAT-ACT-BLEND-01,Bisabolol (and) Stearyl Glycyrrhetinate (and) Tocopherol (and) Rosmarinus Extract,TBD,TBD,Soothing Blend,100.0,None,0.0,None,None,0.0,TBD,TBD,Supercritical extract
