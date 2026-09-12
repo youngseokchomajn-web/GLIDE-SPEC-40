@@ -259,25 +259,38 @@ elif menu == "5. QC & SOP Test Station":
     st.write("동일한 수치라도 시험 방법(SOP)이 다르면 QC로 인정하지 않습니다. 측정값과 시험 장비/환경 조건을 함께 기록합니다.")
 
     with st.form("qc_entry_form"):
-        st.markdown("#### 1. Batch Identification")
-        b1, b2, b3 = st.columns(3)
+        st.markdown("#### 1. Batch Identification & Data Contract (Phase 2A)")
+        b1, b2, b3, b4 = st.columns(4)
         with b1:
             batch_id = st.text_input("Batch ID", value="BATCH-PILOT-001")
         with b2:
             formula_id = st.text_input("Formula ID", value="FORM-GLIDE40-REV7.3")
         with b3:
             operator = st.text_input("Operator / Lab Engineer", value="Lead Chemist")
+        with b4:
+            data_origin_val = st.selectbox("Data Origin", ["REAL_PILOT", "SYNTHETIC_TEST"], index=0, help="REAL_PILOT만 머신러닝 학습 세트에 편입됩니다.")
 
-        st.markdown("#### 2. Core QC Measurements & Mandatory SOP Tracking")
+        st.markdown("#### 2. Linked DOE Trial & Process Conditions")
+        all_trials = db.get_all_doe_trials()
+        trial_options = ["None (Unlinked Manual Batch)"] + [t.trial_id for t in all_trials]
+        selected_trial = st.selectbox("Linked DOE Trial ID", trial_options, index=0)
+        actual_trial_id = None if selected_trial.startswith("None") else selected_trial
+
+        st.markdown("#### 3. Core QC Measurements & Mandatory SOP Tracking")
         q1, q2 = st.columns(2)
         with q1:
             meas_hardness = st.number_input("Hardness @ 25°C (gf) [Target: 750~900]", min_value=0.0, max_value=2000.0, value=820.0)
             probe_type = st.selectbox("Hardness Probe Type", ["2mm Cylindrical Needle", "45 deg Conical", "10mm Sphere"])
             depth_mm = st.number_input("Penetration Depth (mm)", value=2.0)
+            test_speed = st.number_input("Test Speed (mm/s)", value=1.0)
+            cond_time = st.number_input("Conditioning Time (min)", value=30)
         with q2:
             meas_transfer = st.number_input("Pay-off / Transfer @ 10°C (g) [Target: >= 0.040]", min_value=0.0, max_value=1.0, value=0.048, format="%.3f")
             substrate = st.selectbox("Transfer Substrate", ["Artificial Collagen Skin", "Textured Polyurethane Leather", "Human Forearm"])
+            applied_area = st.number_input("Applied Area (cm²)", value=4.0)
             pressure_g = st.number_input("Applied Contact Pressure (g)", value=500.0)
+            contact_time = st.number_input("Contact Time (s)", value=3.0)
+            test_method = st.text_input("Test Method / SOP Code", value="Two-stroke standardized friction SOP")
 
         q3, q4 = st.columns(2)
         with q3:
@@ -295,16 +308,32 @@ elif menu == "5. QC & SOP Test Station":
                 revision="Rev.7.3",
                 test_date="2026-09-12",
                 operator=operator,
+                trial_id=actual_trial_id,
+                data_origin=DataOrigin(data_origin_val),
                 hardness_gf=meas_hardness,
                 transfer_g_10c=meas_transfer,
                 density_g_cm3=meas_density,
                 drop_point_c=meas_drop_point,
-                hardness_sop=HardnessSOP(probe_type=probe_type, penetration_depth_mm=depth_mm),
-                transfer_sop=TransferSOP(substrate_type=substrate, applied_pressure_g=pressure_g),
+                hardness_sop=HardnessSOP(
+                    probe_type=probe_type,
+                    penetration_depth_mm=depth_mm,
+                    test_speed_mm_s=test_speed,
+                    conditioning_time_min=int(cond_time)
+                ),
+                transfer_sop=TransferSOP(
+                    substrate_type=substrate,
+                    applied_area_cm2=applied_area,
+                    applied_pressure_g=pressure_g,
+                    contact_time_s=contact_time,
+                    test_method=test_method
+                ),
                 notes=qc_notes
             )
             db.save_qc_record(new_record)
-            st.success(f"QC Record for {batch_id} successfully persisted!")
+            if new_record.is_sop_complete():
+                st.success(f"✅ QC Record for {batch_id} successfully persisted! (SOP Complete & Training Eligible)")
+            else:
+                st.warning(f"⚠️ QC Record for {batch_id} saved, but SOP is INCOMPLETE (cannot be used for model training).")
 
     st.markdown("---")
     st.markdown("### QC Test History & Target Pass/Fail Analysis")
@@ -315,12 +344,13 @@ elif menu == "5. QC & SOP Test Station":
             evals = r.evaluate_targets()
             eval_list.append({
                 "Batch ID": r.batch_id,
-                "Date": r.test_date,
+                "Linked Trial": r.trial_id or "-",
+                "Origin": r.data_origin.value,
+                "SOP Status": "COMPLETE" if r.is_sop_complete() else "INCOMPLETE",
                 "Hardness": f"{r.hardness_gf:.0f} gf ({evals['hardness'].status.value})",
                 "Transfer": f"{r.transfer_g_10c:.3f} g ({evals['transfer'].status.value})",
                 "Density": f"{r.density_g_cm3:.2f} ({evals['density'].status.value})",
                 "Drop Point": f"{r.drop_point_c:.1f}°C ({evals['drop_point'].status.value})",
-                "Probe / Substrate SOP": f"{r.hardness_sop.probe_type} / {r.transfer_sop.substrate_type}",
                 "Notes": r.notes
             })
         st.dataframe(pd.DataFrame(eval_list), use_container_width=True, hide_index=True)
@@ -339,7 +369,7 @@ elif menu == "6. Optimizer & Revision Tracker":
 
     st.write(f"**ML Property Predictor State:** `{predictor.state.value}`")
     if predictor.state == ModelState.AWAITING_PILOT_DATA:
-        st.warning("⚠️ [RULE #6 ACTIVE] Model is currently waiting for $\ge 5$ verified Pilot QC datasets. Rule-based candidate generation is applied instead of blind AI guessing.")
+        st.warning(f"⚠️ [RULE #6 & Phase 3 ACTIVE] Model is strictly awaiting $\ge {FormulationPredictor.MIN_ELIGIBLE_PILOT_RECORDS}$ eligible real Pilot observations with complete SOPs. Rule-based candidate generation is enforced instead of blind guessing.")
 
     optimizer = MultiObjectiveOptimizer(predictor=predictor)
     candidates = optimizer.generate_candidates(top_n=3)

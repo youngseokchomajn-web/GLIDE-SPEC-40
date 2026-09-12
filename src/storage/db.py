@@ -209,31 +209,34 @@ class FormulationDatabase:
         records: List[BatchQCRecord] = []
         with sqlite3.connect(self.qc_db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM qc_records ORDER BY test_date DESC")
+            cursor.execute("""
+            SELECT
+                batch_id, formula_id, revision, test_date, operator,
+                hardness_gf, transfer_g_10c, density_g_cm3, drop_point_c,
+                hardness_probe, transfer_substrate, powder_bloom,
+                white_cast_score, sweating_syneresis, notes,
+                hardness_sop_json, transfer_sop_json, sop_complete,
+                trial_id, data_origin, process_conditions_json
+            FROM qc_records
+            ORDER BY test_date DESC
+            """)
             rows = cursor.fetchall()
             for r in rows:
-                # Column indices based on SELECT *
-                # 0:batch_id, 1:formula_id, 2:revision, 3:test_date, 4:operator,
-                # 5:hardness_gf, 6:transfer_g_10c, 7:density_g_cm3, 8:drop_point_c,
-                # 9:hardness_probe, 10:transfer_substrate, 11:powder_bloom,
-                # 12:white_cast_score, 13:sweating_syneresis, 14:notes,
-                # 15:hardness_sop_json, 16:transfer_sop_json, 17:sop_complete,
-                # 18:trial_id, 19:data_origin, 20:process_conditions_json
                 hardness_sop = (
                     HardnessSOP(**json.loads(r[15]))
-                    if len(r) > 15 and r[15]
+                    if r[15]
                     else HardnessSOP(probe_type=r[9])
                 )
                 transfer_sop = (
                     TransferSOP(**json.loads(r[16]))
-                    if len(r) > 16 and r[16]
+                    if r[16]
                     else TransferSOP(substrate_type=r[10])
                 )
-                trial_id = r[18] if len(r) > 18 else None
-                data_origin = DataOrigin(r[19]) if len(r) > 19 and r[19] else DataOrigin.REAL_PILOT
+                trial_id = r[18]
+                data_origin = DataOrigin(r[19]) if r[19] else DataOrigin.REAL_PILOT
                 proc_cond = (
                     ProcessCondition(**json.loads(r[20]))
-                    if len(r) > 20 and r[20]
+                    if r[20]
                     else ProcessCondition()
                 )
 
