@@ -6,9 +6,11 @@ Validates STEP 1 ~ 11, M0 ~ M5 modules using standard unittest.
 import unittest
 import os
 import shutil
+import sqlite3
 from src.materials.master import RawMaterial, MaterialType, MaterialStatus, REV73_RAW_MATERIALS
 from src.formulas.master import REV73_TARGET_ACTIVE_FORMULA
 from src.manufacturing.calculator import ManufacturingCalculator, STANDARD_BATCH_SIZES
+from src.manufacturing.models import ManufacturingBatch
 from src.qc.models import BatchQCRecord, QCStatus, HardnessSOP, TransferSOP, DataOrigin, ProcessCondition
 from src.revision.tracker import get_rev73_revision_master
 from src.doe.engine import AdvancedDOEEngine, DOETrial
@@ -220,26 +222,49 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
             self.assertAlmostEqual(sil_sum, 28.0, places=2)
 
     def test_schema_migration_idempotency(self):
-        """Phase 2A: Verifies schema versioning table and idempotent migrations."""
+        """Phase 2A: Verifies schema versioning table and idempotent migrations to Schema v3."""
         test_dir = "data/test_migration_tmp"
         db = FormulationDatabase(data_dir=test_dir)
-        self.assertEqual(db.get_current_schema_version(), 2)
+        self.assertEqual(db.get_current_schema_version(), 3)
 
         # Run init again to test idempotency
         db._init_sqlite()
-        self.assertEqual(db.get_current_schema_version(), 2)
+        self.assertEqual(db.get_current_schema_version(), 3)
+
+        if os.path.exists(test_dir):
+            shutil.rmtree(test_dir)
+
+    def test_foreign_key_violation_raises_error(self):
+        """Phase 2A [P1 Fix]: Verifies that unlinked/invalid trial_id violates Foreign Key integrity."""
+        test_dir = "data/test_fk_tmp"
+        db = FormulationDatabase(data_dir=test_dir)
+
+        complete_hardness = HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30)
+        complete_transfer = TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")
+
+        orphan_qc = BatchQCRecord(
+            batch_id="BATCH-ORPHAN-01",
+            trial_id="DOE-NON-EXISTENT-999",  # Does NOT exist in doe_trials!
+            formula_id="FORM-TEST", revision="Rev.7.3",
+            test_date="2026-09-12", operator="Tester",
+            hardness_gf=820.0, transfer_g_10c=0.045,
+            hardness_sop=complete_hardness, transfer_sop=complete_transfer
+        )
+
+        with self.assertRaises(sqlite3.IntegrityError):
+            db.save_qc_record(orphan_qc)
 
         if os.path.exists(test_dir):
             shutil.rmtree(test_dir)
 
     def test_data_eligibility_gate_rejects_synthetic_and_incomplete(self):
-        """Phase 2A: Data Contract gate strictly rejects synthetic data and incomplete SOPs."""
+        """Phase 2A [P1 Fix]: Data Contract gate verifies lineage, complete SOPs, and blocks premature ML promotion."""
         complete_hardness = HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30)
         complete_transfer = TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")
 
-        # 1. Real Pilot with complete SOP -> Eligible
+        # 1. Real Pilot with linked trial_id and complete SOP -> Eligible
         real_record = BatchQCRecord(
-            batch_id="BATCH-REAL-01", formula_id="FORM-TEST", revision="Rev.7.3",
+            batch_id="BATCH-REAL-01", trial_id="DOE-EXP-001", formula_id="FORM-TEST", revision="Rev.7.3",
             test_date="2026-09-12", operator="Chemist",
             hardness_gf=820.0, transfer_g_10c=0.045,
             data_origin=DataOrigin.REAL_PILOT,
@@ -247,9 +272,19 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         )
         self.assertTrue(real_record.is_training_eligible())
 
-        # 2. Synthetic Test data -> Rejected from training
+        # 2. Unlinked record (trial_id is None) -> Lineage violation, rejected
+        unlinked_record = BatchQCRecord(
+            batch_id="BATCH-UNLINKED-01", trial_id=None, formula_id="FORM-TEST", revision="Rev.7.3",
+            test_date="2026-09-12", operator="Chemist",
+            hardness_gf=820.0, transfer_g_10c=0.045,
+            data_origin=DataOrigin.REAL_PILOT,
+            hardness_sop=complete_hardness, transfer_sop=complete_transfer
+        )
+        self.assertFalse(unlinked_record.is_training_eligible())
+
+        # 3. Synthetic Test data -> Strictly rejected from training
         synthetic_record = BatchQCRecord(
-            batch_id="BATCH-SYNTH-01", formula_id="FORM-TEST", revision="Rev.7.3",
+            batch_id="BATCH-SYNTH-01", trial_id="DOE-EXP-001", formula_id="FORM-TEST", revision="Rev.7.3",
             test_date="2026-09-12", operator="Simulation Engine",
             hardness_gf=820.0, transfer_g_10c=0.045,
             data_origin=DataOrigin.SYNTHETIC_TEST,
@@ -257,46 +292,81 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         )
         self.assertFalse(synthetic_record.is_training_eligible())
 
-        # 3. Predictor rejects 20 synthetic records from promoting to TRAINED_LINEAR
+        # 4. Predictor does NOT prematurely promote to TRAINED_LINEAR even with 20 records
         predictor = FormulationPredictor()
-        records = [synthetic_record] * 20
+        records = [real_record] * 20
         promoted = predictor.fit(records)
-        self.assertFalse(promoted)
+        self.assertFalse(promoted, "Model must not promote to TRAINED_LINEAR prior to Phase 3 regression engine")
         self.assertEqual(predictor.state, ModelState.AWAITING_PILOT_DATA)
 
     def test_doe_batch_qc_complete_linkage(self):
-        """Phase 2A: End-to-end integration of DOETrial -> Batch -> QC Record in DB."""
+        """Phase 2A [P1/P2 Fix]: Full End-to-End Lineage: DOETrial (75C) -> ManufacturingBatch -> QC Record."""
         test_dir = "data/test_linkage_tmp"
         db = FormulationDatabase(data_dir=test_dir)
 
-        # 1. Save DOE Trial
+        # 1. Save DOE Trial with non-default fill temperature (75.0C, 3200 RPM)
         trial = DOETrial(
             trial_id="DOE-EXP-LINK-01", design_type="Vertex",
             synthetic_wax_pct=13.0, candelilla_wax_pct=4.0,
             dimethicone_pct=16.0, caprylyl_methicone_pct=12.0,
-            fill_temperature_c=80.0
+            fill_temperature_c=75.0, shear_speed_rpm=3200.0,
+            mixing_time_min=25.0
         )
         db.save_doe_trial(trial)
-        reloaded_trials = db.get_all_doe_trials()
-        self.assertTrue(any(t.trial_id == "DOE-EXP-LINK-01" for t in reloaded_trials))
+        reloaded_trial = db.get_doe_trial("DOE-EXP-LINK-01")
+        self.assertIsNotNone(reloaded_trial)
+        self.assertEqual(reloaded_trial.fill_temperature_c, 75.0)
 
-        # 2. Generate Manufacturing Charges from Trial Ratios
+        # 2. Generate Manufacturing Charges from Trial Ratios using verified mock specs
         component_ratios = trial.to_component_ratios()
+        verified_specs = dict(REV73_RAW_MATERIALS)
+        verified_specs["MAT-MQ-01"] = RawMaterial(
+            material_id="MAT-MQ-01", inci="Trimethylsiloxysilicate (and) Dimethicone",
+            trade_name="MQ-60-D", supplier="Shin-Etsu", grade="Resin Solution",
+            material_type=MaterialType.RESIN, active_pct=60.0, carrier="Dimethicone", carrier_pct=40.0,
+            cost_per_kg=60000.0, status=MaterialStatus.VERIFIED
+        )
         calc_result = ManufacturingCalculator.generate_manufacturing_formula(
             active_formula=REV73_TARGET_ACTIVE_FORMULA,
-            material_specs=REV73_RAW_MATERIALS,
+            material_specs=verified_specs,
             batch_size_kg=5.0,
             component_ratios=component_ratios
         )
-        # Specs are TBD in base REV73, so gatekeeper correctly stops here
-        self.assertFalse(calc_result.is_valid)
+        self.assertTrue(calc_result.is_valid)
 
-        # 3. Link QC Record to Trial ID
+        # 3. Create and persist ManufacturingBatch with real process conditions snapshot
+        mfg_batch = ManufacturingBatch(
+            batch_id="BATCH-PILOT-LINK-01",
+            trial_id=trial.trial_id,
+            formula_id=calc_result.formula_id,
+            revision="Rev.7.3",
+            created_date="2026-09-12",
+            operator="Pilot Lead",
+            batch_size_kg=calc_result.batch_size_kg,
+            total_charge_pct=calc_result.total_charge_pct,
+            items=calc_result.items,
+            process_conditions=trial.to_process_condition(),
+            total_raw_material_cost=calc_result.total_raw_material_cost,
+            cost_per_20g_stick=calc_result.cost_per_20g_stick
+        )
+        db.save_manufacturing_batch(mfg_batch)
+
+        reloaded_batch = db.get_manufacturing_batch("BATCH-PILOT-LINK-01")
+        self.assertIsNotNone(reloaded_batch)
+        self.assertEqual(reloaded_batch.process_conditions.fill_temperature_c, 75.0)
+        self.assertEqual(reloaded_batch.process_conditions.shear_speed_rpm, 3200.0)
+
+        # 4. Link QC Record: explicitly snapshots process conditions from the batch
         qc_record = BatchQCRecord(
-            batch_id="BATCH-PILOT-LINK-01", trial_id=trial.trial_id,
-            formula_id="FORM-REV7.3", revision="Rev.7.3",
-            test_date="2026-09-12", operator="Pilot Lead",
-            hardness_gf=810.0, transfer_g_10c=0.046,
+            batch_id=mfg_batch.batch_id,
+            trial_id=trial.trial_id,
+            formula_id=mfg_batch.formula_id,
+            revision=mfg_batch.revision,
+            test_date="2026-09-12",
+            operator="QC Specialist",
+            process_conditions=mfg_batch.process_conditions,
+            hardness_gf=810.0,
+            transfer_g_10c=0.046,
             hardness_sop=HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30),
             transfer_sop=TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")
         )
@@ -305,7 +375,9 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         reloaded_qc = db.get_all_qc_records()
         linked = next(r for r in reloaded_qc if r.batch_id == "BATCH-PILOT-LINK-01")
         self.assertEqual(linked.trial_id, "DOE-EXP-LINK-01")
-        self.assertEqual(linked.process_conditions.fill_temperature_c, 80.0)
+        self.assertEqual(linked.process_conditions.fill_temperature_c, 75.0)
+        self.assertEqual(linked.process_conditions.shear_speed_rpm, 3200.0)
+        self.assertTrue(linked.is_training_eligible(verified_raw_materials=True))
 
         if os.path.exists(test_dir):
             shutil.rmtree(test_dir)

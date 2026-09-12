@@ -38,9 +38,11 @@ class FormulationPredictor:
     def fit(self, records: List[BatchQCRecord], verified_raw_materials: bool = True) -> bool:
         """
         Phase 2A & 3 Data Contract Enforced:
-        Accepts only genuine REAL_PILOT records with complete SOP and verified materials.
+        Accepts only genuine REAL_PILOT records with complete SOP, verified materials, and DOE lineage.
         Synthetic records or incomplete SOP records are strictly rejected.
-        Requires >= 16 eligible real Pilot observations to promote to TRAINED_LINEAR.
+        Requires >= 16 eligible real Pilot observations.
+        IMPORTANT: In Phase 2A, promotion to TRAINED_LINEAR is blocked until Phase 3 implements
+        the actual mathematical multivariate regression coefficients fit.
         """
         eligible_records = [
             r for r in records
@@ -52,9 +54,9 @@ class FormulationPredictor:
             self.state = ModelState.AWAITING_PILOT_DATA
             return False
 
-        # Promotion to TRAINED_LINEAR occurs in Phase 3 when linear regression coefficients are fitted
-        self.state = ModelState.TRAINED_LINEAR
-        return True
+        # Gatekeeper: Do NOT promote to TRAINED_LINEAR without Phase 3 regression engine!
+        self.state = ModelState.AWAITING_PILOT_DATA
+        return False
 
     def predict(self, synthetic_wax: float, candelilla_wax: float, dimethicone: float, caprylyl_methicone: float) -> PropertyPrediction:
         if self.state == ModelState.AWAITING_PILOT_DATA:

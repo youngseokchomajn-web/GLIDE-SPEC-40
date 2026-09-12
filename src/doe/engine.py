@@ -48,6 +48,16 @@ class DOETrial(BaseModel):
             },
         }
 
+    def to_process_condition(self):
+        """Phase 2A Data Contract: Extracts real process conditions for batch & QC snapshot."""
+        from src.qc.models import ProcessCondition
+        return ProcessCondition(
+            fill_temperature_c=self.fill_temperature_c,
+            shear_speed_rpm=self.shear_speed_rpm,
+            mixing_time_min=self.mixing_time_min,
+            cooling_profile=self.cooling_profile
+        )
+
 
 class AdvancedDOEEngine:
     """

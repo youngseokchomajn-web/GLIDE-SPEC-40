@@ -101,12 +101,16 @@ class BatchQCRecord(BaseModel):
         """
         Phase 2A Data Contract Gate:
         A record is eligible for model training ONLY if:
-        1. It is genuine real pilot data (synthetic data strictly excluded from production models).
-        2. SOP is complete without any missing parameters.
-        3. Raw material specifications are verified.
-        4. Core measured properties (hardness & transfer) are non-null and positive.
+        1. It is genuine real pilot data (synthetic data strictly excluded).
+        2. trial_id is linked (full lineage to DOE specification required).
+        3. SOP is complete without any missing parameters.
+        4. Raw material specifications are verified.
+        5. Core measured properties (hardness & transfer) are non-null and positive.
+        6. Process conditions are within controlled pilot screening bounds (e.g. 70~90°C fill).
         """
         if self.data_origin != DataOrigin.REAL_PILOT:
+            return False
+        if not self.trial_id:
             return False
         if not self.is_sop_complete():
             return False
@@ -115,6 +119,10 @@ class BatchQCRecord(BaseModel):
         if self.hardness_gf is None or self.hardness_gf <= 0:
             return False
         if self.transfer_g_10c is None or self.transfer_g_10c <= 0:
+            return False
+        # Controlled process space check
+        fill_t = self.process_conditions.fill_temperature_c
+        if fill_t < 70.0 or fill_t > 90.0:
             return False
         return True
 

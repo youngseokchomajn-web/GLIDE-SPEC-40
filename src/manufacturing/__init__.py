@@ -5,6 +5,7 @@ from .calculator import (
     BatchScaleSpec,
     STANDARD_BATCH_SIZES,
 )
+from .models import ManufacturingBatch
 
 __all__ = [
     "ManufacturingCalculator",
@@ -12,4 +13,5 @@ __all__ = [
     "BatchChargeItem",
     "BatchScaleSpec",
     "STANDARD_BATCH_SIZES",
+    "ManufacturingBatch",
 ]

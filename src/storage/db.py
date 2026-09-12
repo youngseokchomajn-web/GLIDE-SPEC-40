@@ -1,7 +1,8 @@
 """
-GLIDE-SPEC 40 - Data Storage & Repository Layer
-Manages persistence of raw materials, formula revisions, DOE trials, and QC records
-with idempotent SQLite schema versioning and full data contract preservation.
+GLIDE-SPEC 40 - Data Storage & Repository Layer (Schema v3)
+Manages persistence of raw materials, formula revisions, DOE trials,
+manufacturing batches, and QC records with strict Foreign Key enforcement,
+idempotent migrations, and full DOE -> Batch -> QC lineage.
 """
 
 import json
@@ -14,8 +15,10 @@ from src.materials.master import RawMaterial, REV73_RAW_MATERIALS
 from src.formulas.master import FormulaMaster, REV73_TARGET_ACTIVE_FORMULA
 from src.qc.models import BatchQCRecord, HardnessSOP, TransferSOP, DataOrigin, ProcessCondition
 from src.doe.engine import DOETrial
+from src.manufacturing.models import ManufacturingBatch
+from src.manufacturing.calculator import BatchChargeItem
 
-CURRENT_SCHEMA_VERSION = 2
+CURRENT_SCHEMA_VERSION = 3
 
 
 class FormulationDatabase:
@@ -27,6 +30,11 @@ class FormulationDatabase:
         self._init_directories()
         self._init_sqlite()
 
+    def _get_connection(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(self.qc_db_path)
+        conn.execute("PRAGMA foreign_keys = ON;")
+        return conn
+
     def _init_directories(self):
         (self.data_dir / "raw_materials").mkdir(parents=True, exist_ok=True)
         (self.data_dir / "formulas").mkdir(parents=True, exist_ok=True)
@@ -34,7 +42,7 @@ class FormulationDatabase:
         (self.data_dir / "doe").mkdir(parents=True, exist_ok=True)
 
     def _init_sqlite(self):
-        with sqlite3.connect(self.qc_db_path) as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
 
             # 1. Schema versioning tracking table
@@ -46,7 +54,7 @@ class FormulationDatabase:
             )
             """)
 
-            # 2. DOE Trials table (Phase 2A)
+            # 2. DOE Trials table
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS doe_trials (
                 trial_id TEXT PRIMARY KEY,
@@ -65,7 +73,28 @@ class FormulationDatabase:
             )
             """)
 
-            # 3. Base QC Records table
+            # 3. Manufacturing Batches table (Phase 2A Data Contract v0.2)
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS manufacturing_batches (
+                batch_id TEXT PRIMARY KEY,
+                trial_id TEXT,
+                formula_id TEXT NOT NULL,
+                revision TEXT NOT NULL,
+                created_date TEXT NOT NULL,
+                operator TEXT NOT NULL,
+                batch_size_kg REAL NOT NULL,
+                total_charge_pct REAL NOT NULL,
+                items_json TEXT NOT NULL,
+                process_conditions_json TEXT NOT NULL,
+                total_raw_material_cost REAL,
+                cost_per_20g_stick REAL,
+                target_cogs_per_stick REAL NOT NULL DEFAULT 2950.0,
+                notes TEXT,
+                FOREIGN KEY (trial_id) REFERENCES doe_trials(trial_id) ON DELETE SET NULL
+            )
+            """)
+
+            # 4. Base QC Records table with Foreign Key to doe_trials
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS qc_records (
                 batch_id TEXT PRIMARY KEY,
@@ -88,11 +117,12 @@ class FormulationDatabase:
                 sop_complete INTEGER NOT NULL DEFAULT 0,
                 trial_id TEXT,
                 data_origin TEXT NOT NULL DEFAULT 'REAL_PILOT',
-                process_conditions_json TEXT
+                process_conditions_json TEXT,
+                FOREIGN KEY (trial_id) REFERENCES doe_trials(trial_id) ON DELETE RESTRICT
             )
             """)
 
-            # 4. Idempotent column migrations for qc_records
+            # 5. Idempotent column migrations for qc_records
             columns = {row[1] for row in cursor.execute("PRAGMA table_info(qc_records)")}
             migrations = {
                 "hardness_sop_json": "TEXT",
@@ -106,18 +136,18 @@ class FormulationDatabase:
                 if name not in columns:
                     cursor.execute(f"ALTER TABLE qc_records ADD COLUMN {name} {definition}")
 
-            # Record schema version v2 if not present
+            # Record schema version v3
             cursor.execute("SELECT version FROM schema_versions WHERE version = ?", (CURRENT_SCHEMA_VERSION,))
             if not cursor.fetchone():
                 cursor.execute(
                     "INSERT INTO schema_versions (version, applied_at, description) VALUES (?, datetime('now'), ?)",
-                    (CURRENT_SCHEMA_VERSION, "Phase 2A: DOE linkage, schema versioning, and Data Contract")
+                    (CURRENT_SCHEMA_VERSION, "Phase 2A Data Contract v0.2: ManufacturingBatch, Foreign Key enforcement, and Lineage")
                 )
 
             conn.commit()
 
     def get_current_schema_version(self) -> int:
-        with sqlite3.connect(self.qc_db_path) as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT MAX(version) FROM schema_versions")
             row = cursor.fetchone()
@@ -137,8 +167,11 @@ class FormulationDatabase:
         with open(self.materials_file, "w", encoding="utf-8") as f:
             json.dump(dump_data, f, ensure_ascii=False, indent=2)
 
+    # --------------------------------------------------------------------------
+    # DOE Trials
+    # --------------------------------------------------------------------------
     def save_doe_trial(self, trial: DOETrial):
-        with sqlite3.connect(self.qc_db_path) as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
             INSERT OR REPLACE INTO doe_trials (
@@ -155,9 +188,23 @@ class FormulationDatabase:
             ))
             conn.commit()
 
+    def get_doe_trial(self, trial_id: str) -> Optional[DOETrial]:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM doe_trials WHERE trial_id = ?", (trial_id,))
+            r = cursor.fetchone()
+            if not r:
+                return None
+            return DOETrial(
+                trial_id=r[0], design_type=r[1], synthetic_wax_pct=r[2], candelilla_wax_pct=r[3],
+                dimethicone_pct=r[4], caprylyl_methicone_pct=r[5], c12_15_alkyl_benzoate_pct=r[6],
+                fill_temperature_c=r[7], shear_speed_rpm=r[8], mixing_time_min=r[9],
+                cooling_profile=r[10], status=r[11], notes=r[12]
+            )
+
     def get_all_doe_trials(self) -> List[DOETrial]:
         trials: List[DOETrial] = []
-        with sqlite3.connect(self.qc_db_path) as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM doe_trials ORDER BY trial_id ASC")
             for r in cursor.fetchall():
@@ -169,9 +216,68 @@ class FormulationDatabase:
                 ))
         return trials
 
-    def save_qc_record(self, record: BatchQCRecord):
-        with sqlite3.connect(self.qc_db_path) as conn:
+    # --------------------------------------------------------------------------
+    # Manufacturing Batches
+    # --------------------------------------------------------------------------
+    def save_manufacturing_batch(self, batch: ManufacturingBatch):
+        with self._get_connection() as conn:
             cursor = conn.cursor()
+            # If trial_id is specified, verify its existence to enforce referential integrity
+            if batch.trial_id:
+                cursor.execute("SELECT 1 FROM doe_trials WHERE trial_id = ?", (batch.trial_id,))
+                if not cursor.fetchone():
+                    raise sqlite3.IntegrityError(f"Foreign Key violation: trial_id '{batch.trial_id}' does not exist in doe_trials.")
+
+            items_json = json.dumps([item.model_dump() for item in batch.items])
+            proc_json = json.dumps(batch.process_conditions.model_dump())
+
+            cursor.execute("""
+            INSERT OR REPLACE INTO manufacturing_batches (
+                batch_id, trial_id, formula_id, revision, created_date, operator,
+                batch_size_kg, total_charge_pct, items_json, process_conditions_json,
+                total_raw_material_cost, cost_per_20g_stick, target_cogs_per_stick, notes
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                batch.batch_id, batch.trial_id, batch.formula_id, batch.revision,
+                batch.created_date, batch.operator, batch.batch_size_kg, batch.total_charge_pct,
+                items_json, proc_json, batch.total_raw_material_cost,
+                batch.cost_per_20g_stick, batch.target_cogs_per_stick, batch.notes
+            ))
+            conn.commit()
+
+    def get_manufacturing_batch(self, batch_id: str) -> Optional[ManufacturingBatch]:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM manufacturing_batches WHERE batch_id = ?", (batch_id,))
+            r = cursor.fetchone()
+            if not r:
+                return None
+            items = [BatchChargeItem(**i) for i in json.loads(r[8])]
+            proc_cond = ProcessCondition(**json.loads(r[9]))
+            return ManufacturingBatch(
+                batch_id=r[0], trial_id=r[1], formula_id=r[2], revision=r[3],
+                created_date=r[4], operator=r[5], batch_size_kg=r[6], total_charge_pct=r[7],
+                items=items, process_conditions=proc_cond,
+                total_raw_material_cost=r[10], cost_per_20g_stick=r[11],
+                target_cogs_per_stick=r[12], notes=r[13]
+            )
+
+    # --------------------------------------------------------------------------
+    # QC Records
+    # --------------------------------------------------------------------------
+    def save_qc_record(self, record: BatchQCRecord):
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+
+            # Strict Referential Integrity Gate:
+            # If trial_id is provided, it MUST exist in doe_trials.
+            if record.trial_id:
+                cursor.execute("SELECT 1 FROM doe_trials WHERE trial_id = ?", (record.trial_id,))
+                if not cursor.fetchone():
+                    raise sqlite3.IntegrityError(
+                        f"Foreign Key violation: trial_id '{record.trial_id}' does not exist in doe_trials table."
+                    )
+
             cursor.execute("""
             INSERT OR REPLACE INTO qc_records (
                 batch_id, formula_id, revision, test_date, operator, hardness_gf,
@@ -207,7 +313,7 @@ class FormulationDatabase:
 
     def get_all_qc_records(self) -> List[BatchQCRecord]:
         records: List[BatchQCRecord] = []
-        with sqlite3.connect(self.qc_db_path) as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
             SELECT

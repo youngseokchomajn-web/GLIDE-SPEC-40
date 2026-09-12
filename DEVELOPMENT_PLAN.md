@@ -13,7 +13,7 @@
 | 0 | Historical critical-fix claims (C1, M2, M4) | ⚠️ Unverified — no release note is present in the repository |
 | 1 | Raw Material ↔ Formula ID unification (C2) | ✅ Complete — composite resolver & DOE integration |
 | 2 | QC SOP data integrity (C3) | ✅ Complete — JSON round-trip & completeness gate |
-| 2A | DOE & model data contract | ✅ Complete — DataOrigin, schema v2 migration & linkage |
+| 2A | DOE & model data contract (Data Contract v0.2) | ✅ Complete — Schema v3, ManufacturingBatch, strict FK enforcement, process snapshots, and lineage integrity |
 | 3 | M4 real regression model (H1) | 🔲 Not started |
 | 4 | M5 real multi-objective optimizer (H2/H3) | 🔲 Not started |
 | 5 | DOE engine generalization (H4) | 🔲 Not started |

@@ -302,6 +302,13 @@ elif menu == "5. QC & SOP Test Station":
 
         qc_submit = st.form_submit_button("Record QC Laboratory Result")
         if qc_submit:
+            # Phase 2A Data Contract v0.2: Snapshot real process conditions from linked DOE Trial
+            proc_cond = ProcessCondition()
+            if actual_trial_id:
+                linked_trial_obj = db.get_doe_trial(actual_trial_id)
+                if linked_trial_obj:
+                    proc_cond = linked_trial_obj.to_process_condition()
+
             new_record = BatchQCRecord(
                 batch_id=batch_id,
                 formula_id=formula_id,
@@ -310,6 +317,7 @@ elif menu == "5. QC & SOP Test Station":
                 operator=operator,
                 trial_id=actual_trial_id,
                 data_origin=DataOrigin(data_origin_val),
+                process_conditions=proc_cond,
                 hardness_gf=meas_hardness,
                 transfer_g_10c=meas_transfer,
                 density_g_cm3=meas_density,
