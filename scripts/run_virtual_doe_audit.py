@@ -156,6 +156,30 @@ def run_virtual_doe_audit(matrix_path: Path, output_report: Path):
 
     print(f"\n[+] Virtual DOE sensitivity audit report written to: {output_report}")
 
+    # Export machine-readable CSV baseline
+    baseline_csv = matrix_path.parent / "pilot_doe_virtual_prior_baseline.csv"
+    with open(baseline_csv, mode="w", encoding="utf-8", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            "Run_No", "Batch_ID", "Design_Type",
+            "Syn_Wax_Pct", "Dimethicone_Pct", "Fill_Temp_C",
+            "Prior_Hardness_Mean_gf", "Prior_Hardness_SD_gf",
+            "Prior_Transfer_Index_Mean", "Prior_Thermal_Trans_Mean_C",
+            "Prior_Tribology_CoF_Mean", "Prior_Risk_Classification"
+        ])
+        for row in audit_rows:
+            writer.writerow([
+                row["run_no"], row["batch_id"], row["design_type"],
+                row["syn_wax"], row["dim"], row["temp"],
+                round(row["hard_mean"], 2),
+                round(float(row["hard_mean"]) * 0.0622, 2),
+                round(row["trans_mean"], 4),
+                round(row["therm_mean"], 2),
+                round(row["trib_mean"], 3),
+                row["risk"]
+            ])
+    print(f"[+] Machine-readable Virtual Prior Baseline saved to: {baseline_csv}")
+
 
 if __name__ == "__main__":
     root_dir = Path(__file__).resolve().parent.parent

@@ -59,7 +59,7 @@ def run_cli():
     print(f"  • Caprylyl Methicone: {caprylyl:5.1f} %  (1 - v1 = {caprylyl / 28.0:.3f})")
     print(f"  • Fill Temperature:   {args.temp:5.1f} °C (dT = {args.temp - 80.0:+.1f}°C from 80°C baseline)\n")
 
-    print("[2. SCIENTIFIC PRIOR SOURCES, ANCHORS & ENGINEERING TRANSFORMATIONS]")
+    print("[2. SCIENTIFIC PRIOR SOURCES, ANCHORS & EMPIRICAL REGRESSIONS]")
     props = [
         ("Hardness Prior", res.predicted_hardness_prior_gf),
         ("Transfer Prior Index", res.predicted_transfer_prior_index),
@@ -72,9 +72,10 @@ def run_cli():
         print(f"    ├─ Primary Source:       {prov.source_name}")
         print(f"    ├─ Citation & DOI:       {prov.citation} (DOI: {prov.doi})")
         print(f"    ├─ Empirical Anchor:     {prov.anchor_measurement}")
-        print(f"    ├─ Transformation Type:  {prov.transformation_type}")
+        print(f"    ├─ Regression Model:     {prov.transformation_type}")
         print(f"    ├─ Coefficient Source:   {prov.coefficient_source}")
         print(f"    ├─ Derivation Formula:   {prov.formula_derivation}")
+        print(f"    ├─ Residual Variance:    {prov.residual_variance_stats}")
         print(f"    ├─ Scientific Caveat:    {prov.scientific_caveat}")
         print(f"    └─ ⚠️ Non-Equivalence:   {prov.golden_principle_warning}")
 
@@ -85,13 +86,14 @@ def run_cli():
 
     print("\n[4. HIERARCHICAL UNCERTAINTY TRANSMISSION BREAKDOWN (Hardness Prior)]")
     bd = res.hierarchical_uncertainty_breakdown
-    print(f"  • Level 1 Raw Candelilla Lot CV (TU Berlin): {bd.get('level1_candelilla_raw_cv_pct', 0.0):5.2f} %")
-    print(f"  • Level 2 Wax Network Composite CV:          {bd.get('level2_wax_network_cv_pct', 0.0):5.2f} %")
-    print(f"  • Level 3 Particulate / Resin Damped CV:     {bd.get('level3_powder_damped_cv_pct', 0.0):5.2f} %")
-    print(f"  • Level 4 Thermal Process CV:                {bd.get('level4_thermal_process_cv_pct', 0.0):5.2f} %")
-    print(f"  • Level 4 Gauge Repeatability CV:            {bd.get('level4_gauge_repeatability_cv_pct', 0.0):5.2f} %")
+    print(f"  • Level 1 Raw Candelilla Lot CV (TU Berlin):          {bd.get('level1_candelilla_raw_cv_pct', 0.0):5.2f} %")
+    print(f"  • Level 2 Wax Network Composite CV:                   {bd.get('level2_wax_network_cv_pct', 0.0):5.2f} %")
+    print(f"  • Level 3 Particulate / Resin Damped CV:              {bd.get('level3_powder_damped_cv_pct', 0.0):5.2f} %")
+    print(f"  • Level 4 Empirical Regression Residual CV (Doan):    {bd.get('level4_empirical_regression_residual_cv_pct', 0.0):5.2f} %")
+    print(f"  • Level 5 Thermal Process CV:                         {bd.get('level5_thermal_process_cv_pct', 0.0):5.2f} %")
+    print(f"  • Level 5 Gauge Repeatability CV:                     {bd.get('level5_gauge_repeatability_cv_pct', 0.0):5.2f} %")
     print(f"  ──────────────────────────────────────────────────────────────────────────")
-    print(f"  • Total Composite Hardness Prior CV:         {bd.get('composite_total_hardness_cv_pct', 0.0):5.2f} %  (SD = ±{bd.get('composite_hardness_sd_gf', 0.0):.1f} gf)")
+    print(f"  • Total Composite Hardness Prior CV:                  {bd.get('composite_total_hardness_cv_pct', 0.0):5.2f} %  (SD = ±{bd.get('composite_hardness_sd_gf', 0.0):.1f} gf)")
 
     print(f"\n[*] Uncertainty Driver Notes: {res.simulation_notes}")
     print("\n--------------------------------------------------------------------------------")

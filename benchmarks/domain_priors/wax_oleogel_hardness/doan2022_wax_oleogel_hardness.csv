@@ -1,0 +1,13 @@
+sample_id,wax_system,wax_ratio,wax_total_pct,oil_type,hardness_gf,hardness_sd_gf,melting_temp_c,oil_loss_pct,citation,doi,notes
+DOAN_01,SFW-RBW,1:0 (Pure SFW),2.0,Olive Oil,51.9,16.5,65.48,0.0,Doan et al. (2022),10.1016/j.foodhyd.2022.107794,Lowest wax concentration
+DOAN_02,SFW-RBW,1:0 (Pure SFW),2.5,Olive Oil,75.5,29.9,65.48,0.0,Doan et al. (2022),10.1016/j.foodhyd.2022.107794,Baseline linear regime
+DOAN_03,SFW-RBW,1:0 (Pure SFW),3.0,Olive Oil,115.1,34.1,66.19,0.0,Doan et al. (2022),10.1016/j.foodhyd.2022.107794,Linear hardening regime
+DOAN_04,SFW-RBW,1:0 (Pure SFW),3.5,Olive Oil,157.6,24.1,67.23,0.0,Doan et al. (2022),10.1016/j.foodhyd.2022.107794,Structured gel network
+DOAN_05,SFW-RBW,1:0 (Pure SFW),4.0,Olive Oil,198.4,10.9,67.35,0.0,Doan et al. (2022),10.1016/j.foodhyd.2022.107794,Firm oleogel network
+DOAN_06,SFW-RBW,1:1 (Binary Blend),2.0,Olive Oil,122.7,11.6,63.31,0.0,Doan et al. (2022),10.1016/j.foodhyd.2022.107794,Synergistic crystal packing
+DOAN_07,SFW-RBW,1:1 (Binary Blend),2.5,Olive Oil,179.3,5.7,63.31,0.0,Doan et al. (2022),10.1016/j.foodhyd.2022.107794,Synergistic binary blend
+DOAN_08,SFW-RBW,1:1 (Binary Blend),3.0,Olive Oil,204.6,11.5,63.42,0.0,Doan et al. (2022),10.1016/j.foodhyd.2022.107794,Plateau onset
+DOAN_09,SFW-RBW,1:1 (Binary Blend),3.5,Olive Oil,270.8,16.9,64.44,0.0,Doan et al. (2022),10.1016/j.foodhyd.2022.107794,High firmness binary
+DOAN_10,SFW-RBW,1:1 (Binary Blend),4.0,Olive Oil,296.9,40.6,65.19,0.0,Doan et al. (2022),10.1016/j.foodhyd.2022.107794,Maximum binary firmness
+DOAN_11,RBW-CDW,1:1 (Candelilla Blend),3.0,Olive Oil,168.5,22.4,62.10,17.04,Doan et al. (2022),10.1016/j.foodhyd.2022.107794,Candelilla containing oleogel
+DOAN_12,Pure CDW,1:0 (Pure Candelilla),3.0,Olive Oil,142.0,18.5,61.80,23.50,Doan et al. (2022),10.1016/j.foodhyd.2022.107794,Natural candelilla oleogel

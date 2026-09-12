@@ -5,6 +5,7 @@ hierarchical Monte Carlo bounds, and strict firewall flags.
 """
 
 from pathlib import Path
+import csv
 import unittest
 import numpy as np
 
@@ -24,6 +25,7 @@ class TestVirtualSimulator(unittest.TestCase):
         pat_csv = self.domain_priors_dir / "anhydrous_stick_patents" / "us20070166254_anhydrous_powder_stick.csv"
         sla_csv = self.domain_priors_dir / "commercial_stick_benchmark" / "mdpi_commercial_lipbalm_texture_sla.csv"
         sili_csv = self.domain_priors_dir / "silicone_skin_tribology" / "silicone_powder_skin_tribology_benchmark.csv"
+        doan_csv = self.domain_priors_dir / "wax_oleogel_hardness" / "doan2022_wax_oleogel_hardness.csv"
 
         self.assertTrue(fric_csv.exists(), "Imperial friction CSV must exist")
         self.assertTrue(stick_csv.exists(), "Lipstick 17% anchor CSV must exist")
@@ -31,6 +33,7 @@ class TestVirtualSimulator(unittest.TestCase):
         self.assertTrue(pat_csv.exists(), "Patent anhydrous stick CSV must exist")
         self.assertTrue(sla_csv.exists(), "Commercial lip balm SLA benchmark CSV must exist")
         self.assertTrue(sili_csv.exists(), "Silicone skin tribology benchmark CSV must exist")
+        self.assertTrue(doan_csv.exists(), "Doan 2022 oleogel hardness CSV must exist")
 
     def test_virtual_simulator_center_point_priors(self):
         # Test center point: SynWax 12%, CanWax 5%, Dimethicone 17%, Caprylyl 11%, Fill 80C
@@ -86,21 +89,22 @@ class TestVirtualSimulator(unittest.TestCase):
         self.assertEqual(result.predicted_drop_point_c.mean, result.predicted_thermal_transition_c.mean)
         self.assertEqual(result.predicted_friction_index.mean, result.predicted_tribology_prior_index.mean)
 
-        # Check Provenance & Explicit Coefficient Source (ENGINEERING_ASSUMPTION)
+        # Check Provenance & Explicit Coefficient Source (PUBLIC_EMPIRICAL_REGRESSION)
         h_prov = result.predicted_hardness_prior_gf.provenance
-        self.assertIn("ENGINEERING_ASSUMPTION", h_prov.coefficient_source)
+        self.assertIn("PUBLIC_EMPIRICAL_REGRESSION", h_prov.coefficient_source)
         self.assertIn("Hardness Prior ≠ GS40 Hardness Prediction", h_prov.golden_principle_warning)
+        self.assertTrue(len(h_prov.residual_variance_stats) > 0)
 
         t_prov = result.predicted_thermal_transition_c.provenance
-        self.assertIn("ENGINEERING_ASSUMPTION", t_prov.coefficient_source)
+        self.assertIn("PUBLIC_EMPIRICAL_REGRESSION", t_prov.coefficient_source)
         self.assertIn("Thermal Transition Prior ≠ GS40 Mettler Drop Point", t_prov.golden_principle_warning)
 
         trans_prov = result.predicted_transfer_prior_index.provenance
-        self.assertIn("ENGINEERING_ASSUMPTION", trans_prov.coefficient_source)
+        self.assertIn("PUBLIC_EMPIRICAL_REGRESSION", trans_prov.coefficient_source)
         self.assertIn("Pay-off Anchor ≠ GS40 Physical Transfer (g)", trans_prov.golden_principle_warning)
 
         trib_prov = result.predicted_tribology_prior_index.provenance
-        self.assertIn("ENGINEERING_ASSUMPTION", trib_prov.coefficient_source)
+        self.assertIn("PUBLIC_EMPIRICAL_REGRESSION", trib_prov.coefficient_source)
         self.assertIn("Tribology Prior Index ≠ GS40 Dynamic CoF", trib_prov.golden_principle_warning)
 
         # Check Hierarchical Uncertainty Breakdown
@@ -108,7 +112,24 @@ class TestVirtualSimulator(unittest.TestCase):
         self.assertGreaterEqual(bd["level1_candelilla_raw_cv_pct"], 15.0)
         self.assertLess(bd["level2_wax_network_cv_pct"], bd["level1_candelilla_raw_cv_pct"])
         self.assertLess(bd["level3_powder_damped_cv_pct"], bd["level2_wax_network_cv_pct"])
+        self.assertIn("level4_empirical_regression_residual_cv_pct", bd)
         self.assertTrue(4.0 <= bd["composite_total_hardness_cv_pct"] <= 10.0)
+
+    def test_virtual_prior_baseline_csv_and_comparator(self):
+        root_dir = Path(__file__).resolve().parent.parent
+        baseline_csv = root_dir / "data" / "doe" / "pilot_doe_virtual_prior_baseline.csv"
+        matrix_csv = root_dir / "data" / "doe" / "pilot_doe_run_matrix_rev1.0.csv"
+
+        self.assertTrue(baseline_csv.exists(), "pilot_doe_virtual_prior_baseline.csv must exist")
+
+        with open(baseline_csv, mode="r", encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+        self.assertEqual(len(rows), 18, "Prior baseline must contain exactly 18 runs")
+
+        # Test comparator execution in mock mode
+        from scripts.compare_pilot_vs_prior import run_comparison
+        # Should execute cleanly without error
+        run_comparison(matrix_csv, baseline_csv, mock_mode=True)
 
 
 if __name__ == "__main__":
