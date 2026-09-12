@@ -146,6 +146,29 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         dim = next(item for item in result.items if item.material_id == "MAT-SIL-DIM-01")
         self.assertAlmostEqual(dim.charge_pct, 9.0, places=3)
 
+    def test_doe_to_manufacturing_to_cogs(self):
+        """A DOE trial deterministically resolves to raw charges and COGS."""
+        specs = {key: value.model_copy(deep=True) for key, value in REV73_RAW_MATERIALS.items()}
+        for index, material in enumerate(specs.values(), start=1):
+            material.cost_per_kg = float(index * 1000)
+        specs["MAT-MQ-01"] = RawMaterial(
+            material_id="MAT-MQ-01", inci="MQ Resin", trade_name="MQ-60", supplier="Supplier",
+            grade="Cosmetic", material_type=MaterialType.RESIN, active_pct=60.0,
+            carrier="Dimethicone", carrier_pct=40.0, cost_per_kg=10000.0,
+            status=MaterialStatus.VERIFIED,
+        )
+        trial = AdvancedDOEEngine.generate_full_doe_design()[8]
+        ratios = {
+            "MAT-WAX-SYSTEM": {"MAT-WAX-SYN-01": trial.synthetic_wax_pct, "MAT-WAX-CAN-01": trial.candelilla_wax_pct},
+            "MAT-SIL-SYSTEM": {"MAT-SIL-DIM-01": trial.dimethicone_pct, "MAT-SIL-CAP-01": trial.caprylyl_methicone_pct},
+        }
+        first = ManufacturingCalculator.generate_manufacturing_formula(REV73_TARGET_ACTIVE_FORMULA, specs, 1.0, component_ratios=ratios)
+        second = ManufacturingCalculator.generate_manufacturing_formula(REV73_TARGET_ACTIVE_FORMULA, specs, 1.0, component_ratios=ratios)
+        self.assertTrue(first.is_valid)
+        self.assertIsNotNone(first.cost_per_20g_stick)
+        self.assertEqual(first.model_dump(), second.model_dump())
+        self.assertAlmostEqual(sum(i.charge_weight_kg for i in first.items), first.total_charge_pct / 100, places=4)
+
     def test_advanced_doe_matrix_constraints(self):
         """Validates that Advanced DOE Engine adheres to mixture boundaries."""
         trials = AdvancedDOEEngine.generate_full_doe_design()
@@ -168,13 +191,17 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
             transfer_g_10c=0.045,
             density_g_cm3=1.08,
             drop_point_c=61.5,
-            hardness_sop=HardnessSOP(probe_type="2mm Needle"),
-            transfer_sop=TransferSOP(substrate_type="Artificial Skin")
+            hardness_sop=HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30),
+            transfer_sop=TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")
         )
 
         db.save_qc_record(sample_record)
         records = db.get_all_qc_records()
         self.assertTrue(any(r.batch_id == "BATCH-TEST-SQLITE-01" for r in records))
+        restored = next(r for r in records if r.batch_id == "BATCH-TEST-SQLITE-01")
+        self.assertEqual(restored.hardness_sop, sample_record.hardness_sop)
+        self.assertEqual(restored.transfer_sop, sample_record.transfer_sop)
+        self.assertTrue(restored.is_sop_complete())
 
         # Cleanup tmp test directory
         if os.path.exists(test_dir):

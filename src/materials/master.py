@@ -4,7 +4,7 @@ Manages raw material specifications with explicit TBD tracking and strict valida
 """
 
 from enum import Enum
-from typing import Optional, Union, Any
+from typing import Optional, List
 from pydantic import BaseModel, Field
 
 
@@ -23,6 +23,26 @@ class MaterialStatus(str, Enum):
     CANDIDATE = "CANDIDATE"
     VERIFIED = "VERIFIED"
     LOCKED = "LOCKED"
+
+
+class RatioType(str, Enum):
+    ABSOLUTE_ACTIVE_PERCENT = "ABSOLUTE_ACTIVE_PERCENT"
+    RELATIVE_RATIO = "RELATIVE_RATIO"
+
+
+class CompositeComponent(BaseModel):
+    material_id: str
+    ratio: Optional[float] = None
+
+
+class CompositeMaterial(BaseModel):
+    """Versioned blend definition; DOE supplies ratios when they are unlocked."""
+    material_id: str
+    material_name: str
+    components: List[CompositeComponent]
+    ratio_type: RatioType = RatioType.ABSOLUTE_ACTIVE_PERCENT
+    version: str = "Rev.7.3"
+    notes: str = ""
 
 
 class RawMaterial(BaseModel):
@@ -228,5 +248,21 @@ REV73_RAW_MATERIALS = {
         active_pct=100.0,
         status=MaterialStatus.TBD,
         notes="2.0% total active soothing and rancidity defense blend"
+    ),
+}
+
+# Composite membership belongs to the Material Master, not calculator code.
+# Ratios stay unset until a DOE trial or a locked manufacturing formula supplies
+# absolute target-active percentages.
+REV73_COMPOSITE_MATERIALS = {
+    "MAT-WAX-SYSTEM": CompositeMaterial(
+        material_id="MAT-WAX-SYSTEM", material_name="Synthetic Wax + Candelilla Wax Blend",
+        components=[CompositeComponent(material_id="MAT-WAX-SYN-01"), CompositeComponent(material_id="MAT-WAX-CAN-01")],
+        notes="17% wax system; detailed ratio is DOE/production-formula controlled.",
+    ),
+    "MAT-SIL-SYSTEM": CompositeMaterial(
+        material_id="MAT-SIL-SYSTEM", material_name="Dimethicone + Caprylyl Methicone Blend",
+        components=[CompositeComponent(material_id="MAT-SIL-DIM-01"), CompositeComponent(material_id="MAT-SIL-CAP-01")],
+        notes="28% silicone system; detailed ratio is DOE/production-formula controlled.",
     ),
 }

@@ -69,6 +69,17 @@ class BatchQCRecord(BaseModel):
 
     notes: Optional[str] = ""
 
+    def is_sop_complete(self) -> bool:
+        hardness = self.hardness_sop
+        transfer = self.transfer_sop
+        return all([
+            hardness.probe_type != "TBD", hardness.penetration_depth_mm is not None,
+            hardness.test_speed_mm_s is not None, hardness.conditioning_time_min is not None,
+            transfer.substrate_type != "TBD", transfer.applied_area_cm2 is not None,
+            transfer.applied_pressure_g is not None, transfer.contact_time_s is not None,
+            transfer.test_method != "TBD",
+        ])
+
     def evaluate_targets(self) -> Dict[str, QCTestResult]:
         results = {}
 

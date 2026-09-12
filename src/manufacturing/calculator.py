@@ -7,7 +7,7 @@ batch weight scaling, and specification completeness gating.
 from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 
-from src.materials.master import RawMaterial, MaterialStatus
+from src.materials.master import RawMaterial, CompositeMaterial, REV73_COMPOSITE_MATERIALS, RatioType
 from src.formulas.master import FormulaMaster, FormulaComponent, FormulaType, FormulaStatus
 
 
@@ -72,16 +72,12 @@ class ManufacturingCalculator:
             raise ValueError(f"Raw material active % must be positive, got {raw_active_pct}")
         return target_active_pct / (raw_active_pct / 100.0)
 
-    COMPOSITE_COMPONENTS = {
-        "MAT-WAX-SYSTEM": ("MAT-WAX-SYN-01", "MAT-WAX-CAN-01"),
-        "MAT-SIL-SYSTEM": ("MAT-SIL-DIM-01", "MAT-SIL-CAP-01"),
-    }
-
     @classmethod
     def _resolve_components(
         cls,
         active_formula: FormulaMaster,
         component_ratios: Optional[Dict[str, Dict[str, float]]],
+        composites: Dict[str, CompositeMaterial],
     ) -> List[FormulaComponent]:
         """Expand formula blend placeholders into traceable raw-material lines.
 
@@ -90,10 +86,13 @@ class ManufacturingCalculator:
         """
         resolved: List[FormulaComponent] = []
         for component in active_formula.components:
-            child_ids = cls.COMPOSITE_COMPONENTS.get(component.material_id)
-            if not child_ids:
+            composite = composites.get(component.material_id)
+            if not composite:
                 resolved.append(component)
                 continue
+            if composite.ratio_type != RatioType.ABSOLUTE_ACTIVE_PERCENT:
+                raise ValueError(f"Unsupported ratio type for {component.material_id}: {composite.ratio_type}")
+            child_ids = tuple(child.material_id for child in composite.components)
             ratios = (component_ratios or {}).get(component.material_id)
             if not ratios:
                 resolved.append(component)
@@ -123,6 +122,7 @@ class ManufacturingCalculator:
         batch_size_kg: float,
         offset_carrier: bool = True,
         component_ratios: Optional[Dict[str, Dict[str, float]]] = None,
+        composites: Optional[Dict[str, CompositeMaterial]] = None,
     ) -> ManufacturingCalculationResult:
         missing_specs: List[str] = []
         warnings: List[str] = []
@@ -134,7 +134,9 @@ class ManufacturingCalculator:
             warnings.append(f"Target active formula total is {total_target:.2f}%, expected 100.0%")
 
         try:
-            resolved_components = cls._resolve_components(active_formula, component_ratios)
+            resolved_components = cls._resolve_components(
+                active_formula, component_ratios, composites or REV73_COMPOSITE_MATERIALS
+            )
         except ValueError as error:
             return ManufacturingCalculationResult(
                 is_valid=False, formula_id=f"MFG-{active_formula.formula_id}",

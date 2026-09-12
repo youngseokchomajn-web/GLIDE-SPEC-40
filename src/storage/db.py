@@ -50,9 +50,19 @@ class FormulationDatabase:
                 powder_bloom INTEGER,
                 white_cast_score INTEGER,
                 sweating_syneresis INTEGER,
-                notes TEXT
+                notes TEXT,
+                hardness_sop_json TEXT,
+                transfer_sop_json TEXT,
+                sop_complete INTEGER NOT NULL DEFAULT 0
             )
             """)
+            columns = {row[1] for row in cursor.execute("PRAGMA table_info(qc_records)")}
+            for name, definition in {
+                "hardness_sop_json": "TEXT", "transfer_sop_json": "TEXT",
+                "sop_complete": "INTEGER NOT NULL DEFAULT 0",
+            }.items():
+                if name not in columns:
+                    cursor.execute(f"ALTER TABLE qc_records ADD COLUMN {name} {definition}")
             conn.commit()
 
     def load_materials_catalog(self) -> Dict[str, RawMaterial]:
@@ -74,7 +84,12 @@ class FormulationDatabase:
         with sqlite3.connect(self.qc_db_path) as conn:
             cursor = conn.cursor()
             cursor.execute("""
-            INSERT OR REPLACE INTO qc_records VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT OR REPLACE INTO qc_records (
+                batch_id, formula_id, revision, test_date, operator, hardness_gf,
+                transfer_g_10c, density_g_cm3, drop_point_c, hardness_probe,
+                transfer_substrate, powder_bloom, white_cast_score, sweating_syneresis,
+                notes, hardness_sop_json, transfer_sop_json, sop_complete
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 record.batch_id,
                 record.formula_id,
@@ -90,7 +105,10 @@ class FormulationDatabase:
                 1 if record.powder_bloom_observed else 0,
                 record.white_cast_score,
                 1 if record.sweating_syneresis_observed else 0,
-                record.notes
+                record.notes,
+                json.dumps(record.hardness_sop.model_dump()),
+                json.dumps(record.transfer_sop.model_dump()),
+                1 if record.is_sop_complete() else 0,
             ))
             conn.commit()
 
@@ -111,8 +129,8 @@ class FormulationDatabase:
                     transfer_g_10c=r[6],
                     density_g_cm3=r[7],
                     drop_point_c=r[8],
-                    hardness_sop=HardnessSOP(probe_type=r[9]),
-                    transfer_sop=TransferSOP(substrate_type=r[10]),
+                    hardness_sop=HardnessSOP(**json.loads(r[15])) if r[15] else HardnessSOP(probe_type=r[9]),
+                    transfer_sop=TransferSOP(**json.loads(r[16])) if r[16] else TransferSOP(substrate_type=r[10]),
                     powder_bloom_observed=bool(r[11]),
                     white_cast_score=r[12],
                     sweating_syneresis_observed=bool(r[13]),
