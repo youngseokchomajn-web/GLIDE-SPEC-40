@@ -73,6 +73,13 @@ class FormulationPredictor:
         3. Fits OLS regression for Hardness and Transfer without mixture collinearity.
         4. Calculates LOOCV RMSE and establishes prediction intervals.
         """
+        if db is None:
+            try:
+                from src.storage.db import FormulationDatabase
+                db = FormulationDatabase()
+            except Exception:
+                db = None
+
         eligible = []
         for r in records:
             if not r.is_training_eligible(verified_raw_materials=verified_raw_materials):
@@ -104,8 +111,10 @@ class FormulationPredictor:
         for r in eligible:
             # Look up trial formulation coordinates
             trial_obj = db.get_doe_trial(r.trial_id) if db else None
-            syn_wax = trial_obj.synthetic_wax_pct if trial_obj else 12.0
-            dimeth = trial_obj.dimethicone_pct if trial_obj else 17.0
+            if trial_obj is None:
+                continue
+            syn_wax = trial_obj.synthetic_wax_pct
+            dimeth = trial_obj.dimethicone_pct
             temp = r.process_conditions.fill_temperature_c
 
             u1, v1, T = MixtureRegressionModel.extract_features(syn_wax, dimeth, temp)
@@ -113,6 +122,10 @@ class FormulationPredictor:
             y_hardness.append(r.hardness_gf)
             y_transfer.append(r.transfer_g_10c)
             y_drop_point.append(r.drop_point_c if r.drop_point_c is not None else 61.5)
+
+        if len(X_list) < self.MIN_ELIGIBLE_PILOT_RECORDS:
+            self.state = ModelState.AWAITING_PILOT_DATA
+            return False
 
         X = np.array(X_list)
 

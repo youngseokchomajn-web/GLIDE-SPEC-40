@@ -224,7 +224,7 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
 
         # Cleanup tmp test directory
         if os.path.exists(test_dir):
-            shutil.rmtree(test_dir)
+            shutil.rmtree(test_dir, ignore_errors=True)
 
     def test_qc_requires_existing_manufacturing_batch(self):
         """Phase 2A [P1 Fix]: QC record MUST reject orphan batch_id not existing in manufacturing_batches."""
@@ -251,7 +251,7 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
             db.save_qc_record(orphan_batch_qc)
 
         if os.path.exists(test_dir):
-            shutil.rmtree(test_dir)
+            shutil.rmtree(test_dir, ignore_errors=True)
 
     def test_cogs_basis_and_quote_status_snapshot(self):
         """Phase 2A [P2 Fix]: Verifies COGS status, price source, and calculation timestamp snapshots."""
@@ -285,7 +285,7 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         self.assertFalse(reloaded.is_cogs_confirmed())
 
         if os.path.exists(test_dir):
-            shutil.rmtree(test_dir)
+            shutil.rmtree(test_dir, ignore_errors=True)
 
     def test_predictor_fit_checks_persisted_db_lineage(self):
         """Phase 2A [P2 Fix]: Predictor checks DB existence to reject memory-forged orphan lineage records."""
@@ -328,7 +328,7 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         self.assertEqual(predictor.training_records[0].batch_id, "BATCH-REAL-01")
 
         if os.path.exists(test_dir):
-            shutil.rmtree(test_dir)
+            shutil.rmtree(test_dir, ignore_errors=True)
 
     def test_optimizer_candidate_generation(self):
         """Optimizer generates valid candidate formulations conforming to constraints."""
@@ -353,7 +353,7 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         self.assertEqual(db.get_current_schema_version(), 4)
 
         if os.path.exists(test_dir):
-            shutil.rmtree(test_dir)
+            shutil.rmtree(test_dir, ignore_errors=True)
 
     def test_foreign_key_violation_raises_error(self):
         """Phase 2A [P1 Fix]: Verifies that unlinked/invalid trial_id violates Foreign Key integrity."""
@@ -384,7 +384,7 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
             db.save_qc_record(orphan_qc)
 
         if os.path.exists(test_dir):
-            shutil.rmtree(test_dir)
+            shutil.rmtree(test_dir, ignore_errors=True)
 
     def test_data_eligibility_gate_rejects_synthetic_and_incomplete(self):
         """Phase 2A [P1 Fix]: Data Contract gate verifies lineage, complete SOPs, and blocks premature ML promotion."""
@@ -512,7 +512,7 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         self.assertTrue(linked.is_training_eligible(verified_raw_materials=True))
 
         if os.path.exists(test_dir):
-            shutil.rmtree(test_dir)
+            shutil.rmtree(test_dir, ignore_errors=True)
 
     def test_synthetic_coefficient_recovery(self):
         """Phase 3 [M4 Engine]: Verify OLS recovers known linear response coefficients within 1e-3."""
@@ -662,7 +662,7 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         self.assertIn("LOOCV RMSE", pred.message)
 
         if os.path.exists(test_dir):
-            shutil.rmtree(test_dir)
+            shutil.rmtree(test_dir, ignore_errors=True)
 
     def test_optimizer_uncalibrated_returns_rule_candidates(self):
         """Phase 4 [M5 Optimizer]: Uncalibrated predictor returns rule-based boundary candidates without predictions."""
@@ -767,7 +767,7 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
             self.assertIn("NOT experimental measurement", c.prediction_label)
 
         if os.path.exists(test_dir):
-            shutil.rmtree(test_dir)
+            shutil.rmtree(test_dir, ignore_errors=True)
 
     def test_parameterized_doe_generation(self):
         """Phase 5 [DOE Engine]: Parameterized DOE produces >= 16 runs with >= 3 centre-points and valid mixture invariants."""
@@ -849,7 +849,7 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         self.assertEqual(cand_rev["changes"][0]["change_id"], "NEW-09")
 
         if os.path.exists(test_dir):
-            shutil.rmtree(test_dir)
+            shutil.rmtree(test_dir, ignore_errors=True)
 
 
 if __name__ == "__main__":

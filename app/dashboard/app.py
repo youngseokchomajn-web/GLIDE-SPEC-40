@@ -425,7 +425,7 @@ elif menu == "6. Optimizer & Revision Tracker":
         if predictor.state == ModelState.TRAINED_LINEAR:
             st.success("✅ **Calibrated Linear Model:** Real pilot observations threshold achieved. Full SLSQP Multi-Objective Optimization enabled.")
         else:
-            st.warning(f"⚠️ **[RULE #6 LOCKED]:** Waiting for $\ge {FormulationPredictor.MIN_ELIGIBLE_PILOT_RECORDS}$ real Pilot records with $\ge {FormulationPredictor.MIN_CENTRE_POINT_REPLICATES}$ centre-points. Using rule-based boundary candidates.")
+            st.warning(f"⚠️ **[RULE #6 LOCKED]:** Waiting for $\\ge {FormulationPredictor.MIN_ELIGIBLE_PILOT_RECORDS}$ real Pilot records with $\\ge {FormulationPredictor.MIN_CENTRE_POINT_REPLICATES}$ centre-points. Using rule-based boundary candidates.")
 
     if predictor.state == ModelState.TRAINED_LINEAR and predictor.metrics:
         with st.expander("📈 Multivariate Mixture Regression Model Metrics (M4 Engine)", expanded=False):
