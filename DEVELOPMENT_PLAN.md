@@ -14,11 +14,11 @@
 | 1 | Raw Material ↔ Formula ID unification (C2) | ✅ Complete — Composite resolver & DOE integration |
 | 2 | QC SOP data integrity (C3) | ✅ Complete — JSON round-trip & completeness gate |
 | 2A | DOE & model data contract (Data Contract v0.2) | ✅ Complete — Schema v3/v4, ManufacturingBatch, strict FK enforcement, process snapshots, and lineage integrity |
-| 3 | M4 real regression model (H1) | ✅ Complete (Gatekeeper Hardened) — Multivariate mixture OLS with LOOCV & strict 3D centre-point physical verification; production qualification awaiting ≥16 real pilot observations |
-| 4 | M5 optimizer (H2/H3) | ✅ Complete (Baseline Optimizer) — SLSQP constrained weighted-loss search bounded to empirical training range across 3 scenarios |
+| 3 | M4 Regression Engine & Qualification Framework (H1) | • Framework & Gatekeeper: **✅ IMPLEMENTED & HARDENED**<br>• Regression Engine: **✅ IMPLEMENTED**<br>• Production Model: **⏳ NOT YET QUALIFIED**<br>• Experimental Validation: **⏳ PENDING REAL PILOT DATA (n ≥ 16, Centre Points ≥ 3)** |
+| 4 | M5 Optimizer (H2/H3) | ✅ Baseline Optimizer Implemented — SLSQP constrained weighted-loss search bounded to empirical training range across 3 scenarios (NSGA-II Pareto optimizer deferred until M4 is empirically qualified) |
 | 5 | DOE engine generalization (H4) | ✅ Complete — Parameterized DOE with pure-error center replicates (>= 16 runs) |
 | 6 | Revision Tracker persistence (M1) | ✅ Complete — Schema v4 revision_history DB table & Rev.7.3 8-point baseline |
-| **v1.0** | **Production Release** | **🚀 Qualification Framework Complete & Verified (26/26 Tests Passing)** |
+| **v1.0** | **Framework Baseline** | **🛡️ Qualification Framework Complete / Production Model Pending Real Pilot Data (26/26 Tests Passing)** |
 
 ---
 
