@@ -6,7 +6,7 @@
 > **Target Application:** 20kg 완전군장 40km 행군 장병 및 42.195km 풀코스/트레일 마라토너 (사타구니/겨드랑이/발바닥 쓸림 원천 방어)  
 > **Product Architecture:** 20g Powder-in-Balm Technical Anti-Chafing Stick  
 > **Target COGS:** ₩2,950 / 20g 완제품 (현재 벌크 원료 원가: 약 ₩815 ~ ₩2,610 / 스틱)  
-> **Test Coverage:** 23 Unit Tests 100% Pass (`tests/test_simulator_core.py`)
+> **Test Coverage:** 25 Unit Tests 100% Pass (`tests/test_simulator_core.py`)
 
 ---
 
@@ -90,7 +90,7 @@
 ```bash
 python3 -m unittest discover tests
 ```
-* **23개 핵심 단위 테스트 100% 정상 통과 (Ran 23 tests in ~0.12s - OK)**
+* **25개 핵심 단위 테스트 100% 정상 통과 (Ran 25 tests in ~0.39s - OK)**
 
 ### 2. 통합 CLI 시뮬레이션 데모 실행
 ```bash

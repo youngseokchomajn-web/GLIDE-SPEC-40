@@ -75,9 +75,15 @@ class FormulationDatabase:
                 mixing_time_min REAL,
                 cooling_profile TEXT,
                 status TEXT,
-                notes TEXT
+                notes TEXT,
+                is_center_point INTEGER NOT NULL DEFAULT 0
             )
             """)
+
+            # Idempotent column migrations for doe_trials
+            doe_cols = {row[1] for row in cursor.execute("PRAGMA table_info(doe_trials)").fetchall()}
+            if "is_center_point" not in doe_cols:
+                cursor.execute("ALTER TABLE doe_trials ADD COLUMN is_center_point INTEGER NOT NULL DEFAULT 0")
 
             # 3. Manufacturing Batches table (Phase 2A Lineage)
             cursor.execute("""
@@ -343,8 +349,8 @@ class FormulationDatabase:
                 trial_id, design_type, synthetic_wax_pct, candelilla_wax_pct,
                 dimethicone_pct, caprylyl_methicone_pct, c12_15_alkyl_benzoate_pct,
                 fill_temperature_c, shear_speed_rpm, mixing_time_min,
-                cooling_profile, status, notes
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                cooling_profile, status, notes, is_center_point
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(trial_id) DO UPDATE SET
                 design_type = excluded.design_type,
                 synthetic_wax_pct = excluded.synthetic_wax_pct,
@@ -357,12 +363,14 @@ class FormulationDatabase:
                 mixing_time_min = excluded.mixing_time_min,
                 cooling_profile = excluded.cooling_profile,
                 status = excluded.status,
-                notes = excluded.notes
+                notes = excluded.notes,
+                is_center_point = excluded.is_center_point
             """, (
                 trial.trial_id, trial.design_type, trial.synthetic_wax_pct, trial.candelilla_wax_pct,
                 trial.dimethicone_pct, trial.caprylyl_methicone_pct, trial.c12_15_alkyl_benzoate_pct,
                 trial.fill_temperature_c, trial.shear_speed_rpm, trial.mixing_time_min,
-                trial.cooling_profile, trial.status, trial.notes
+                trial.cooling_profile, trial.status, trial.notes,
+                1 if trial.is_centre_point() else 0
             ))
             conn.commit()
 
@@ -373,11 +381,15 @@ class FormulationDatabase:
             r = cursor.fetchone()
             if not r:
                 return None
+            is_cp = bool(r[13]) if len(r) > 13 else (
+                abs(r[2] - 12.0) <= 0.2 and abs(r[4] - 17.0) <= 0.2 and abs(r[7] - 80.0) <= 1.0
+            )
             return DOETrial(
                 trial_id=r[0], design_type=r[1], synthetic_wax_pct=r[2], candelilla_wax_pct=r[3],
                 dimethicone_pct=r[4], caprylyl_methicone_pct=r[5], c12_15_alkyl_benzoate_pct=r[6],
                 fill_temperature_c=r[7], shear_speed_rpm=r[8], mixing_time_min=r[9],
-                cooling_profile=r[10], status=r[11], notes=r[12]
+                cooling_profile=r[10], status=r[11], notes=r[12],
+                is_center_point=is_cp
             )
 
     def get_all_doe_trials(self) -> List[DOETrial]:
@@ -386,11 +398,15 @@ class FormulationDatabase:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM doe_trials ORDER BY trial_id ASC")
             for r in cursor.fetchall():
+                is_cp = bool(r[13]) if len(r) > 13 else (
+                    abs(r[2] - 12.0) <= 0.2 and abs(r[4] - 17.0) <= 0.2 and abs(r[7] - 80.0) <= 1.0
+                )
                 trials.append(DOETrial(
                     trial_id=r[0], design_type=r[1], synthetic_wax_pct=r[2], candelilla_wax_pct=r[3],
                     dimethicone_pct=r[4], caprylyl_methicone_pct=r[5], c12_15_alkyl_benzoate_pct=r[6],
                     fill_temperature_c=r[7], shear_speed_rpm=r[8], mixing_time_min=r[9],
-                    cooling_profile=r[10], status=r[11], notes=r[12]
+                    cooling_profile=r[10], status=r[11], notes=r[12],
+                    is_center_point=is_cp
                 ))
         return trials
 

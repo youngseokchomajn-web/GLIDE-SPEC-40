@@ -140,11 +140,19 @@ class MultiObjectiveOptimizer:
         x0: np.ndarray
     ) -> CandidateFormula:
         """Runs SLSQP on decision variables [u1, v1, T]."""
-        bounds = [
-            (9.0 / 17.0, 15.0 / 17.0),
-            (12.0 / 28.0, 22.0 / 28.0),
-            (75.0, 85.0)
-        ]
+        if self.predictor.metrics and "hardness" in self.predictor.metrics:
+            h_m = self.predictor.metrics["hardness"]
+            bounds = [
+                (float(h_m.u1_range[0]), float(h_m.u1_range[1])),
+                (float(h_m.v1_range[0]), float(h_m.v1_range[1])),
+                (float(h_m.temp_range[0]), float(h_m.temp_range[1]))
+            ]
+        else:
+            bounds = [
+                (9.0 / 17.0, 15.0 / 17.0),
+                (12.0 / 28.0, 22.0 / 28.0),
+                (75.0, 85.0)
+            ]
 
         if HAS_SCIPY:
             res = minimize(

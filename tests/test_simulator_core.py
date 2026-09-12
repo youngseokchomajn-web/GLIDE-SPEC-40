@@ -661,6 +661,14 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         self.assertIn("NOT experimental measurement", pred.message)
         self.assertIn("LOOCV RMSE", pred.message)
 
+        # Dynamic applicability range verification
+        self.assertIn("synthetic_wax_pct", pred.applicable_range)
+        self.assertIn("dimethicone_pct", pred.applicable_range)
+        self.assertIn("fill_temperature_c", pred.applicable_range)
+        syn_min, syn_max = pred.applicable_range["synthetic_wax_pct"]
+        self.assertAlmostEqual(syn_min, 10.0, places=1)
+        self.assertAlmostEqual(syn_max, 14.0, places=1)
+
         if os.path.exists(test_dir):
             shutil.rmtree(test_dir, ignore_errors=True)
 
@@ -847,6 +855,142 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         self.assertIsNotNone(cand_rev)
         self.assertEqual(cand_rev["status"], "EXPERIMENTAL")
         self.assertEqual(cand_rev["changes"][0]["change_id"], "NEW-09")
+
+        if os.path.exists(test_dir):
+            shutil.rmtree(test_dir, ignore_errors=True)
+
+    def test_false_centre_point_rejected_from_promotion(self):
+        """Phase 2A/M4 Hardening: Rejects promotion when temperature is 80C but wax/silicone coordinates deviate from center."""
+        test_dir = "data/test_false_center_tmp"
+        db = FormulationDatabase(data_dir=test_dir)
+
+        complete_hardness = HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30)
+        complete_transfer = TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")
+
+        records = []
+        for i in range(16):
+            trial_id = f"DOE-FC-{i:02d}"
+            batch_id = f"BATCH-FC-{i:02d}"
+            # All 16 trials have fill temp = 80C, BUT wax & silicone are at vertex boundaries!
+            # SynWax = 15.0%, Dimethicone = 22.0% -> NOT a centroid!
+            syn_w = 15.0 if i < 15 else 12.0  # Only 1 true centroid at i = 15
+            dim = 22.0 if i < 15 else 17.0
+
+            trial = DOETrial(
+                trial_id=trial_id, design_type="Vertex_HighSyn_HighDim",
+                synthetic_wax_pct=syn_w, candelilla_wax_pct=17.0 - syn_w,
+                dimethicone_pct=dim, caprylyl_methicone_pct=28.0 - dim,
+                fill_temperature_c=80.0, shear_speed_rpm=3000.0, mixing_time_min=20.0,
+                is_center_point=(syn_w == 12.0 and dim == 17.0)
+            )
+            db.save_doe_trial(trial)
+
+            calc = ManufacturingCalculator.generate_manufacturing_formula(
+                active_formula=REV73_TARGET_ACTIVE_FORMULA,
+                material_specs=REV73_RAW_MATERIALS,
+                batch_size_kg=5.0,
+                component_ratios=trial.to_component_ratios()
+            )
+            mfg = ManufacturingBatch(
+                batch_id=batch_id, trial_id=trial_id, formula_id="GLIDE-REV73-PILOT", revision="Rev.7.3",
+                created_date="2026-09-12", operator="Pilot Lead",
+                batch_size_kg=calc.batch_size_kg, total_charge_pct=calc.total_charge_pct,
+                items=calc.items, process_conditions=trial.to_process_condition()
+            )
+            db.save_manufacturing_batch(mfg)
+
+            qc = BatchQCRecord(
+                batch_id=batch_id, trial_id=trial_id, formula_id="GLIDE-REV73-PILOT", revision="Rev.7.3",
+                test_date="2026-09-12", operator="Pilot QC",
+                process_conditions=trial.to_process_condition(),
+                hardness_gf=830.0, transfer_g_10c=0.045, drop_point_c=61.5,
+                data_origin=DataOrigin.REAL_PILOT,
+                hardness_sop=complete_hardness, transfer_sop=complete_transfer
+            )
+            db.save_qc_record(qc)
+            records.append(qc)
+
+        predictor = FormulationPredictor()
+        promoted = predictor.fit(records, verified_raw_materials=True, db=db)
+
+        # MUST NOT promote: Only 1 true centroid exists despite all 16 runs being at 80°C!
+        self.assertFalse(promoted, "Model must reject promotion when true 3-coordinate centre-points < 3")
+        self.assertEqual(predictor.state, ModelState.AWAITING_PILOT_DATA)
+
+        if os.path.exists(test_dir):
+            shutil.rmtree(test_dir, ignore_errors=True)
+
+    def test_drop_point_missing_value_handled_without_fake_substitution(self):
+        """Phase 2A/M4 Hardening: Unmeasured drop point is never forged as 61.5, remaining None until 16 real observations exist."""
+        test_dir = "data/test_dp_isolation_tmp"
+        db = FormulationDatabase(data_dir=test_dir)
+
+        complete_hardness = HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30)
+        complete_transfer = TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")
+
+        records = []
+        for i in range(16):
+            trial_id = f"DOE-DP-{i:02d}"
+            batch_id = f"BATCH-DP-{i:02d}"
+            fill_t = 80.0 if i < 4 else (76.0 if i % 2 == 0 else 84.0)
+            syn_w = 12.0 if i < 4 else (10.0 + (i % 6) * 0.8)
+            dim = 17.0 if i < 4 else (14.0 + (i % 5) * 1.5)
+
+            trial = DOETrial(
+                trial_id=trial_id, design_type="Custom",
+                synthetic_wax_pct=syn_w, candelilla_wax_pct=17.0 - syn_w,
+                dimethicone_pct=dim, caprylyl_methicone_pct=28.0 - dim,
+                fill_temperature_c=fill_t, shear_speed_rpm=3000.0, mixing_time_min=20.0,
+                is_center_point=(i < 4)
+            )
+            db.save_doe_trial(trial)
+
+            calc = ManufacturingCalculator.generate_manufacturing_formula(
+                active_formula=REV73_TARGET_ACTIVE_FORMULA,
+                material_specs=REV73_RAW_MATERIALS,
+                batch_size_kg=5.0,
+                component_ratios=trial.to_component_ratios()
+            )
+            mfg = ManufacturingBatch(
+                batch_id=batch_id, trial_id=trial_id, formula_id="GLIDE-REV73-PILOT", revision="Rev.7.3",
+                created_date="2026-09-12", operator="Pilot Lead",
+                batch_size_kg=calc.batch_size_kg, total_charge_pct=calc.total_charge_pct,
+                items=calc.items, process_conditions=trial.to_process_condition()
+            )
+            db.save_manufacturing_batch(mfg)
+
+            # Drop point is intentionally NOT MEASURED (None) on all batches
+            qc = BatchQCRecord(
+                batch_id=batch_id, trial_id=trial_id, formula_id="GLIDE-REV73-PILOT", revision="Rev.7.3",
+                test_date="2026-09-12", operator="Pilot QC",
+                process_conditions=trial.to_process_condition(),
+                hardness_gf=810.0 + 8.0 * (syn_w - 12.0) - 1.2 * (fill_t - 80.0),
+                transfer_g_10c=0.046 - 0.0008 * (syn_w - 12.0) + 0.0004 * (dim - 17.0),
+                drop_point_c=None,  # Missing measurement
+                data_origin=DataOrigin.REAL_PILOT,
+                hardness_sop=complete_hardness, transfer_sop=complete_transfer
+            )
+            db.save_qc_record(qc)
+            records.append(qc)
+
+        predictor = FormulationPredictor()
+        promoted = predictor.fit(records, verified_raw_materials=True, db=db)
+
+        # Hardness & Transfer are complete -> Model promotes to TRAINED_LINEAR
+        self.assertTrue(promoted)
+        self.assertEqual(predictor.state, ModelState.TRAINED_LINEAR)
+        self.assertIsNotNone(predictor.hardness_model)
+        self.assertIsNotNone(predictor.transfer_model)
+
+        # Drop point model must be None (never forged as 61.5)
+        self.assertIsNone(predictor.drop_point_model)
+        self.assertNotIn("drop_point", predictor.metrics)
+
+        # Prediction output must leave drop_point_c as None
+        pred = predictor.predict(12.0, 5.0, 17.0, 11.0, 80.0)
+        self.assertIsNotNone(pred.hardness_gf)
+        self.assertIsNotNone(pred.transfer_g)
+        self.assertIsNone(pred.drop_point_c, "Drop point must remain None when unmeasured")
 
         if os.path.exists(test_dir):
             shutil.rmtree(test_dir, ignore_errors=True)

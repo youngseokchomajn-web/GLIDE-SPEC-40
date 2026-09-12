@@ -46,19 +46,53 @@ class FormulationPredictor:
         self.drop_point_model: Optional[MixtureRegressionModel] = None
         self.metrics: Dict[str, RegressionMetrics] = {}
 
-    def _count_centre_points(self, eligible_records: List[BatchQCRecord]) -> int:
+    def _count_centre_points(self, eligible_records: List[BatchQCRecord], db: Optional[Any] = None) -> int:
         """
-        Detects centre-point replicates:
-        Rev.7.3 centre point: SynWax ≈ 12.0% (u1 ≈ 0.706), Dimethicone ≈ 17.0% (v1 ≈ 0.607), FillTemp ≈ 80°C.
+        Detects genuine centre-point replicates:
+        Must satisfy all 3 physical coordinates:
+          - Synthetic Wax ≈ 12.0% (u1 ≈ 0.706)
+          - Dimethicone ≈ 17.0% (v1 ≈ 0.607)
+          - Fill Temperature ≈ 80.0°C
+        Or trial_obj.is_centre_point() is explicitly True.
         """
         count = 0
         for r in eligible_records:
-            t = r.process_conditions.fill_temperature_c
-            # Check if associated with Centroid or values close to center
-            if abs(t - 80.0) <= 1.0:
-                # If trial metadata exists or ratios match centroid
+            trial_obj = db.get_doe_trial(r.trial_id) if db else None
+            if trial_obj and trial_obj.is_centre_point():
                 count += 1
+            elif trial_obj:
+                t = r.process_conditions.fill_temperature_c
+                if (
+                    abs(t - 80.0) <= 1.0 and
+                    abs(trial_obj.synthetic_wax_pct - 12.0) <= 0.2 and
+                    abs(trial_obj.dimethicone_pct - 17.0) <= 0.2
+                ):
+                    count += 1
         return count
+
+    def _build_matrix(
+        self,
+        records: List[BatchQCRecord],
+        db: Optional[Any],
+        target_attr: str
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        X_list = []
+        y_list = []
+        for r in records:
+            trial_obj = db.get_doe_trial(r.trial_id) if db else None
+            if trial_obj is None:
+                continue
+            val = getattr(r, target_attr)
+            if val is None:
+                continue
+            u1, v1, T = MixtureRegressionModel.extract_features(
+                trial_obj.synthetic_wax_pct,
+                trial_obj.dimethicone_pct,
+                r.process_conditions.fill_temperature_c
+            )
+            X_list.append([u1, v1, T])
+            y_list.append(val)
+        return np.array(X_list), np.array(y_list)
 
     def fit(
         self,
@@ -67,11 +101,11 @@ class FormulationPredictor:
         db: Optional[Any] = None
     ) -> bool:
         """
-        Phase 3 Real Multivariate Regression Fit:
+        Phase 3 Real Multivariate Regression Fit (Hardened Qualification):
         1. Filters genuine, SOP-complete, lineage-verified REAL_PILOT records.
-        2. Enforces >= 16 eligible records and >= 3 centre-point replicates.
-        3. Fits OLS regression for Hardness and Transfer without mixture collinearity.
-        4. Calculates LOOCV RMSE and establishes prediction intervals.
+        2. Property-isolated datasets: Hardness and Transfer models fit only on real measurements.
+        3. Strictly eliminates any fake replacement of unmeasured Drop Point values.
+        4. Enforces >= 16 eligible records AND >= 3 true 3-coordinate centre-point replicates.
         """
         if db is None:
             try:
@@ -93,51 +127,44 @@ class FormulationPredictor:
 
         self.training_records = eligible
 
-        if len(eligible) < self.MIN_ELIGIBLE_PILOT_RECORDS:
+        # Property-specific isolated observation sets
+        h_records = [r for r in eligible if r.hardness_gf is not None]
+        t_records = [r for r in eligible if r.transfer_g_10c is not None]
+        dp_records = [r for r in eligible if r.drop_point_c is not None]
+
+        # Count genuine 3-coordinate centre-points for each property
+        h_centre = self._count_centre_points(h_records, db)
+        t_centre = self._count_centre_points(t_records, db)
+
+        # Core promotion criteria for production model
+        if len(h_records) < self.MIN_ELIGIBLE_PILOT_RECORDS or h_centre < self.MIN_CENTRE_POINT_REPLICATES:
             self.state = ModelState.AWAITING_PILOT_DATA
             return False
 
-        centre_points = self._count_centre_points(eligible)
-        if centre_points < self.MIN_CENTRE_POINT_REPLICATES:
+        if len(t_records) < self.MIN_ELIGIBLE_PILOT_RECORDS or t_centre < self.MIN_CENTRE_POINT_REPLICATES:
             self.state = ModelState.AWAITING_PILOT_DATA
             return False
 
-        # Prepare regression matrices
-        X_list = []
-        y_hardness = []
-        y_transfer = []
-        y_drop_point = []
-
-        for r in eligible:
-            # Look up trial formulation coordinates
-            trial_obj = db.get_doe_trial(r.trial_id) if db else None
-            if trial_obj is None:
-                continue
-            syn_wax = trial_obj.synthetic_wax_pct
-            dimeth = trial_obj.dimethicone_pct
-            temp = r.process_conditions.fill_temperature_c
-
-            u1, v1, T = MixtureRegressionModel.extract_features(syn_wax, dimeth, temp)
-            X_list.append([u1, v1, T])
-            y_hardness.append(r.hardness_gf)
-            y_transfer.append(r.transfer_g_10c)
-            y_drop_point.append(r.drop_point_c if r.drop_point_c is not None else 61.5)
-
-        if len(X_list) < self.MIN_ELIGIBLE_PILOT_RECORDS:
-            self.state = ModelState.AWAITING_PILOT_DATA
-            return False
-
-        X = np.array(X_list)
-
-        # Fit distinct property response models
+        # 1. Fit Hardness response surface
+        X_h, y_h = self._build_matrix(h_records, db, "hardness_gf")
         self.hardness_model = MixtureRegressionModel("Hardness @ 25C")
-        self.metrics["hardness"] = self.hardness_model.fit(X, np.array(y_hardness))
+        self.metrics["hardness"] = self.hardness_model.fit(X_h, y_h)
 
+        # 2. Fit Pay-off / Transfer response surface
+        X_t, y_t = self._build_matrix(t_records, db, "transfer_g_10c")
         self.transfer_model = MixtureRegressionModel("Pay-off @ 10C")
-        self.metrics["transfer"] = self.transfer_model.fit(X, np.array(y_transfer))
+        self.metrics["transfer"] = self.transfer_model.fit(X_t, y_t)
 
-        self.drop_point_model = MixtureRegressionModel("Drop Point")
-        self.metrics["drop_point"] = self.drop_point_model.fit(X, np.array(y_drop_point))
+        # 3. Fit Drop Point model ONLY if genuine >= 16 real observations & >= 3 centre points exist
+        dp_centre = self._count_centre_points(dp_records, db)
+        if len(dp_records) >= self.MIN_ELIGIBLE_PILOT_RECORDS and dp_centre >= self.MIN_CENTRE_POINT_REPLICATES:
+            X_dp, y_dp = self._build_matrix(dp_records, db, "drop_point_c")
+            self.drop_point_model = MixtureRegressionModel("Drop Point")
+            self.metrics["drop_point"] = self.drop_point_model.fit(X_dp, y_dp)
+        else:
+            self.drop_point_model = None
+            if "drop_point" in self.metrics:
+                del self.metrics["drop_point"]
 
         self.state = ModelState.TRAINED_LINEAR
         return True
@@ -153,6 +180,7 @@ class FormulationPredictor:
         """
         Generates empirical response surface predictions adhering strictly to Rule #12:
         Always labeled visibly as 'Predicted (n=X samples), not experimental'.
+        Applicability range is derived directly from the real training data boundaries.
         """
         if self.state == ModelState.AWAITING_PILOT_DATA or self.hardness_model is None or self.transfer_model is None:
             return PropertyPrediction(
@@ -165,13 +193,17 @@ class FormulationPredictor:
                 model_state=self.state,
                 sample_count=len(self.training_records),
                 applicable_range={},
-                message=f"Property prediction locked. Waiting for >= {self.MIN_ELIGIBLE_PILOT_RECORDS} verified real Pilot records and >= {self.MIN_CENTRE_POINT_REPLICATES} centre-point replicates (Current eligible: {len(self.training_records)})."
+                message=f"Property prediction locked. Waiting for >= {self.MIN_ELIGIBLE_PILOT_RECORDS} verified real Pilot records and >= {self.MIN_CENTRE_POINT_REPLICATES} genuine 3-coordinate centre-point replicates (Current eligible: {len(self.training_records)})."
             )
 
         # Perform actual multivariate OLS predictions
         pred_h, margin_h = self.hardness_model.predict(synthetic_wax, dimethicone, fill_temperature_c)
         pred_t, margin_t = self.transfer_model.predict(synthetic_wax, dimethicone, fill_temperature_c)
-        pred_dp, _ = self.drop_point_model.predict(synthetic_wax, dimethicone, fill_temperature_c)
+
+        # Drop point is predicted ONLY if genuine model exists
+        pred_dp = None
+        if self.drop_point_model is not None:
+            pred_dp, _ = self.drop_point_model.predict(synthetic_wax, dimethicone, fill_temperature_c)
 
         # Calculate composite confidence score based on R² and LOOCV
         h_r2 = max(0.0, self.metrics["hardness"].r_squared)
@@ -180,10 +212,13 @@ class FormulationPredictor:
         confidence = round(min(0.98, max(0.10, avg_r2 * 0.95)), 2)
 
         sample_n = len(self.training_records)
+
+        # Extract dynamic applicability range directly from fitted training metrics
+        h_m = self.metrics["hardness"]
         ranges = {
-            "synthetic_wax_pct": (9.0, 15.0),
-            "dimethicone_pct": (12.0, 22.0),
-            "fill_temperature_c": (75.0, 85.0)
+            "synthetic_wax_pct": (round(h_m.u1_range[0] * 17.0, 2), round(h_m.u1_range[1] * 17.0, 2)),
+            "dimethicone_pct": (round(h_m.v1_range[0] * 28.0, 2), round(h_m.v1_range[1] * 28.0, 2)),
+            "fill_temperature_c": (round(h_m.temp_range[0], 1), round(h_m.temp_range[1], 1))
         }
 
         # Rule #12 Mandatory labeling

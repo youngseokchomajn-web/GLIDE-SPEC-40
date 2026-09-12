@@ -28,7 +28,18 @@ class DOETrial(BaseModel):
     mixing_time_min: float = 20.0
     cooling_profile: str = "3-Step Gradual (25->15->5C)"
     status: str = "PLANNED"
+    is_center_point: bool = False
     notes: Optional[str] = ""
+
+    def is_centre_point(self) -> bool:
+        """Strict 3-coordinate physical centre-point validation: SynWax ~12%, Dimethicone ~17%, Fill Temp ~80C."""
+        if self.is_center_point:
+            return True
+        return (
+            abs(self.synthetic_wax_pct - 12.0) <= 0.2 and
+            abs(self.dimethicone_pct - 17.0) <= 0.2 and
+            abs(self.fill_temperature_c - 80.0) <= 1.0
+        )
 
     def validate_mixture_constraints(self) -> bool:
         wax_sum = self.synthetic_wax_pct + self.candelilla_wax_pct
@@ -197,6 +208,7 @@ class AdvancedDOEEngine:
                 shear_speed_rpm=cfg.shear_speed_rpm,
                 mixing_time_min=cfg.mixing_time_min,
                 cooling_profile=cfg.cooling_profile,
+                is_center_point=True,
                 notes=f"Centre-point pure-error replicate {i+1} of {cfg.centre_point_replicates}"
             ))
             counter += 1
