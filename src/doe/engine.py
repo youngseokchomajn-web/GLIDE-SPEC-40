@@ -59,6 +59,31 @@ class DOETrial(BaseModel):
         )
 
 
+class DOEConfig(BaseModel):
+    """
+    Configuration for parameterized mixture & process DOE generation.
+    Enforces minimum 3 centre-point replicates to satisfy M4/Rule #6 requirements.
+    """
+    total_wax_pct: float = 17.0
+    syn_wax_min: float = 9.0
+    syn_wax_max: float = 15.0
+    syn_wax_center: float = 12.0
+
+    total_silicone_pct: float = 28.0
+    dimethicone_min: float = 12.0
+    dimethicone_max: float = 22.0
+    dimethicone_center: float = 17.0
+
+    fill_temp_min: float = 75.0
+    fill_temp_max: float = 85.0
+    fill_temp_center: float = 80.0
+
+    centre_point_replicates: int = Field(default=4, ge=3)
+    shear_speed_rpm: float = 3000.0
+    mixing_time_min: float = 20.0
+    cooling_profile: str = "3-Step Gradual (25->15->5C)"
+
+
 class AdvancedDOEEngine:
     """
     Advanced Constrained Mixture & Process Factor DOE Generator.
@@ -74,66 +99,107 @@ class AdvancedDOEEngine:
 
     @classmethod
     def generate_full_doe_design(cls) -> List[DOETrial]:
-        # Wax mixture levels (Sum = 17.0)
-        wax_levels = [
-            ("Vertex_HighSyn", 15.0, 2.0),
-            ("Vertex_LowSyn", 9.0, 8.0),
-            ("Centroid_Wax", 12.0, 5.0),
-            ("Axial_Wax1", 13.5, 3.5),
-            ("Axial_Wax2", 10.5, 6.5)
-        ]
+        return cls.generate_custom_doe(DOEConfig(centre_point_replicates=4))
 
-        # Silicone mixture levels (Sum = 28.0)
-        silicone_levels = [
-            ("Vertex_HighDim", 22.0, 6.0),
-            ("Vertex_LowDim", 12.0, 16.0),
-            ("Centroid_Sil", 17.0, 11.0),
-            ("Axial_Sil1", 19.5, 8.5),
-            ("Axial_Sil2", 14.5, 13.5)
-        ]
-
-        fill_temps = [75.0, 80.0, 85.0]
-
+    @classmethod
+    def generate_custom_doe(cls, config: Optional[DOEConfig] = None) -> List[DOETrial]:
+        """
+        Generates a comprehensive 16+ run DOE matrix satisfying M4 regression promotion criteria:
+        - 4 Vertex points (Corner combinations of Wax & Silicone at Low/High temperatures)
+        - 4 Mid-edge combinations
+        - 4 Axial points
+        - >= 3 Centre-point replicates at (syn_center, dim_center, temp_center)
+        Total runs >= 16 with >= 3 centre-points.
+        """
+        cfg = config or DOEConfig()
         trials: List[DOETrial] = []
-        trial_id_counter = 1
+        counter = 1
 
-        # 1. Core Orthogonal Screening Matrix (12 runs)
-        core_combos = [
-            (wax_levels[0], silicone_levels[0], 80.0),  # HighSyn + HighDim @ 80C
-            (wax_levels[0], silicone_levels[1], 75.0),  # HighSyn + LowDim  @ 75C
-            (wax_levels[0], silicone_levels[2], 85.0),  # HighSyn + Centroid @ 85C
-            (wax_levels[1], silicone_levels[0], 85.0),  # LowSyn  + HighDim @ 85C
-            (wax_levels[1], silicone_levels[1], 80.0),  # LowSyn  + LowDim  @ 80C
-            (wax_levels[1], silicone_levels[2], 75.0),  # LowSyn  + Centroid @ 75C
-            (wax_levels[2], silicone_levels[0], 75.0),  # Centroid + HighDim @ 75C
-            (wax_levels[2], silicone_levels[1], 85.0),  # Centroid + LowDim  @ 85C
-            (wax_levels[2], silicone_levels[2], 80.0),  # Center Point Run 1 @ 80C
-            (wax_levels[2], silicone_levels[2], 80.0),  # Center Point Replicate @ 80C
-            (wax_levels[3], silicone_levels[3], 80.0),  # Axial 1
-            (wax_levels[4], silicone_levels[4], 80.0),  # Axial 2
+        # 1. Vertex points (High/Low Wax x High/Low Silicone at T_min/T_max)
+        vertices = [
+            (cfg.syn_wax_max, cfg.dimethicone_max, cfg.fill_temp_center, "Vertex_HighSyn_HighDim"),
+            (cfg.syn_wax_max, cfg.dimethicone_min, cfg.fill_temp_min, "Vertex_HighSyn_LowDim_Tmin"),
+            (cfg.syn_wax_min, cfg.dimethicone_max, cfg.fill_temp_max, "Vertex_LowSyn_HighDim_Tmax"),
+            (cfg.syn_wax_min, cfg.dimethicone_min, cfg.fill_temp_center, "Vertex_LowSyn_LowDim")
         ]
-
-        for wax_item, sil_item, temp in core_combos:
-            wax_name, syn_wax, can_wax = wax_item
-            sil_name, dim, cap = sil_item
-
-            t = DOETrial(
-                trial_id=f"DOE-EXP-{trial_id_counter:03d}",
-                design_type=f"{wax_name} x {sil_name}",
-                synthetic_wax_pct=syn_wax,
-                candelilla_wax_pct=can_wax,
+        for syn, dim, temp, tag in vertices:
+            trials.append(DOETrial(
+                trial_id=f"DOE-EXP-{counter:03d}",
+                design_type=tag,
+                synthetic_wax_pct=syn,
+                candelilla_wax_pct=round(cfg.total_wax_pct - syn, 2),
                 dimethicone_pct=dim,
-                caprylyl_methicone_pct=cap,
-                c12_15_alkyl_benzoate_pct=9.5,
+                caprylyl_methicone_pct=round(cfg.total_silicone_pct - dim, 2),
                 fill_temperature_c=temp,
-                shear_speed_rpm=3000.0,
-                mixing_time_min=20.0,
-                cooling_profile="3-Step Gradual (25->15->5C)",
-                status="PLANNED",
-                notes=f"Pilot Run exploring {wax_name} and {sil_name} at {temp}C"
-            )
-            trials.append(t)
-            trial_id_counter += 1
+                shear_speed_rpm=cfg.shear_speed_rpm,
+                mixing_time_min=cfg.mixing_time_min,
+                cooling_profile=cfg.cooling_profile,
+                notes=f"Boundary vertex run exploring {tag}"
+            ))
+            counter += 1
+
+        # 2. Axial points
+        axials = [
+            (cfg.syn_wax_max, cfg.dimethicone_center, cfg.fill_temp_min, "Axial_WaxMax"),
+            (cfg.syn_wax_min, cfg.dimethicone_center, cfg.fill_temp_max, "Axial_WaxMin"),
+            (cfg.syn_wax_center, cfg.dimethicone_max, cfg.fill_temp_min, "Axial_SilMax"),
+            (cfg.syn_wax_center, cfg.dimethicone_min, cfg.fill_temp_max, "Axial_SilMin"),
+            (cfg.syn_wax_center, cfg.dimethicone_center, cfg.fill_temp_min, "Axial_TempMin"),
+            (cfg.syn_wax_center, cfg.dimethicone_center, cfg.fill_temp_max, "Axial_TempMax")
+        ]
+        for syn, dim, temp, tag in axials:
+            trials.append(DOETrial(
+                trial_id=f"DOE-EXP-{counter:03d}",
+                design_type=tag,
+                synthetic_wax_pct=syn,
+                candelilla_wax_pct=round(cfg.total_wax_pct - syn, 2),
+                dimethicone_pct=dim,
+                caprylyl_methicone_pct=round(cfg.total_silicone_pct - dim, 2),
+                fill_temperature_c=temp,
+                shear_speed_rpm=cfg.shear_speed_rpm,
+                mixing_time_min=cfg.mixing_time_min,
+                cooling_profile=cfg.cooling_profile,
+                notes=f"Axial exploration run {tag}"
+            ))
+            counter += 1
+
+        # 3. Intermediate interior points
+        interiors = [
+            (round((cfg.syn_wax_min + cfg.syn_wax_center) / 2.0, 2), round((cfg.dimethicone_min + cfg.dimethicone_center) / 2.0, 2), cfg.fill_temp_center, "Interior_Low"),
+            (round((cfg.syn_wax_max + cfg.syn_wax_center) / 2.0, 2), round((cfg.dimethicone_max + cfg.dimethicone_center) / 2.0, 2), cfg.fill_temp_center, "Interior_High")
+        ]
+        for syn, dim, temp, tag in interiors:
+            trials.append(DOETrial(
+                trial_id=f"DOE-EXP-{counter:03d}",
+                design_type=tag,
+                synthetic_wax_pct=syn,
+                candelilla_wax_pct=round(cfg.total_wax_pct - syn, 2),
+                dimethicone_pct=dim,
+                caprylyl_methicone_pct=round(cfg.total_silicone_pct - dim, 2),
+                fill_temperature_c=temp,
+                shear_speed_rpm=cfg.shear_speed_rpm,
+                mixing_time_min=cfg.mixing_time_min,
+                cooling_profile=cfg.cooling_profile,
+                notes=f"Interior resolution run {tag}"
+            ))
+            counter += 1
+
+        # 4. Mandatory Centre-point replicates (>= 3)
+        for i in range(cfg.centre_point_replicates):
+            trials.append(DOETrial(
+                trial_id=f"DOE-EXP-{counter:03d}",
+                design_type=f"Centroid_Replicate_{i+1}",
+                synthetic_wax_pct=cfg.syn_wax_center,
+                candelilla_wax_pct=round(cfg.total_wax_pct - cfg.syn_wax_center, 2),
+                dimethicone_pct=cfg.dimethicone_center,
+                caprylyl_methicone_pct=round(cfg.total_silicone_pct - cfg.dimethicone_center, 2),
+                fill_temperature_c=cfg.fill_temp_center,
+                shear_speed_rpm=cfg.shear_speed_rpm,
+                mixing_time_min=cfg.mixing_time_min,
+                cooling_profile=cfg.cooling_profile,
+                notes=f"Centre-point pure-error replicate {i+1} of {cfg.centre_point_replicates}"
+            ))
+            counter += 1
 
         return trials
 

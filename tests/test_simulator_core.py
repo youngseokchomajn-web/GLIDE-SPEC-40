@@ -769,6 +769,46 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         if os.path.exists(test_dir):
             shutil.rmtree(test_dir)
 
+    def test_parameterized_doe_generation(self):
+        """Phase 5 [DOE Engine]: Parameterized DOE produces >= 16 runs with >= 3 centre-points and valid mixture invariants."""
+        from src.doe.engine import AdvancedDOEEngine, DOEConfig
+
+        cfg = DOEConfig(
+            total_wax_pct=17.0,
+            syn_wax_min=10.0,
+            syn_wax_max=14.0,
+            syn_wax_center=12.0,
+            total_silicone_pct=28.0,
+            dimethicone_min=14.0,
+            dimethicone_max=20.0,
+            dimethicone_center=17.0,
+            fill_temp_min=76.0,
+            fill_temp_max=84.0,
+            fill_temp_center=80.0,
+            centre_point_replicates=5
+        )
+
+        trials = AdvancedDOEEngine.generate_custom_doe(cfg)
+
+        # 1. Total runs count >= 16 (4 vertex + 6 axial + 2 interior + 5 centre = 17 runs)
+        self.assertGreaterEqual(len(trials), 16)
+        self.assertEqual(len(trials), 17)
+
+        # 2. Centre points count >= 5
+        centre_trials = [t for t in trials if "Centroid" in t.design_type]
+        self.assertEqual(len(centre_trials), 5)
+
+        # 3. Verify mixture invariants on every trial
+        for t in trials:
+            self.assertTrue(t.validate_mixture_constraints(), f"Mixture constraint failed on {t.trial_id}")
+            self.assertAlmostEqual(t.synthetic_wax_pct + t.candelilla_wax_pct, 17.0, places=2)
+            self.assertAlmostEqual(t.dimethicone_pct + t.caprylyl_methicone_pct, 28.0, places=2)
+            self.assertTrue(76.0 <= t.fill_temperature_c <= 84.0)
+
+        # 4. Default generator also produces >= 16 runs
+        default_trials = AdvancedDOEEngine.generate_full_doe_design()
+        self.assertGreaterEqual(len(default_trials), 16)
+
 
 if __name__ == "__main__":
     unittest.main()

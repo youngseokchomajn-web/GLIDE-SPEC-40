@@ -1,3 +1,3 @@
-from .engine import DOETrial, AdvancedDOEEngine
+from .engine import DOETrial, AdvancedDOEEngine, DOEConfig
 
-__all__ = ["DOETrial", "AdvancedDOEEngine"]
+__all__ = ["DOETrial", "AdvancedDOEEngine", "DOEConfig"]
