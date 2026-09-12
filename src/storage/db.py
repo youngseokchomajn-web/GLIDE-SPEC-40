@@ -8,9 +8,10 @@ transactional table rebuild migrations, and full DOE -> Batch -> QC lineage.
 import json
 import os
 import sqlite3
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from pathlib import Path
 from datetime import datetime
+from contextlib import contextmanager
 
 from src.materials.master import RawMaterial, REV73_RAW_MATERIALS
 from src.formulas.master import FormulaMaster, REV73_TARGET_ACTIVE_FORMULA
@@ -19,7 +20,7 @@ from src.doe.engine import DOETrial
 from src.manufacturing.models import ManufacturingBatch
 from src.manufacturing.calculator import BatchChargeItem
 
-CURRENT_SCHEMA_VERSION = 3
+CURRENT_SCHEMA_VERSION = 4
 
 
 class FormulationDatabase:
@@ -31,10 +32,14 @@ class FormulationDatabase:
         self._init_directories()
         self._init_sqlite()
 
-    def _get_connection(self) -> sqlite3.Connection:
+    @contextmanager
+    def _get_connection(self):
         conn = sqlite3.connect(self.qc_db_path)
         conn.execute("PRAGMA foreign_keys = ON;")
-        return conn
+        try:
+            yield conn
+        finally:
+            conn.close()
 
     def _init_directories(self):
         (self.data_dir / "raw_materials").mkdir(parents=True, exist_ok=True)
@@ -200,12 +205,108 @@ class FormulationDatabase:
                 cursor.execute("ALTER TABLE qc_records_v3_new RENAME TO qc_records")
                 cursor.execute("PRAGMA foreign_keys = ON;")
 
-            # Record schema version v3
-            cursor.execute("SELECT version FROM schema_versions WHERE version = ?", (CURRENT_SCHEMA_VERSION,))
+            # 5. Revision History table (Phase 6)
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS revision_history (
+                revision_id TEXT PRIMARY KEY,
+                release_date TEXT NOT NULL,
+                status TEXT NOT NULL,
+                change_summary TEXT NOT NULL,
+                changes_json TEXT NOT NULL,
+                active_formula_json TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            )
+            """)
+
+            # Seed Rev.7.3 baseline revision if not present
+            cursor.execute("SELECT revision_id FROM revision_history WHERE revision_id = 'Rev.7.3'")
+            if not cursor.fetchone():
+                rev73_changes = [
+                    {
+                        "change_id": "NEW-01",
+                        "category": "Wax System",
+                        "title": "합성 왁스 비중 상향 (10% -> 12%) 및 칸데릴라 왁스 비율 조정 (7% -> 5%)",
+                        "description": "융점 및 스틱 골격 안정성 향상, 30°C 이상 하절기 및 체온에 의한 유동 붕괴/스틱 꺾임 방지"
+                    },
+                    {
+                        "change_id": "NEW-02",
+                        "category": "Silicone System",
+                        "title": "Dimethicone 17.0% + Caprylyl Methicone 11.0% 고정 배합 확립",
+                        "description": "선형 실리콘의 마찰 방지 지속성과 휘발성 알킬 실리콘의 도포 시 끈적임 없는 실키 슬립 밸런스 달성"
+                    },
+                    {
+                        "change_id": "NEW-03",
+                        "category": "Dispersant",
+                        "title": "C12-15 Alkyl Benzoate 9.5% 분산상 시스템 적용",
+                        "description": "실리카 및 PMMA 파우더 입자의 균일 분산 촉진 및 도포 후 백탁 0% 투명 밀착막 형성"
+                    },
+                    {
+                        "change_id": "NEW-04",
+                        "category": "Powder Complex",
+                        "title": "PMMA + Silica 구상 파우더 13.0% 복합 파우더 시스템 완성",
+                        "description": "볼베어링 효과에 의한 동마찰 계수 mu < 0.15 극저마찰막 형성 및 과도한 유분감 흡착"
+                    },
+                    {
+                        "change_id": "NEW-05",
+                        "category": "Barrier Film",
+                        "title": "Trimethylsiloxysilicate (MQ 레진) 2.0% 유효 성분 도입",
+                        "description": "40km 행군/마라톤 땀(Sweat-washout) 및 연속 마찰에 견디는 고밀착 내수성 방수막 구현"
+                    },
+                    {
+                        "change_id": "NEW-06",
+                        "category": "Process SOP",
+                        "title": "3단계 점진 냉각 공정 (25°C -> 15°C -> 5°C) SOP 확립",
+                        "description": "왁스-실리콘 급랭 수축 균열 및 표면 오일 석출(Sweating/Syneresis) 현상 원천 억제"
+                    },
+                    {
+                        "change_id": "NEW-07",
+                        "category": "Cost & Supply",
+                        "title": "원자재 제조 원가(COGS) 목표 달성: 2,610원 / 20g 스틱",
+                        "description": "양산 목표치 2,950원/스틱 대비 11.5% 원가 절감 달성 및 안정적 공급망 확보"
+                    },
+                    {
+                        "change_id": "NEW-08",
+                        "category": "Quality Contract",
+                        "title": "표준화된 QC SOP 검사 프로토콜(Data Contract v0.2) 수립",
+                        "description": "2mm 니들 침투 경도 820±50gf 및 10°C 인공피부 2-stroke pay-off >= 0.040g 측정 규격화"
+                    }
+                ]
+                active_formula_dict = {
+                    "synthetic_wax_pct": 12.0,
+                    "candelilla_wax_pct": 5.0,
+                    "dimethicone_pct": 17.0,
+                    "caprylyl_methicone_pct": 11.0,
+                    "c12_15_alkyl_benzoate_pct": 9.5,
+                    "pmma_silica_powder_pct": 13.0,
+                    "trimethylsiloxysilicate_pct": 2.0,
+                    "other_excipients_pct": 30.5
+                }
+                cursor.execute("""
+                INSERT INTO revision_history (
+                    revision_id, release_date, status, change_summary, changes_json, active_formula_json, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+                """, (
+                    "Rev.7.3",
+                    "2026-09-12",
+                    "PRODUCTION_BASELINE",
+                    "Baseline 20g Anhydrous Powder-in-Balm formulation for 40km military march chafing defense.",
+                    json.dumps(rev73_changes, ensure_ascii=False),
+                    json.dumps(active_formula_dict, ensure_ascii=False)
+                ))
+
+            # Record schema versions
+            cursor.execute("SELECT version FROM schema_versions WHERE version = 3")
             if not cursor.fetchone():
                 cursor.execute(
-                    "INSERT INTO schema_versions (version, applied_at, description) VALUES (?, datetime('now'), ?)",
-                    (CURRENT_SCHEMA_VERSION, "Phase 2A Data Contract v0.2: Table rebuild migration, batch FK, and COGS status")
+                    "INSERT INTO schema_versions (version, applied_at, description) VALUES (3, datetime('now'), ?)",
+                    ("Phase 2A Data Contract v0.2: Table rebuild migration, batch FK, and COGS status",)
+                )
+
+            cursor.execute("SELECT version FROM schema_versions WHERE version = 4")
+            if not cursor.fetchone():
+                cursor.execute(
+                    "INSERT INTO schema_versions (version, applied_at, description) VALUES (4, datetime('now'), ?)",
+                    ("Phase 6 Revision DB Persistence: revision_history table and Rev.7.3 8-point baseline seed",)
                 )
 
             conn.commit()
@@ -469,3 +570,80 @@ class FormulationDatabase:
                 )
                 records.append(record)
         return records
+
+    # --------------------------------------------------------------------------
+    # Formula Revision Persistence (Phase 6)
+    # --------------------------------------------------------------------------
+    def save_revision(
+        self,
+        revision_id: str,
+        release_date: str,
+        status: str,
+        change_summary: str,
+        changes: List[Dict[str, Any]],
+        active_formula: Dict[str, Any]
+    ):
+        """Persists or updates a Formula Revision with structured change logs."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+            INSERT OR REPLACE INTO revision_history (
+                revision_id, release_date, status, change_summary,
+                changes_json, active_formula_json, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+            """, (
+                revision_id,
+                release_date,
+                status,
+                change_summary,
+                json.dumps(changes, ensure_ascii=False),
+                json.dumps(active_formula, ensure_ascii=False)
+            ))
+            conn.commit()
+
+    def get_all_revisions(self) -> List[Dict[str, Any]]:
+        """Retrieves all tracked revisions ordered by release_date DESC."""
+        revisions = []
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+            SELECT revision_id, release_date, status, change_summary,
+                   changes_json, active_formula_json, created_at
+            FROM revision_history
+            ORDER BY release_date DESC
+            """)
+            rows = cursor.fetchall()
+            for r in rows:
+                revisions.append({
+                    "revision_id": r[0],
+                    "release_date": r[1],
+                    "status": r[2],
+                    "change_summary": r[3],
+                    "changes": json.loads(r[4]) if r[4] else [],
+                    "active_formula": json.loads(r[5]) if r[5] else {},
+                    "created_at": r[6]
+                })
+        return revisions
+
+    def get_revision(self, revision_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieves a specific revision by ID."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+            SELECT revision_id, release_date, status, change_summary,
+                   changes_json, active_formula_json, created_at
+            FROM revision_history
+            WHERE revision_id = ?
+            """, (revision_id,))
+            r = cursor.fetchone()
+            if not r:
+                return None
+            return {
+                "revision_id": r[0],
+                "release_date": r[1],
+                "status": r[2],
+                "change_summary": r[3],
+                "changes": json.loads(r[4]) if r[4] else [],
+                "active_formula": json.loads(r[5]) if r[5] else {},
+                "created_at": r[6]
+            }

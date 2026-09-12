@@ -343,14 +343,14 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
             self.assertAlmostEqual(sil_sum, 28.0, places=2)
 
     def test_schema_migration_idempotency(self):
-        """Phase 2A: Verifies schema versioning table and idempotent migrations to Schema v3."""
+        """Phase 2A & Phase 6: Verifies schema versioning table and idempotent migrations to Schema v4."""
         test_dir = "data/test_migration_tmp"
         db = FormulationDatabase(data_dir=test_dir)
-        self.assertEqual(db.get_current_schema_version(), 3)
+        self.assertEqual(db.get_current_schema_version(), 4)
 
         # Run init again to test idempotency
         db._init_sqlite()
-        self.assertEqual(db.get_current_schema_version(), 3)
+        self.assertEqual(db.get_current_schema_version(), 4)
 
         if os.path.exists(test_dir):
             shutil.rmtree(test_dir)
@@ -808,6 +808,48 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         # 4. Default generator also produces >= 16 runs
         default_trials = AdvancedDOEEngine.generate_full_doe_design()
         self.assertGreaterEqual(len(default_trials), 16)
+
+    def test_revision_history_persistence_and_seed(self):
+        """Phase 6 [Revision Persistence]: Schema v4 persists Rev.7.3 8-point baseline and custom revisions."""
+        test_dir = "data/test_phase6_tmp"
+        db = FormulationDatabase(data_dir=test_dir)
+
+        # 1. Verify schema version 4
+        self.assertGreaterEqual(db.get_current_schema_version(), 4)
+
+        # 2. Verify Rev.7.3 seed
+        revs = db.get_all_revisions()
+        self.assertGreaterEqual(len(revs), 1)
+        rev73 = next((r for r in revs if r["revision_id"] == "Rev.7.3"), None)
+        self.assertIsNotNone(rev73)
+        self.assertEqual(rev73["status"], "PRODUCTION_BASELINE")
+
+        # 3. Verify all 8 improvement items are present (NEW-01 ~ NEW-08)
+        change_ids = [c["change_id"] for c in rev73["changes"]]
+        self.assertEqual(len(change_ids), 8)
+        for i in range(1, 9):
+            self.assertIn(f"NEW-{i:02d}", change_ids)
+
+        # 4. Save and retrieve custom revision
+        custom_changes = [
+            {"change_id": "NEW-09", "category": "Silicone", "title": "Optimized Dimethicone share", "description": "SLSQP candidate"}
+        ]
+        db.save_revision(
+            revision_id="Rev.7.4-CAND1",
+            release_date="2026-09-13",
+            status="EXPERIMENTAL",
+            change_summary="First algorithmic candidate revision",
+            changes=custom_changes,
+            active_formula={"synthetic_wax_pct": 12.5, "dimethicone_pct": 16.5}
+        )
+
+        cand_rev = db.get_revision("Rev.7.4-CAND1")
+        self.assertIsNotNone(cand_rev)
+        self.assertEqual(cand_rev["status"], "EXPERIMENTAL")
+        self.assertEqual(cand_rev["changes"][0]["change_id"], "NEW-09")
+
+        if os.path.exists(test_dir):
+            shutil.rmtree(test_dir)
 
 
 if __name__ == "__main__":

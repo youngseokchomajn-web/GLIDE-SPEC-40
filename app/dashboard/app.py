@@ -412,40 +412,79 @@ elif menu == "5. QC & SOP Test Station":
 # 6. Optimizer & Revision Tracker
 # ==============================================================================
 elif menu == "6. Optimizer & Revision Tracker":
-    st.subheader("🔮 Multi-Objective Optimizer & Revision History (M5)")
+    st.subheader("🔮 Multi-Objective SLSQP Optimizer & Revision History (Phase 4 ~ Phase 6)")
 
     predictor = FormulationPredictor()
     all_qc = db.get_all_qc_records()
-    predictor.fit(all_qc)
+    predictor.fit(all_qc, verified_raw_materials=True, db=db)
 
-    st.write(f"**ML Property Predictor State:** `{predictor.state.value}`")
-    if predictor.state == ModelState.AWAITING_PILOT_DATA:
-        st.warning(f"⚠️ [RULE #6 & Phase 3 ACTIVE] Model is strictly awaiting $\ge {FormulationPredictor.MIN_ELIGIBLE_PILOT_RECORDS}$ eligible real Pilot observations with complete SOPs. Rule-based candidate generation is enforced instead of blind guessing.")
+    col_state1, col_state2 = st.columns([1, 2])
+    with col_state1:
+        st.write(f"**ML Property Predictor State:** `{predictor.state.value}`")
+    with col_state2:
+        if predictor.state == ModelState.TRAINED_LINEAR:
+            st.success("✅ **Calibrated Linear Model:** Real pilot observations threshold achieved. Full SLSQP Multi-Objective Optimization enabled.")
+        else:
+            st.warning(f"⚠️ **[RULE #6 LOCKED]:** Waiting for $\ge {FormulationPredictor.MIN_ELIGIBLE_PILOT_RECORDS}$ real Pilot records with $\ge {FormulationPredictor.MIN_CENTRE_POINT_REPLICATES}$ centre-points. Using rule-based boundary candidates.")
+
+    if predictor.state == ModelState.TRAINED_LINEAR and predictor.metrics:
+        with st.expander("📈 Multivariate Mixture Regression Model Metrics (M4 Engine)", expanded=False):
+            m_cols = st.columns(3)
+            with m_cols[0]:
+                st.metric("Hardness R²", f"{predictor.metrics['hardness'].r_squared:.3f}", f"LOOCV: ±{predictor.metrics['hardness'].loocv_rmse:.1f} gf")
+            with m_cols[1]:
+                st.metric("Transfer R²", f"{predictor.metrics['transfer'].r_squared:.3f}", f"LOOCV: ±{predictor.metrics['transfer'].loocv_rmse:.4f} g")
+            with m_cols[2]:
+                st.metric("Training Observations", f"{predictor.metrics['hardness'].sample_count} samples", "Real Pilot Data")
 
     optimizer = MultiObjectiveOptimizer(predictor=predictor)
     candidates = optimizer.generate_candidates(top_n=3)
 
-    st.markdown("#### Candidate Formulations for Next Pilot (Rev.7.4 Candidates)")
-    cand_data = [{
-        "Candidate ID": c.candidate_id,
-        "Syn Wax %": f"{c.synthetic_wax_pct:.1f}%",
-        "Can Wax %": f"{c.candelilla_wax_pct:.1f}%",
-        "Dimethicone %": f"{c.dimethicone_pct:.1f}%",
-        "Caprylyl %": f"{c.caprylyl_methicone_pct:.1f}%",
-        "Desirability Score": f"{c.desirability_score:.2f}",
-        "Strategy / Rationale": c.notes
-    } for c in candidates]
+    st.markdown("#### 🎯 SLSQP Pareto Frontier Candidates (Rev.7.4 Candidates)")
+    cand_data = []
+    for c in candidates:
+        cand_data.append({
+            "Candidate ID": c.candidate_id,
+            "Scenario": c.scenario_name,
+            "Syn Wax %": f"{c.synthetic_wax_pct:.1f}%",
+            "Can Wax %": f"{c.candelilla_wax_pct:.1f}%",
+            "Dimethicone %": f"{c.dimethicone_pct:.1f}%",
+            "Caprylyl %": f"{c.caprylyl_methicone_pct:.1f}%",
+            "Fill Temp": f"{c.fill_temperature_c:.1f}°C",
+            "Est. COGS": f"{c.estimated_cogs_krw:,.0f} ₩",
+            "Pred. Hardness": f"{c.predicted_hardness_gf:.0f} gf" if c.predicted_hardness_gf is not None else "Pending QC",
+            "Pred. Transfer": f"{c.predicted_transfer_g:.4f} g" if c.predicted_transfer_g is not None else "Pending QC",
+            "Desirability": f"{c.desirability_score:.2f}",
+            "Rule #12 Label / Note": c.prediction_label or c.notes
+        })
     st.dataframe(pd.DataFrame(cand_data), use_container_width=True, hide_index=True)
 
     st.markdown("---")
-    st.markdown("#### 📜 Rev.7.3 Formal Revision Audit Trail")
-    rev_master = get_rev73_revision_master()
-    rev_data = [{
-        "Change ID": ch.change_id,
-        "Type": ch.change_type.value,
-        "Item": ch.item,
-        "Previous Value": ch.previous_value,
-        "New Baseline Value": ch.new_value,
-        "Engineering Reason": ch.reason
-    } for ch in rev_master.changes]
-    st.dataframe(pd.DataFrame(rev_data), use_container_width=True, hide_index=True)
+    st.markdown("#### 📜 Database-Backed Formula Revision History (Schema v4)")
+    db_revisions = db.get_all_revisions()
+
+    if db_revisions:
+        rev_tabs = st.tabs([f"{r['revision_id']} ({r['status']})" for r in db_revisions])
+        for tab, rev in zip(rev_tabs, db_revisions):
+            with tab:
+                st.write(f"**Release Date:** `{rev['release_date']}` | **Status:** `{rev['status']}`")
+                st.write(f"**Summary:** {rev['change_summary']}")
+
+                st.markdown("##### 8 Key Engineering Improvements (NEW-01 ~ NEW-08)")
+                ch_list = rev.get("changes", [])
+                if ch_list:
+                    ch_df = pd.DataFrame([{
+                        "Item ID": item.get("change_id", "-"),
+                        "Category": item.get("category", "-"),
+                        "Title": item.get("title", "-"),
+                        "Detailed Rationale": item.get("description", "-")
+                    } for item in ch_list])
+                    st.dataframe(ch_df, use_container_width=True, hide_index=True)
+
+                st.markdown("##### Active Target Formulation Breakdown")
+                formula_dict = rev.get("active_formula", {})
+                if formula_dict:
+                    f_df = pd.DataFrame([{"Component": k, "Target Share %": f"{v:.1f}%"} for k, v in formula_dict.items()])
+                    st.dataframe(f_df, use_container_width=True, hide_index=True)
+    else:
+        st.info("No persisted revisions found in database.")
