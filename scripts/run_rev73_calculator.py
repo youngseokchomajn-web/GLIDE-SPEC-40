@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 from src.materials.master import RawMaterial, MaterialType, MaterialStatus, REV73_RAW_MATERIALS
 from src.formulas.master import REV73_TARGET_ACTIVE_FORMULA
 from src.manufacturing.calculator import ManufacturingCalculator, STANDARD_BATCH_SIZES
+from src.manufacturing.models import ManufacturingBatch
 from src.qc.models import BatchQCRecord, HardnessSOP, TransferSOP
 from src.doe.engine import AdvancedDOEEngine
 from src.modeling.predictor import FormulationPredictor
@@ -117,24 +118,52 @@ def main():
         print(f"{t.trial_id:<13} {t.design_type[:24]:<25} {t.synthetic_wax_pct:>7.1f}% {t.candelilla_wax_pct:>7.1f}% {t.dimethicone_pct:>7.1f}% {t.caprylyl_methicone_pct:>7.1f}% {t.fill_temperature_c:>5.0f}°C")
 
     # 4. Storage & QC Test Demonstration
-    print("\n[4] DATA PERSISTENCE & QC LABORATORY RECORDING")
+    print("\n[4] DATA PERSISTENCE & QC LABORATORY RECORDING (Full DOE -> Batch -> QC Lineage)")
     db = FormulationDatabase()
-    sample_qc = BatchQCRecord(
+
+    # Save DOE trial 1 first
+    first_trial = trials[0]
+    db.save_doe_trial(first_trial)
+
+    # Save parent ManufacturingBatch (FK requirement)
+    mfg_batch = ManufacturingBatch(
         batch_id="BATCH-PILOT-001",
+        trial_id=first_trial.trial_id,
         formula_id="FORM-GLIDE40-REV7.3",
         revision="Rev.7.3",
+        created_date="2026-09-12",
+        operator="Chief Compounder",
+        batch_size_kg=batch_kg,
+        total_charge_pct=calc_result.total_charge_pct,
+        items=calc_result.items,
+        process_conditions=first_trial.to_process_condition(),
+        total_raw_material_cost=calc_result.total_raw_material_cost,
+        cost_per_20g_stick=calc_result.cost_per_20g_stick,
+        cogs_basis="ESTIMATED_SIMULATION",
+        material_price_source="Supplier Quote REQ-GLIDE40-MAT-202609",
+        quote_status="PENDING_FORMAL_QUOTES",
+        notes="Scale-up 66kg pilot batch."
+    )
+    db.save_manufacturing_batch(mfg_batch)
+
+    sample_qc = BatchQCRecord(
+        batch_id=mfg_batch.batch_id,
+        trial_id=first_trial.trial_id,
+        formula_id=mfg_batch.formula_id,
+        revision=mfg_batch.revision,
         test_date="2026-09-12",
         operator="Chief Formulation Chemist",
+        process_conditions=mfg_batch.process_conditions,
         hardness_gf=835.0,
         transfer_g_10c=0.046,
         density_g_cm3=1.08,
         drop_point_c=61.6,
-        hardness_sop=HardnessSOP(probe_type="2mm Cylindrical Needle", penetration_depth_mm=2.0),
-        transfer_sop=TransferSOP(substrate_type="Artificial Collagen Skin", applied_pressure_g=500.0),
+        hardness_sop=HardnessSOP(probe_type="2mm Cylindrical Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30),
+        transfer_sop=TransferSOP(substrate_type="Artificial Collagen Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two-stroke standardized friction SOP"),
         notes="High shear dispersion successful. Zero chalking on black stretch fabric."
     )
     db.save_qc_record(sample_qc)
-    print(f"  • Successfully logged QC Record for {sample_qc.batch_id} to SQLite DB.")
+    print(f"  • Successfully logged Manufacturing Batch & QC Record for {sample_qc.batch_id} to SQLite DB.")
     evals = sample_qc.evaluate_targets()
     for k, v in evals.items():
         print(f"    - {v.test_name:<26}: Measured {v.measured_value} {v.unit} -> [{v.status.value}] (Target: {v.target_value_str})")

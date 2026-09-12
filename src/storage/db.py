@@ -1,8 +1,8 @@
 """
-GLIDE-SPEC 40 - Data Storage & Repository Layer (Schema v3)
+GLIDE-SPEC 40 - Data Storage & Repository Layer (Schema v3 with Table Rebuild Migration)
 Manages persistence of raw materials, formula revisions, DOE trials,
 manufacturing batches, and QC records with strict Foreign Key enforcement,
-idempotent migrations, and full DOE -> Batch -> QC lineage.
+transactional table rebuild migrations, and full DOE -> Batch -> QC lineage.
 """
 
 import json
@@ -10,6 +10,7 @@ import os
 import sqlite3
 from typing import Dict, List, Optional
 from pathlib import Path
+from datetime import datetime
 
 from src.materials.master import RawMaterial, REV73_RAW_MATERIALS
 from src.formulas.master import FormulaMaster, REV73_TARGET_ACTIVE_FORMULA
@@ -73,7 +74,7 @@ class FormulationDatabase:
             )
             """)
 
-            # 3. Manufacturing Batches table (Phase 2A Data Contract v0.2)
+            # 3. Manufacturing Batches table (Phase 2A Lineage)
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS manufacturing_batches (
                 batch_id TEXT PRIMARY KEY,
@@ -89,59 +90,122 @@ class FormulationDatabase:
                 total_raw_material_cost REAL,
                 cost_per_20g_stick REAL,
                 target_cogs_per_stick REAL NOT NULL DEFAULT 2950.0,
+                cogs_basis TEXT NOT NULL DEFAULT 'ESTIMATED_SIMULATION',
+                material_price_source TEXT NOT NULL DEFAULT 'Baseline Simulation Fixture',
+                quote_status TEXT NOT NULL DEFAULT 'PENDING_FORMAL_QUOTES',
+                calculated_at TEXT,
                 notes TEXT,
                 FOREIGN KEY (trial_id) REFERENCES doe_trials(trial_id) ON DELETE SET NULL
             )
             """)
 
-            # 4. Base QC Records table with Foreign Key to doe_trials
-            cursor.execute("""
-            CREATE TABLE IF NOT EXISTS qc_records (
-                batch_id TEXT PRIMARY KEY,
-                formula_id TEXT,
-                revision TEXT,
-                test_date TEXT,
-                operator TEXT,
-                hardness_gf REAL,
-                transfer_g_10c REAL,
-                density_g_cm3 REAL,
-                drop_point_c REAL,
-                hardness_probe TEXT,
-                transfer_substrate TEXT,
-                powder_bloom INTEGER,
-                white_cast_score INTEGER,
-                sweating_syneresis INTEGER,
-                notes TEXT,
-                hardness_sop_json TEXT,
-                transfer_sop_json TEXT,
-                sop_complete INTEGER NOT NULL DEFAULT 0,
-                trial_id TEXT,
-                data_origin TEXT NOT NULL DEFAULT 'REAL_PILOT',
-                process_conditions_json TEXT,
-                FOREIGN KEY (trial_id) REFERENCES doe_trials(trial_id) ON DELETE RESTRICT
-            )
-            """)
-
-            # 5. Idempotent column migrations for qc_records
-            columns = {row[1] for row in cursor.execute("PRAGMA table_info(qc_records)")}
-            migrations = {
-                "hardness_sop_json": "TEXT",
-                "transfer_sop_json": "TEXT",
-                "sop_complete": "INTEGER NOT NULL DEFAULT 0",
-                "trial_id": "TEXT",
-                "data_origin": "TEXT NOT NULL DEFAULT 'REAL_PILOT'",
-                "process_conditions_json": "TEXT",
+            # Idempotent column migrations for manufacturing_batches
+            mfg_cols = {row[1] for row in cursor.execute("PRAGMA table_info(manufacturing_batches)").fetchall()}
+            mfg_migrations = {
+                "cogs_basis": "TEXT NOT NULL DEFAULT 'ESTIMATED_SIMULATION'",
+                "material_price_source": "TEXT NOT NULL DEFAULT 'Baseline Simulation Fixture'",
+                "quote_status": "TEXT NOT NULL DEFAULT 'PENDING_FORMAL_QUOTES'",
+                "calculated_at": "TEXT",
             }
-            for name, definition in migrations.items():
-                if name not in columns:
-                    cursor.execute(f"ALTER TABLE qc_records ADD COLUMN {name} {definition}")
+            for name, definition in mfg_migrations.items():
+                if name not in mfg_cols:
+                    cursor.execute(f"ALTER TABLE manufacturing_batches ADD COLUMN {name} {definition}")
+
+            # 4. Check if qc_records exists and has required FK constraints
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='qc_records'")
+            qc_table_exists = cursor.fetchone() is not None
+
+            needs_rebuild = False
+            if qc_table_exists:
+                # Inspect foreign keys on qc_records
+                fks = cursor.execute("PRAGMA foreign_key_list(qc_records)").fetchall()
+                # Each fk row: (id, seq, table, from, to, on_update, on_delete, match)
+                fk_tables = {row[2] for row in fks}
+                if "doe_trials" not in fk_tables or "manufacturing_batches" not in fk_tables:
+                    needs_rebuild = True
+
+            if not qc_table_exists:
+                # Brand new table with full FK constraints
+                cursor.execute("""
+                CREATE TABLE qc_records (
+                    batch_id TEXT PRIMARY KEY,
+                    formula_id TEXT,
+                    revision TEXT,
+                    test_date TEXT,
+                    operator TEXT,
+                    hardness_gf REAL,
+                    transfer_g_10c REAL,
+                    density_g_cm3 REAL,
+                    drop_point_c REAL,
+                    hardness_probe TEXT,
+                    transfer_substrate TEXT,
+                    powder_bloom INTEGER,
+                    white_cast_score INTEGER,
+                    sweating_syneresis INTEGER,
+                    notes TEXT,
+                    hardness_sop_json TEXT,
+                    transfer_sop_json TEXT,
+                    sop_complete INTEGER NOT NULL DEFAULT 0,
+                    trial_id TEXT,
+                    data_origin TEXT NOT NULL DEFAULT 'REAL_PILOT',
+                    process_conditions_json TEXT,
+                    FOREIGN KEY (batch_id) REFERENCES manufacturing_batches(batch_id) ON DELETE RESTRICT,
+                    FOREIGN KEY (trial_id) REFERENCES doe_trials(trial_id) ON DELETE RESTRICT
+                )
+                """)
+            elif needs_rebuild:
+                # Transactional table rebuild to enforce Foreign Keys on existing tables
+                cursor.execute("PRAGMA foreign_keys = OFF;")
+                cursor.execute("""
+                CREATE TABLE qc_records_v3_new (
+                    batch_id TEXT PRIMARY KEY,
+                    formula_id TEXT,
+                    revision TEXT,
+                    test_date TEXT,
+                    operator TEXT,
+                    hardness_gf REAL,
+                    transfer_g_10c REAL,
+                    density_g_cm3 REAL,
+                    drop_point_c REAL,
+                    hardness_probe TEXT,
+                    transfer_substrate TEXT,
+                    powder_bloom INTEGER,
+                    white_cast_score INTEGER,
+                    sweating_syneresis INTEGER,
+                    notes TEXT,
+                    hardness_sop_json TEXT,
+                    transfer_sop_json TEXT,
+                    sop_complete INTEGER NOT NULL DEFAULT 0,
+                    trial_id TEXT,
+                    data_origin TEXT NOT NULL DEFAULT 'REAL_PILOT',
+                    process_conditions_json TEXT,
+                    FOREIGN KEY (batch_id) REFERENCES manufacturing_batches(batch_id) ON DELETE RESTRICT,
+                    FOREIGN KEY (trial_id) REFERENCES doe_trials(trial_id) ON DELETE RESTRICT
+                )
+                """)
+                # Check existing columns in qc_records to migrate safely
+                existing_cols = [row[1] for row in cursor.execute("PRAGMA table_info(qc_records)").fetchall()]
+                common_cols = [
+                    c for c in [
+                        "batch_id", "formula_id", "revision", "test_date", "operator",
+                        "hardness_gf", "transfer_g_10c", "density_g_cm3", "drop_point_c",
+                        "hardness_probe", "transfer_substrate", "powder_bloom", "white_cast_score",
+                        "sweating_syneresis", "notes", "hardness_sop_json", "transfer_sop_json",
+                        "sop_complete", "trial_id", "data_origin", "process_conditions_json"
+                    ] if c in existing_cols
+                ]
+                cols_str = ", ".join(common_cols)
+                cursor.execute(f"INSERT INTO qc_records_v3_new ({cols_str}) SELECT {cols_str} FROM qc_records")
+                cursor.execute("DROP TABLE qc_records")
+                cursor.execute("ALTER TABLE qc_records_v3_new RENAME TO qc_records")
+                cursor.execute("PRAGMA foreign_keys = ON;")
 
             # Record schema version v3
             cursor.execute("SELECT version FROM schema_versions WHERE version = ?", (CURRENT_SCHEMA_VERSION,))
             if not cursor.fetchone():
                 cursor.execute(
                     "INSERT INTO schema_versions (version, applied_at, description) VALUES (?, datetime('now'), ?)",
-                    (CURRENT_SCHEMA_VERSION, "Phase 2A Data Contract v0.2: ManufacturingBatch, Foreign Key enforcement, and Lineage")
+                    (CURRENT_SCHEMA_VERSION, "Phase 2A Data Contract v0.2: Table rebuild migration, batch FK, and COGS status")
                 )
 
             conn.commit()
@@ -230,18 +294,22 @@ class FormulationDatabase:
 
             items_json = json.dumps([item.model_dump() for item in batch.items])
             proc_json = json.dumps(batch.process_conditions.model_dump())
+            calc_time = batch.calculated_at or datetime.now().isoformat()
 
             cursor.execute("""
             INSERT OR REPLACE INTO manufacturing_batches (
                 batch_id, trial_id, formula_id, revision, created_date, operator,
                 batch_size_kg, total_charge_pct, items_json, process_conditions_json,
-                total_raw_material_cost, cost_per_20g_stick, target_cogs_per_stick, notes
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                total_raw_material_cost, cost_per_20g_stick, target_cogs_per_stick,
+                cogs_basis, material_price_source, quote_status, calculated_at, notes
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 batch.batch_id, batch.trial_id, batch.formula_id, batch.revision,
                 batch.created_date, batch.operator, batch.batch_size_kg, batch.total_charge_pct,
                 items_json, proc_json, batch.total_raw_material_cost,
-                batch.cost_per_20g_stick, batch.target_cogs_per_stick, batch.notes
+                batch.cost_per_20g_stick, batch.target_cogs_per_stick,
+                batch.cogs_basis, batch.material_price_source, batch.quote_status,
+                calc_time, batch.notes
             ))
             conn.commit()
 
@@ -259,8 +327,35 @@ class FormulationDatabase:
                 created_date=r[4], operator=r[5], batch_size_kg=r[6], total_charge_pct=r[7],
                 items=items, process_conditions=proc_cond,
                 total_raw_material_cost=r[10], cost_per_20g_stick=r[11],
-                target_cogs_per_stick=r[12], notes=r[13]
+                target_cogs_per_stick=r[12],
+                cogs_basis=r[13] if len(r) > 13 else "ESTIMATED_SIMULATION",
+                material_price_source=r[14] if len(r) > 14 else "Baseline Simulation Fixture",
+                quote_status=r[15] if len(r) > 15 else "PENDING_FORMAL_QUOTES",
+                calculated_at=r[16] if len(r) > 16 else None,
+                notes=r[17] if len(r) > 17 else ""
             )
+
+    def get_all_manufacturing_batches(self) -> List[ManufacturingBatch]:
+        batches: List[ManufacturingBatch] = []
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM manufacturing_batches ORDER BY created_date DESC")
+            for r in cursor.fetchall():
+                items = [BatchChargeItem(**i) for i in json.loads(r[8])]
+                proc_cond = ProcessCondition(**json.loads(r[9]))
+                batches.append(ManufacturingBatch(
+                    batch_id=r[0], trial_id=r[1], formula_id=r[2], revision=r[3],
+                    created_date=r[4], operator=r[5], batch_size_kg=r[6], total_charge_pct=r[7],
+                    items=items, process_conditions=proc_cond,
+                    total_raw_material_cost=r[10], cost_per_20g_stick=r[11],
+                    target_cogs_per_stick=r[12],
+                    cogs_basis=r[13] if len(r) > 13 else "ESTIMATED_SIMULATION",
+                    material_price_source=r[14] if len(r) > 14 else "Baseline Simulation Fixture",
+                    quote_status=r[15] if len(r) > 15 else "PENDING_FORMAL_QUOTES",
+                    calculated_at=r[16] if len(r) > 16 else None,
+                    notes=r[17] if len(r) > 17 else ""
+                ))
+        return batches
 
     # --------------------------------------------------------------------------
     # QC Records
@@ -269,8 +364,14 @@ class FormulationDatabase:
         with self._get_connection() as conn:
             cursor = conn.cursor()
 
-            # Strict Referential Integrity Gate:
-            # If trial_id is provided, it MUST exist in doe_trials.
+            # Strict Referential Integrity Gate 1: batch_id MUST exist in manufacturing_batches
+            cursor.execute("SELECT 1 FROM manufacturing_batches WHERE batch_id = ?", (record.batch_id,))
+            if not cursor.fetchone():
+                raise sqlite3.IntegrityError(
+                    f"Foreign Key violation: batch_id '{record.batch_id}' does not exist in manufacturing_batches table."
+                )
+
+            # Strict Referential Integrity Gate 2: trial_id MUST exist in doe_trials
             if record.trial_id:
                 cursor.execute("SELECT 1 FROM doe_trials WHERE trial_id = ?", (record.trial_id,))
                 if not cursor.fetchone():

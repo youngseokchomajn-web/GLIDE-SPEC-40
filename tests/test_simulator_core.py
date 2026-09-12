@@ -179,9 +179,26 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
             self.assertTrue(t.validate_mixture_constraints(), f"Trial {t.trial_id} violated mixture constraints")
 
     def test_database_persistence_and_qc(self):
-        """Checks DB SQLite storage for QC records."""
+        """Checks DB SQLite storage for QC records with valid parent ManufacturingBatch."""
         test_dir = "data/test_tmp"
         db = FormulationDatabase(data_dir=test_dir)
+
+        # 1. Create and persist parent ManufacturingBatch first (Foreign Key requirement)
+        parent_batch = ManufacturingBatch(
+            batch_id="BATCH-TEST-SQLITE-01",
+            trial_id=None,
+            formula_id="FORM-TEST",
+            revision="Rev.7.3",
+            created_date="2026-09-12",
+            operator="Chemist",
+            batch_size_kg=1.0,
+            total_charge_pct=100.0,
+            items=[],
+            process_conditions=ProcessCondition(),
+            total_raw_material_cost=20000.0,
+            cost_per_20g_stick=400.0
+        )
+        db.save_manufacturing_batch(parent_batch)
 
         sample_record = BatchQCRecord(
             batch_id="BATCH-TEST-SQLITE-01",
@@ -206,6 +223,110 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         self.assertTrue(restored.is_sop_complete())
 
         # Cleanup tmp test directory
+        if os.path.exists(test_dir):
+            shutil.rmtree(test_dir)
+
+    def test_qc_requires_existing_manufacturing_batch(self):
+        """Phase 2A [P1 Fix]: QC record MUST reject orphan batch_id not existing in manufacturing_batches."""
+        test_dir = "data/test_batch_fk_tmp"
+        db = FormulationDatabase(data_dir=test_dir)
+
+        complete_hardness = HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30)
+        complete_transfer = TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")
+
+        orphan_batch_qc = BatchQCRecord(
+            batch_id="BATCH-NON-EXISTENT-XYZ",
+            trial_id=None,
+            formula_id="FORM-TEST",
+            revision="Rev.7.3",
+            test_date="2026-09-12",
+            operator="Tester",
+            hardness_gf=820.0,
+            transfer_g_10c=0.045,
+            hardness_sop=complete_hardness,
+            transfer_sop=complete_transfer
+        )
+
+        with self.assertRaises(sqlite3.IntegrityError):
+            db.save_qc_record(orphan_batch_qc)
+
+        if os.path.exists(test_dir):
+            shutil.rmtree(test_dir)
+
+    def test_cogs_basis_and_quote_status_snapshot(self):
+        """Phase 2A [P2 Fix]: Verifies COGS status, price source, and calculation timestamp snapshots."""
+        test_dir = "data/test_cogs_status_tmp"
+        db = FormulationDatabase(data_dir=test_dir)
+
+        batch = ManufacturingBatch(
+            batch_id="BATCH-COGS-TEST-01",
+            trial_id=None,
+            formula_id="FORM-REV7.3",
+            revision="Rev.7.3",
+            created_date="2026-09-12",
+            operator="Cost Engineer",
+            batch_size_kg=66.0,
+            total_charge_pct=100.21,
+            items=[],
+            process_conditions=ProcessCondition(),
+            total_raw_material_cost=2689610.0,
+            cost_per_20g_stick=815.0,
+            cogs_basis="ESTIMATED_SIMULATION",
+            material_price_source="Supplier Quote REQ-GLIDE40-MAT-202609",
+            quote_status="PENDING_FORMAL_QUOTES",
+            calculated_at="2026-09-12T16:00:00"
+        )
+        db.save_manufacturing_batch(batch)
+
+        reloaded = db.get_manufacturing_batch("BATCH-COGS-TEST-01")
+        self.assertIsNotNone(reloaded)
+        self.assertEqual(reloaded.cogs_basis, "ESTIMATED_SIMULATION")
+        self.assertEqual(reloaded.quote_status, "PENDING_FORMAL_QUOTES")
+        self.assertFalse(reloaded.is_cogs_confirmed())
+
+        if os.path.exists(test_dir):
+            shutil.rmtree(test_dir)
+
+    def test_predictor_fit_checks_persisted_db_lineage(self):
+        """Phase 2A [P2 Fix]: Predictor checks DB existence to reject memory-forged orphan lineage records."""
+        test_dir = "data/test_predictor_db_tmp"
+        db = FormulationDatabase(data_dir=test_dir)
+
+        # Create real trial & batch in DB
+        trial = DOETrial(trial_id="DOE-REAL-01", synthetic_wax_pct=12.0, candelilla_wax_pct=5.0, dimethicone_pct=18.0, caprylyl_methicone_pct=10.0)
+        db.save_doe_trial(trial)
+        batch = ManufacturingBatch(
+            batch_id="BATCH-REAL-01", trial_id=trial.trial_id, formula_id="FORM-REV7.3", revision="Rev.7.3",
+            created_date="2026-09-12", operator="Lead", batch_size_kg=1.0, total_charge_pct=100.0,
+            items=[], process_conditions=trial.to_process_condition()
+        )
+        db.save_manufacturing_batch(batch)
+
+        complete_hardness = HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30)
+        complete_transfer = TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")
+
+        # 1. Real record matching DB records
+        real_qc = BatchQCRecord(
+            batch_id=batch.batch_id, trial_id=trial.trial_id, formula_id="FORM-REV7.3", revision="Rev.7.3",
+            test_date="2026-09-12", operator="Tester", hardness_gf=820.0, transfer_g_10c=0.045,
+            data_origin=DataOrigin.REAL_PILOT, process_conditions=batch.process_conditions,
+            hardness_sop=complete_hardness, transfer_sop=complete_transfer
+        )
+
+        # 2. Forged record with non-existent trial/batch
+        forged_qc = BatchQCRecord(
+            batch_id="BATCH-FORGED-99", trial_id="DOE-FORGED-99", formula_id="FORM-REV7.3", revision="Rev.7.3",
+            test_date="2026-09-12", operator="Tester", hardness_gf=820.0, transfer_g_10c=0.045,
+            data_origin=DataOrigin.REAL_PILOT, process_conditions=batch.process_conditions,
+            hardness_sop=complete_hardness, transfer_sop=complete_transfer
+        )
+
+        predictor = FormulationPredictor()
+        predictor.fit([real_qc, forged_qc], db=db)
+        # Only the real_qc should be accepted into training_records; forged_qc must be dropped
+        self.assertEqual(len(predictor.training_records), 1)
+        self.assertEqual(predictor.training_records[0].batch_id, "BATCH-REAL-01")
+
         if os.path.exists(test_dir):
             shutil.rmtree(test_dir)
 
@@ -238,6 +359,14 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         """Phase 2A [P1 Fix]: Verifies that unlinked/invalid trial_id violates Foreign Key integrity."""
         test_dir = "data/test_fk_tmp"
         db = FormulationDatabase(data_dir=test_dir)
+
+        # 1. Create valid parent batch so batch_id is valid
+        parent_batch = ManufacturingBatch(
+            batch_id="BATCH-ORPHAN-01", trial_id=None, formula_id="FORM-TEST", revision="Rev.7.3",
+            created_date="2026-09-12", operator="Tester", batch_size_kg=1.0, total_charge_pct=100.0,
+            items=[], process_conditions=ProcessCondition()
+        )
+        db.save_manufacturing_batch(parent_batch)
 
         complete_hardness = HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30)
         complete_transfer = TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")

@@ -5,7 +5,7 @@ Starts in UNTRAINED state and only trains when verified QC records are provided.
 """
 
 from enum import Enum
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
 
 from src.qc.models import BatchQCRecord
@@ -35,19 +35,33 @@ class FormulationPredictor:
 
     MIN_ELIGIBLE_PILOT_RECORDS: int = 16
 
-    def fit(self, records: List[BatchQCRecord], verified_raw_materials: bool = True) -> bool:
+    def fit(
+        self,
+        records: List[BatchQCRecord],
+        verified_raw_materials: bool = True,
+        db: Optional[Any] = None
+    ) -> bool:
         """
         Phase 2A & 3 Data Contract Enforced:
         Accepts only genuine REAL_PILOT records with complete SOP, verified materials, and DOE lineage.
+        If a DB instance is supplied, double-checks referential lineage against persistent records.
         Synthetic records or incomplete SOP records are strictly rejected.
         Requires >= 16 eligible real Pilot observations.
         IMPORTANT: In Phase 2A, promotion to TRAINED_LINEAR is blocked until Phase 3 implements
         the actual mathematical multivariate regression coefficients fit.
         """
-        eligible_records = [
-            r for r in records
-            if r.is_training_eligible(verified_raw_materials=verified_raw_materials)
-        ]
+        eligible_records = []
+        for r in records:
+            if not r.is_training_eligible(verified_raw_materials=verified_raw_materials):
+                continue
+            if db is not None:
+                # Re-verify DB-backed referential existence
+                if not db.get_doe_trial(r.trial_id):
+                    continue
+                if not db.get_manufacturing_batch(r.batch_id):
+                    continue
+            eligible_records.append(r)
+
         self.training_records = eligible_records
 
         if len(eligible_records) < self.MIN_ELIGIBLE_PILOT_RECORDS:
