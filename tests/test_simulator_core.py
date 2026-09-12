@@ -9,9 +9,9 @@ import shutil
 from src.materials.master import RawMaterial, MaterialType, MaterialStatus, REV73_RAW_MATERIALS
 from src.formulas.master import REV73_TARGET_ACTIVE_FORMULA
 from src.manufacturing.calculator import ManufacturingCalculator, STANDARD_BATCH_SIZES
-from src.qc.models import BatchQCRecord, QCStatus, HardnessSOP, TransferSOP
+from src.qc.models import BatchQCRecord, QCStatus, HardnessSOP, TransferSOP, DataOrigin, ProcessCondition
 from src.revision.tracker import get_rev73_revision_master
-from src.doe.engine import AdvancedDOEEngine
+from src.doe.engine import AdvancedDOEEngine, DOETrial
 from src.modeling.predictor import FormulationPredictor, ModelState
 from src.optimization.optimizer import MultiObjectiveOptimizer
 from src.storage.db import FormulationDatabase
@@ -219,6 +219,98 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
             self.assertAlmostEqual(wax_sum, 17.0, places=2)
             self.assertAlmostEqual(sil_sum, 28.0, places=2)
 
+    def test_schema_migration_idempotency(self):
+        """Phase 2A: Verifies schema versioning table and idempotent migrations."""
+        test_dir = "data/test_migration_tmp"
+        db = FormulationDatabase(data_dir=test_dir)
+        self.assertEqual(db.get_current_schema_version(), 2)
+
+        # Run init again to test idempotency
+        db._init_sqlite()
+        self.assertEqual(db.get_current_schema_version(), 2)
+
+        if os.path.exists(test_dir):
+            shutil.rmtree(test_dir)
+
+    def test_data_eligibility_gate_rejects_synthetic_and_incomplete(self):
+        """Phase 2A: Data Contract gate strictly rejects synthetic data and incomplete SOPs."""
+        complete_hardness = HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30)
+        complete_transfer = TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")
+
+        # 1. Real Pilot with complete SOP -> Eligible
+        real_record = BatchQCRecord(
+            batch_id="BATCH-REAL-01", formula_id="FORM-TEST", revision="Rev.7.3",
+            test_date="2026-09-12", operator="Chemist",
+            hardness_gf=820.0, transfer_g_10c=0.045,
+            data_origin=DataOrigin.REAL_PILOT,
+            hardness_sop=complete_hardness, transfer_sop=complete_transfer
+        )
+        self.assertTrue(real_record.is_training_eligible())
+
+        # 2. Synthetic Test data -> Rejected from training
+        synthetic_record = BatchQCRecord(
+            batch_id="BATCH-SYNTH-01", formula_id="FORM-TEST", revision="Rev.7.3",
+            test_date="2026-09-12", operator="Simulation Engine",
+            hardness_gf=820.0, transfer_g_10c=0.045,
+            data_origin=DataOrigin.SYNTHETIC_TEST,
+            hardness_sop=complete_hardness, transfer_sop=complete_transfer
+        )
+        self.assertFalse(synthetic_record.is_training_eligible())
+
+        # 3. Predictor rejects 20 synthetic records from promoting to TRAINED_LINEAR
+        predictor = FormulationPredictor()
+        records = [synthetic_record] * 20
+        promoted = predictor.fit(records)
+        self.assertFalse(promoted)
+        self.assertEqual(predictor.state, ModelState.AWAITING_PILOT_DATA)
+
+    def test_doe_batch_qc_complete_linkage(self):
+        """Phase 2A: End-to-end integration of DOETrial -> Batch -> QC Record in DB."""
+        test_dir = "data/test_linkage_tmp"
+        db = FormulationDatabase(data_dir=test_dir)
+
+        # 1. Save DOE Trial
+        trial = DOETrial(
+            trial_id="DOE-EXP-LINK-01", design_type="Vertex",
+            synthetic_wax_pct=13.0, candelilla_wax_pct=4.0,
+            dimethicone_pct=16.0, caprylyl_methicone_pct=12.0,
+            fill_temperature_c=80.0
+        )
+        db.save_doe_trial(trial)
+        reloaded_trials = db.get_all_doe_trials()
+        self.assertTrue(any(t.trial_id == "DOE-EXP-LINK-01" for t in reloaded_trials))
+
+        # 2. Generate Manufacturing Charges from Trial Ratios
+        component_ratios = trial.to_component_ratios()
+        calc_result = ManufacturingCalculator.generate_manufacturing_formula(
+            active_formula=REV73_TARGET_ACTIVE_FORMULA,
+            material_specs=REV73_RAW_MATERIALS,
+            batch_size_kg=5.0,
+            component_ratios=component_ratios
+        )
+        # Specs are TBD in base REV73, so gatekeeper correctly stops here
+        self.assertFalse(calc_result.is_valid)
+
+        # 3. Link QC Record to Trial ID
+        qc_record = BatchQCRecord(
+            batch_id="BATCH-PILOT-LINK-01", trial_id=trial.trial_id,
+            formula_id="FORM-REV7.3", revision="Rev.7.3",
+            test_date="2026-09-12", operator="Pilot Lead",
+            hardness_gf=810.0, transfer_g_10c=0.046,
+            hardness_sop=HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30),
+            transfer_sop=TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")
+        )
+        db.save_qc_record(qc_record)
+
+        reloaded_qc = db.get_all_qc_records()
+        linked = next(r for r in reloaded_qc if r.batch_id == "BATCH-PILOT-LINK-01")
+        self.assertEqual(linked.trial_id, "DOE-EXP-LINK-01")
+        self.assertEqual(linked.process_conditions.fill_temperature_c, 80.0)
+
+        if os.path.exists(test_dir):
+            shutil.rmtree(test_dir)
+
 
 if __name__ == "__main__":
     unittest.main()
+

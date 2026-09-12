@@ -35,6 +35,19 @@ class DOETrial(BaseModel):
         sil_sum = self.dimethicone_pct + self.caprylyl_methicone_pct
         return abs(wax_sum - 17.0) < 0.05 and abs(sil_sum - 28.0) < 0.05
 
+    def to_component_ratios(self) -> Dict[str, Dict[str, float]]:
+        """Maps trial mixture ratios directly to Composite Component IDs."""
+        return {
+            "MAT-WAX-SYSTEM": {
+                "MAT-WAX-SYN-01": self.synthetic_wax_pct,
+                "MAT-WAX-CAN-01": self.candelilla_wax_pct,
+            },
+            "MAT-SIL-SYSTEM": {
+                "MAT-SIL-DIM-01": self.dimethicone_pct,
+                "MAT-SIL-CAP-01": self.caprylyl_methicone_pct,
+            },
+        }
+
 
 class AdvancedDOEEngine:
     """

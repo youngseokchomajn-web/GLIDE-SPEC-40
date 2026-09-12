@@ -15,6 +15,18 @@ class QCStatus(str, Enum):
     PENDING_SOP = "PENDING_SOP"
 
 
+class DataOrigin(str, Enum):
+    REAL_PILOT = "REAL_PILOT"
+    SYNTHETIC_TEST = "SYNTHETIC_TEST"
+
+
+class ProcessCondition(BaseModel):
+    fill_temperature_c: float = 80.0
+    shear_speed_rpm: float = 3000.0
+    mixing_time_min: float = 20.0
+    cooling_profile: str = "3-Step Gradual (25->15->5C)"
+
+
 class HardnessSOP(BaseModel):
     probe_type: str = "TBD"  # e.g., 2mm needle, conical 45 deg, spherical
     penetration_depth_mm: Optional[float] = None
@@ -51,6 +63,11 @@ class BatchQCRecord(BaseModel):
     test_date: str
     operator: str
 
+    # Linkage to DOE & Execution Contract
+    trial_id: Optional[str] = None
+    data_origin: DataOrigin = DataOrigin.REAL_PILOT
+    process_conditions: ProcessCondition = Field(default_factory=ProcessCondition)
+
     # Measurements
     hardness_gf: Optional[float] = None
     transfer_g_10c: Optional[float] = None
@@ -79,6 +96,27 @@ class BatchQCRecord(BaseModel):
             transfer.applied_pressure_g is not None, transfer.contact_time_s is not None,
             transfer.test_method != "TBD",
         ])
+
+    def is_training_eligible(self, verified_raw_materials: bool = True) -> bool:
+        """
+        Phase 2A Data Contract Gate:
+        A record is eligible for model training ONLY if:
+        1. It is genuine real pilot data (synthetic data strictly excluded from production models).
+        2. SOP is complete without any missing parameters.
+        3. Raw material specifications are verified.
+        4. Core measured properties (hardness & transfer) are non-null and positive.
+        """
+        if self.data_origin != DataOrigin.REAL_PILOT:
+            return False
+        if not self.is_sop_complete():
+            return False
+        if not verified_raw_materials:
+            return False
+        if self.hardness_gf is None or self.hardness_gf <= 0:
+            return False
+        if self.transfer_g_10c is None or self.transfer_g_10c <= 0:
+            return False
+        return True
 
     def evaluate_targets(self) -> Dict[str, QCTestResult]:
         results = {}

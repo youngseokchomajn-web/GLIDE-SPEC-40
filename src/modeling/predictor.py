@@ -33,19 +33,26 @@ class FormulationPredictor:
         self.state: ModelState = ModelState.AWAITING_PILOT_DATA
         self.training_records: List[BatchQCRecord] = []
 
-    def fit(self, records: List[BatchQCRecord]):
-        """Trains empirical response surface models once sufficient experimental data exists."""
-        valid_records = [
+    MIN_ELIGIBLE_PILOT_RECORDS: int = 16
+
+    def fit(self, records: List[BatchQCRecord], verified_raw_materials: bool = True) -> bool:
+        """
+        Phase 2A & 3 Data Contract Enforced:
+        Accepts only genuine REAL_PILOT records with complete SOP and verified materials.
+        Synthetic records or incomplete SOP records are strictly rejected.
+        Requires >= 16 eligible real Pilot observations to promote to TRAINED_LINEAR.
+        """
+        eligible_records = [
             r for r in records
-            if r.hardness_gf is not None and r.transfer_g_10c is not None
+            if r.is_training_eligible(verified_raw_materials=verified_raw_materials)
         ]
-        if len(valid_records) < 5:
+        self.training_records = eligible_records
+
+        if len(eligible_records) < self.MIN_ELIGIBLE_PILOT_RECORDS:
             self.state = ModelState.AWAITING_PILOT_DATA
-            self.training_records = valid_records
             return False
 
-        # In v0.1, we acknowledge data but require more points for robust response surface
-        self.training_records = valid_records
+        # Promotion to TRAINED_LINEAR occurs in Phase 3 when linear regression coefficients are fitted
         self.state = ModelState.TRAINED_LINEAR
         return True
 
