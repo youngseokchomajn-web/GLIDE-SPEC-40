@@ -24,10 +24,14 @@ def test_domain_prior_files_exist(domain_priors_dir):
     fric_csv = domain_priors_dir / "imperial_friction" / "wax_oil_friction_data.csv"
     stick_csv = domain_priors_dir / "lipstick_17pct_anchor" / "lipstick_17pct_wax_benchmark.csv"
     wax_csv = domain_priors_dir / "tuberlin_wax_variability" / "natural_wax_batch_variability_summary.csv"
+    pat_csv = domain_priors_dir / "anhydrous_stick_patents" / "us20070166254_anhydrous_powder_stick.csv"
+    sla_csv = domain_priors_dir / "commercial_stick_benchmark" / "mdpi_commercial_lipbalm_texture_sla.csv"
 
     assert fric_csv.exists(), "Imperial friction CSV must exist"
     assert stick_csv.exists(), "Lipstick 17% anchor CSV must exist"
     assert wax_csv.exists(), "TU Berlin wax variability CSV must exist"
+    assert pat_csv.exists(), "Patent anhydrous stick CSV must exist"
+    assert sla_csv.exists(), "Commercial lip balm SLA benchmark CSV must exist"
 
 
 def test_virtual_simulator_center_point_priors(simulator):
@@ -74,4 +78,4 @@ def test_virtual_simulator_monte_carlo_distribution(simulator):
     assert result.predicted_hardness_gf.p05 < result.predicted_hardness_gf.mean < result.predicted_hardness_gf.p95
     assert result.predicted_transfer_g_10c.p05 < result.predicted_transfer_g_10c.mean < result.predicted_transfer_g_10c.p95
     assert result.predicted_drop_point_c.p05 < result.predicted_drop_point_c.mean < result.predicted_drop_point_c.p95
-    assert result.predicted_friction_cof.p05 < result.predicted_friction_cof.mean < result.predicted_friction_cof.p95
+    assert result.predicted_friction_index.p05 < result.predicted_friction_index.mean < result.predicted_friction_index.p95

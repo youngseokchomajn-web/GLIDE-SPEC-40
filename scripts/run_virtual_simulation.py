@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-GLIDE-SPEC 40 - Virtual Simulation Runner (Layer 1)
-Evaluates prior-informed property predictions and Monte Carlo tolerance bounds
-for candidate formulations before real pilot execution.
+GLIDE-SPEC 40 - Virtual Simulation & Provenance Audit Runner (Layer 1)
+Evaluates prior-informed property derivations and displays end-to-end scientific provenance.
 
 Usage:
   python3 scripts/run_virtual_simulation.py [--syn-wax 12.0] [--dimethicone 17.0] [--temp 80.0]
@@ -26,8 +25,8 @@ def run_cli():
     parser.add_argument("--draws", type=int, default=1000, help="Number of Monte Carlo draws")
     args = parser.parse_args()
 
-    can_wax = 17.0 - args.syn_wax
-    caprylyl = 28.0 - args.dimethicone
+    can_wax = round(17.0 - args.syn_wax, 3)
+    caprylyl = round(28.0 - args.dimethicone, 3)
 
     if can_wax < 0 or caprylyl < 0:
         print(f"[!] Invalid formulation: Syn Wax must be <= 17.0% and Dimethicone <= 28.0%")
@@ -44,21 +43,41 @@ def run_cli():
     )
 
     print("================================================================================")
-    print("  GLIDE-SPEC 40: Layer 1 Virtual Mechanistic Prior Simulation")
-    print(f"  Inputs: Syn Wax {args.syn_wax}% | Can Wax {can_wax}% | Dimethicone {args.dimethicone}% | Caprylyl {caprylyl}% | Fill {args.temp}°C")
+    print("  GLIDE-SPEC 40: Layer 1 Virtual Mechanistic Prior Simulation & Provenance Audit")
     print("================================================================================\n")
-    print(f"⚠️ NOTICE: {res.warning_notice}\n")
 
-    print("[Prior Property Distributions (with TU Berlin Lot Variance & Monte Carlo)]")
-    print(f"  1. Hardness @ 25°C:       {res.predicted_hardness_gf.mean:.1f} gf "
-          f"(90% CI: [{res.predicted_hardness_gf.p05:.1f}, {res.predicted_hardness_gf.p95:.1f}], SD={res.predicted_hardness_gf.sd:.1f})")
-    print(f"  2. Transfer @ 10°C:       {res.predicted_transfer_g_10c.mean:.4f} g "
-          f"(90% CI: [{res.predicted_transfer_g_10c.p05:.4f}, {res.predicted_transfer_g_10c.p95:.4f}], SD={res.predicted_transfer_g_10c.sd:.4f})")
-    print(f"  3. Drop Point:            {res.predicted_drop_point_c.mean:.2f} °C "
-          f"(90% CI: [{res.predicted_drop_point_c.p05:.2f}, {res.predicted_drop_point_c.p95:.2f}], SD={res.predicted_drop_point_c.sd:.2f})")
-    print(f"  4. Dynamic Friction:      {res.predicted_friction_cof.mean:.3f} CoF "
-          f"(90% CI: [{res.predicted_friction_cof.p05:.3f}, {res.predicted_friction_cof.p95:.3f}], SD={res.predicted_friction_cof.sd:.3f})\n")
-    print(f"[*] Simulation Notes: {res.notes}\n")
+    print("[1. FORMULATION INPUTS]")
+    print(f"  • Synthetic Wax:      {args.syn_wax:5.1f} %  (u1 = {args.syn_wax / 17.0:.3f} of 17% Wax System)")
+    print(f"  • Candelilla Wax:     {can_wax:5.1f} %  (1 - u1 = {can_wax / 17.0:.3f})")
+    print(f"  • Dimethicone:        {args.dimethicone:5.1f} %  (v1 = {args.dimethicone / 28.0:.3f} of 28% Silicone System)")
+    print(f"  • Caprylyl Methicone: {caprylyl:5.1f} %  (1 - v1 = {caprylyl / 28.0:.3f})")
+    print(f"  • Fill Temperature:   {args.temp:5.1f} °C (dT = {args.temp - 80.0:+.1f}°C from 80°C baseline)\n")
+
+    print("[2. SCIENTIFIC PRIOR SOURCES & MATHEMATICAL DERIVATIONS]")
+    props = [
+        ("Hardness @ 25°C", res.predicted_hardness_gf),
+        ("Transfer @ 10°C", res.predicted_transfer_g_10c),
+        ("Drop Point", res.predicted_drop_point_c),
+        ("Friction Index", res.predicted_friction_index)
+    ]
+    for label, dist in props:
+        prov = dist.provenance
+        print(f"  [{label.upper()}]")
+        print(f"    ├─ Primary Source:     {prov.source_name}")
+        print(f"    ├─ Publication / DOI:  {prov.citation} (DOI: {prov.doi})")
+        print(f"    ├─ Empirical Anchor:   {prov.anchor_measurement}")
+        print(f"    └─ Derivation Formula: {prov.derivation_logic}")
+
+    print("\n[3. MONTE CARLO PRIOR DISTRIBUTIONS (Uncertainty & Variability Bounds)]")
+    for label, dist in props:
+        print(f"  • {label:<17}: {dist.mean:7.2f} {dist.unit:<9} "
+              f"| 90% CI: [{dist.p05:6.2f}, {dist.p95:6.2f}] | SD: {dist.sd:5.2f} | Min/Max: [{dist.min_val:.1f}, {dist.max_val:.1f}]")
+
+    print(f"\n[*] Uncertainty Driver: {res.simulation_notes}")
+    print("\n--------------------------------------------------------------------------------")
+    print(f"⚠️  STATUS: {res.status_label}")
+    print(f"    {res.warning_notice}")
+    print("--------------------------------------------------------------------------------\n")
 
 
 if __name__ == "__main__":

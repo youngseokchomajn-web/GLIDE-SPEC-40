@@ -1,0 +1,8 @@
+benchmark_id,product_category,matrix_structural_type,primary_waxes,co_structuring_agents,fracture_resistance_category,hardness_work_correlation_r,failure_rate_survey_pct,consumer_wtp_increase_pct,notes
+COMM_01,Lip Balm Stick,Multi-Wax Complementary,Natural Beeswax + Candelilla + Carnauba,Shea Butter + Triglycerides,Superior Structural Cohesion,0.95,23.1,94.4,Complementary multi-wax matrix with lipid co-structuring agents
+COMM_02,Lip Balm Stick,Multi-Wax Complementary,Synthetic Wax + Microcrystalline,Hydrocarbon Petrolatum,High Cohesion,0.95,21.5,94.4,Petroleum-derived microcrystalline hydrocarbon matrix
+COMM_03,Lip Balm Stick,Simplified Single-Wax,Beeswax Single Phase,Liquid Vegetable Oils,Progressive Mechanical Failure,0.95,76.9,94.4,High consumer reported deformation/breaking during shear
+COMM_04,Lip Balm Stick,Simplified Single-Wax,Ozokerite Single Phase,Mineral Oil,Moderate Brittleness,0.95,68.4,94.4,Prone to fracture under horizontal shear stress
+COMM_05,Lip Balm Stick,Multi-Wax Hybrid,Beeswax + Polyethylene,C12-15 Esters + Silicones,High Cohesion Low Drag,0.95,18.2,94.4,Reinforced polyethylene network with ester plasticizer
+COMM_06,Lip Balm Stick,Single Butter Matrix,Shea Butter High Load,Low Wax Structure,Severe Deformation Failure,0.95,84.1,94.4,Softening failure above 30°C due to low melting wax phase
+COMM_07,Lip Balm Stick,Multi-Wax Complementary,Microcrystalline + Candelilla,Caprylic Triglycerides,Superior Structural Cohesion,0.95,19.8,94.4,Direct analog to GS-40 Synthetic Wax + Candelilla blend
