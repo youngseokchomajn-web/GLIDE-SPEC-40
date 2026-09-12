@@ -604,10 +604,11 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
             dim = 17.0 if i < 4 else (14.0 + (i % 5) * 1.5)
 
             trial = DOETrial(
-                trial_id=trial_id, design_type="Custom",
+                trial_id=trial_id, design_type="Centroid_Replicate" if i < 4 else "Custom",
                 synthetic_wax_pct=syn_w, candelilla_wax_pct=17.0 - syn_w,
                 dimethicone_pct=dim, caprylyl_methicone_pct=28.0 - dim,
-                fill_temperature_c=fill_t, shear_speed_rpm=3000.0, mixing_time_min=20.0
+                fill_temperature_c=fill_t, shear_speed_rpm=3000.0, mixing_time_min=20.0,
+                is_center_point=(i < 4)
             )
             db.save_doe_trial(trial)
 
@@ -710,10 +711,11 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
             dim = 17.0 if i < 4 else (14.0 + (i % 5) * 1.5)
 
             trial = DOETrial(
-                trial_id=trial_id, design_type="Custom",
+                trial_id=trial_id, design_type="Centroid_Replicate" if i < 4 else "Custom",
                 synthetic_wax_pct=syn_w, candelilla_wax_pct=17.0 - syn_w,
                 dimethicone_pct=dim, caprylyl_methicone_pct=28.0 - dim,
-                fill_temperature_c=fill_t, shear_speed_rpm=3000.0, mixing_time_min=20.0
+                fill_temperature_c=fill_t, shear_speed_rpm=3000.0, mixing_time_min=20.0,
+                is_center_point=(i < 4)
             )
             db.save_doe_trial(trial)
 
@@ -991,6 +993,91 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         self.assertIsNotNone(pred.hardness_gf)
         self.assertIsNotNone(pred.transfer_g)
         self.assertIsNone(pred.drop_point_c, "Drop point must remain None when unmeasured")
+
+        if os.path.exists(test_dir):
+            shutil.rmtree(test_dir, ignore_errors=True)
+
+    def test_center_point_flag_cannot_bypass_coordinate_validation(self):
+        """M4 Hardening: is_center_point=True metadata MUST NOT bypass independent physical coordinate validation."""
+        # 1. Direct DOETrial unit checks
+        fake_centroid_trial = DOETrial(
+            trial_id="DOE-FAKE-CP", design_type="Centroid_Fake",
+            synthetic_wax_pct=15.0, candelilla_wax_pct=2.0,
+            dimethicone_pct=22.0, caprylyl_methicone_pct=6.0,
+            fill_temperature_c=85.0, shear_speed_rpm=3000.0, mixing_time_min=20.0,
+            is_center_point=True  # Fraudulent or mislabeled center flag!
+        )
+        self.assertFalse(
+            fake_centroid_trial.is_centre_point(),
+            "DOETrial.is_centre_point() must return False when physical coordinates deviate despite is_center_point=True"
+        )
+
+        true_centroid_trial = DOETrial(
+            trial_id="DOE-TRUE-CP", design_type="Centroid_Replicate",
+            synthetic_wax_pct=12.0, candelilla_wax_pct=5.0,
+            dimethicone_pct=17.0, caprylyl_methicone_pct=11.0,
+            fill_temperature_c=80.0, shear_speed_rpm=3000.0, mixing_time_min=20.0,
+            is_center_point=True
+        )
+        self.assertTrue(true_centroid_trial.is_centre_point())
+
+        # 2. End-to-end Predictor qualification gate test
+        test_dir = "data/test_cp_bypass_tmp"
+        db = FormulationDatabase(data_dir=test_dir)
+
+        complete_hardness = HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30)
+        complete_transfer = TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")
+
+        records = []
+        for i in range(16):
+            trial_id = f"DOE-BYPASS-{i:02d}"
+            batch_id = f"BATCH-BYPASS-{i:02d}"
+            # 4 trials claim is_center_point=True, but are actually at the 15% wax / 22% silicone boundary at 85°C!
+            syn_w = 15.0 if i < 4 else (10.0 + (i % 6) * 0.8)
+            dim = 22.0 if i < 4 else (14.0 + (i % 5) * 1.5)
+            fill_t = 85.0 if i < 4 else 80.0
+
+            trial = DOETrial(
+                trial_id=trial_id, design_type="Vertex_High" if i >= 4 else "False_Centroid",
+                synthetic_wax_pct=syn_w, candelilla_wax_pct=17.0 - syn_w,
+                dimethicone_pct=dim, caprylyl_methicone_pct=28.0 - dim,
+                fill_temperature_c=fill_t, shear_speed_rpm=3000.0, mixing_time_min=20.0,
+                is_center_point=(i < 4)  # Rogue flag on vertex coordinates
+            )
+            db.save_doe_trial(trial)
+
+            calc = ManufacturingCalculator.generate_manufacturing_formula(
+                active_formula=REV73_TARGET_ACTIVE_FORMULA,
+                material_specs=REV73_RAW_MATERIALS,
+                batch_size_kg=5.0,
+                component_ratios=trial.to_component_ratios()
+            )
+            mfg = ManufacturingBatch(
+                batch_id=batch_id, trial_id=trial_id, formula_id="GLIDE-REV73-PILOT", revision="Rev.7.3",
+                created_date="2026-09-12", operator="Pilot Lead",
+                batch_size_kg=calc.batch_size_kg, total_charge_pct=calc.total_charge_pct,
+                items=calc.items, process_conditions=trial.to_process_condition()
+            )
+            db.save_manufacturing_batch(mfg)
+
+            qc = BatchQCRecord(
+                batch_id=batch_id, trial_id=trial_id, formula_id="GLIDE-REV73-PILOT", revision="Rev.7.3",
+                test_date="2026-09-12", operator="Pilot QC",
+                process_conditions=trial.to_process_condition(),
+                hardness_gf=835.0, transfer_g_10c=0.044, drop_point_c=61.8,
+                data_origin=DataOrigin.REAL_PILOT,
+                hardness_sop=complete_hardness, transfer_sop=complete_transfer
+            )
+            db.save_qc_record(qc)
+            records.append(qc)
+
+        predictor = FormulationPredictor()
+        promoted = predictor.fit(records, verified_raw_materials=True, db=db)
+
+        # Rejects promotion because true physical centre points == 0
+        self.assertFalse(promoted, "Model promotion must be rejected when is_center_point=True has invalid coordinates")
+        self.assertEqual(predictor.state, ModelState.AWAITING_PILOT_DATA)
+        self.assertEqual(predictor._count_centre_points(records, db=db), 0)
 
         if os.path.exists(test_dir):
             shutil.rmtree(test_dir, ignore_errors=True)

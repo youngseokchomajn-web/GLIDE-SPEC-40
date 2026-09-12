@@ -48,26 +48,28 @@ class FormulationPredictor:
 
     def _count_centre_points(self, eligible_records: List[BatchQCRecord], db: Optional[Any] = None) -> int:
         """
-        Detects genuine centre-point replicates:
-        Must satisfy all 3 physical coordinates:
-          - Synthetic Wax ≈ 12.0% (u1 ≈ 0.706)
-          - Dimethicone ≈ 17.0% (v1 ≈ 0.607)
-          - Fill Temperature ≈ 80.0°C
-        Or trial_obj.is_centre_point() is explicitly True.
+        Detects genuine centre-point replicates.
+        Strict qualification requires BOTH:
+          1. Metadata declaration (trial_obj.is_center_point is True or centroid design type)
+          2. Physical coordinate verification:
+             - Synthetic Wax ≈ 12.0% (u1 ≈ 0.706)
+             - Dimethicone ≈ 17.0% (v1 ≈ 0.607)
+             - Fill Temperature ≈ 80.0°C (both batch and trial)
+        A trial declaring is_center_point=True with deviating coordinates is strictly rejected.
         """
         count = 0
         for r in eligible_records:
             trial_obj = db.get_doe_trial(r.trial_id) if db else None
-            if trial_obj and trial_obj.is_centre_point():
+            if not trial_obj:
+                continue
+
+            t_batch = r.process_conditions.fill_temperature_c if r.process_conditions else trial_obj.fill_temperature_c
+            temp_match = abs(t_batch - 80.0) <= 1.0 and abs(trial_obj.fill_temperature_c - 80.0) <= 1.0
+            wax_match = abs(trial_obj.synthetic_wax_pct - 12.0) <= 0.2
+            sil_match = abs(trial_obj.dimethicone_pct - 17.0) <= 0.2
+
+            if trial_obj.is_centre_point() and temp_match and wax_match and sil_match:
                 count += 1
-            elif trial_obj:
-                t = r.process_conditions.fill_temperature_c
-                if (
-                    abs(t - 80.0) <= 1.0 and
-                    abs(trial_obj.synthetic_wax_pct - 12.0) <= 0.2 and
-                    abs(trial_obj.dimethicone_pct - 17.0) <= 0.2
-                ):
-                    count += 1
         return count
 
     def _build_matrix(

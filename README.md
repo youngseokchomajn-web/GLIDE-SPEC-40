@@ -61,26 +61,28 @@
     • 완결된 디지털 계보 추적: DOETrial ➔ ManufacturingBatch ➔ BatchQCRecord
     • Formula Revision History 영구 보존 및 Rev.7.3 8대 핵심 변경점(NEW-01 ~ NEW-08) 사전 시딩
                                        ↓
-                  MULTIVARIATE REGRESSION ENGINE (M4) & OPTIMIZER (M5)
-                  (src/modeling/regression.py & src/optimization/optimizer.py)
-    • OLS 다변량 회귀 및 투영 행렬 기반 LOOCV RMSE / R² 실시간 산출
-    • 공선성 방지 혼합비 좌표계: u1 = SynWax/17.0, v1 = Dimethicone/28.0, T = FillTemp
-    • 엄격한 ML 승격 안전 게이트: >= 16개 유효 실측 파일럿 데이터 + >= 3개 중심점 충족 시에만 TRAINED_LINEAR 전환
-    • Rule #12 필수 준수: "Predicted (n=X samples), NOT experimental measurement" 명시
-    • SLSQP 기반 3대 Pareto Frontier 전략 시나리오 (Balanced, High-Slip Summer, High-Payoff Winter)
-                                       ↓
-                             STREAMLIT WEB DASHBOARD
-                              (app/dashboard/app.py)
-    • 브라우저 기반 GUI: Formula, 원료 Spec 수정, 배치 생산 커밋, DOE 생성, QC Station, SLSQP 최적화 & Revision 추적
+                   MULTIVARIATE REGRESSION ENGINE (M4) & OPTIMIZER (M5)
+                   (src/modeling/regression.py & src/optimization/optimizer.py)
+     • OLS 다변량 회귀 및 투영 행렬 기반 LOOCV RMSE / R² 실시간 산출
+     • 공선성 방지 혼합비 좌표계: u1 = SynWax/17.0, v1 = Dimethicone/28.0, T = FillTemp
+     • M4 승격 안전 게이트: >= 16개 유효 실측 파일럿 데이터 + >= 3개 3D 물리 좌표 중심점(SynWax 12±0.2%, Dimethicone 17±0.2%, FillTemp 80±1°C) 충족 시에만 TRAINED_LINEAR 승격 (선언 메타데이터 우회 불가)
+     • 현재 상태: Qualification Gate Hardened / Production Model: Not Yet Qualified (파일럿 실측치 대기 중)
+     • Rule #12 필수 준수: "Predicted (n=X samples), NOT experimental measurement" 명시
+     • SLSQP 기반 3대 전략 시나리오 베이스라인 최적화 (Balanced, High-Slip Summer, High-Payoff Winter - 모델 학습 범위 자동 구속)
+                                        ↓
+                              STREAMLIT WEB DASHBOARD
+                               (app/dashboard/app.py)
+     • 브라우저 기반 GUI: Formula, 원료 Spec 수정, 배치 생산 커밋, DOE 생성, QC Station, SLSQP 최적화 & Revision 추적
 ```
 
 ---
 
 ## 🛡️ 품질 보증 & 안전 철학 (Core Principles)
 
-1. **Rule #6 (Strict Grounding):** 실제 파일럿 QC 실측 데이터가 충족되기 전까지는 어떠한 기계학습 물성 예측도 임의로 가정하지 않습니다 (16개 미만 시 `AWAITING_PILOT_DATA` 상태 유지 및 물리적 경계 기반 Rule-based 후보 제시).
+1. **Rule #6 (Strict Grounding):** 실제 파일럿 QC 실측 데이터가 충족되기 전까지는 어떠한 기계학습 물성 예측도 임의로 가정하지 않습니다 (16개 미만 시 `AWAITING_PILOT_DATA` 상태 유지 및 물리적 경계 기반 Rule-based 후보 제시). Drop Point 등 미측정 항목은 임의의 상수를 대입하지 않고 독립 격리 보관합니다.
 2. **Rule #12 (Explicit Labeling):** 모델이 승격된 후 출력되는 모든 예측값은 반드시 `"Predicted (n=X real Pilot observations, LOOCV RMSE: ...), NOT experimental measurement."` 라벨을 동반합니다.
 3. **Lineage Referential Integrity:** 제조 배치(`ManufacturingBatch`)는 반드시 설계 시험(`DOETrial`)을 참조해야 하며, 품질 기록(`BatchQCRecord`)은 반드시 실존하는 제조 배치를 참조해야만 영구 저장됩니다.
+4. **Physical Centroid Verification:** `is_center_point=True` 메타데이터 플래그 단독으로는 승격 요건을 우회할 수 없으며, 3차원 물리 좌표(Wax 12±0.2%, Silicone 17±0.2%, Temp 80±1°C)가 독립적으로 검증되어야 중심점으로 인정됩니다.
 
 ---
 
@@ -90,7 +92,7 @@
 ```bash
 python3 -m unittest discover tests
 ```
-* **25개 핵심 단위 테스트 100% 정상 통과 (Ran 25 tests in ~0.39s - OK)**
+* **26개 핵심 단위 테스트 100% 정상 통과 (Ran 26 tests - OK)**
 
 ### 2. 통합 CLI 시뮬레이션 데모 실행
 ```bash

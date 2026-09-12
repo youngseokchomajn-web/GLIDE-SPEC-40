@@ -32,14 +32,26 @@ class DOETrial(BaseModel):
     notes: Optional[str] = ""
 
     def is_centre_point(self) -> bool:
-        """Strict 3-coordinate physical centre-point validation: SynWax ~12%, Dimethicone ~17%, Fill Temp ~80C."""
-        if self.is_center_point:
-            return True
-        return (
+        """Strict 3-coordinate physical centre-point validation.
+        
+        The metadata flag `is_center_point` can NEVER bypass physical coordinate verification.
+        Both conditions MUST hold:
+          1. Physical coordinates must strictly fall within centroid bounds:
+             - Synthetic Wax: 12.0 ± 0.2%
+             - Dimethicone: 17.0 ± 0.2%
+             - Fill Temperature: 80.0 ± 1.0°C
+          2. AND it must be designated as a centre point:
+             `self.is_center_point is True` OR design_type contains "Centroid" / "Center".
+        """
+        coord_valid = (
             abs(self.synthetic_wax_pct - 12.0) <= 0.2 and
             abs(self.dimethicone_pct - 17.0) <= 0.2 and
             abs(self.fill_temperature_c - 80.0) <= 1.0
         )
+        if not coord_valid:
+            return False
+
+        return bool(self.is_center_point or "Centroid" in self.design_type or "Center" in self.design_type)
 
     def validate_mixture_constraints(self) -> bool:
         wax_sum = self.synthetic_wax_pct + self.candelilla_wax_pct
