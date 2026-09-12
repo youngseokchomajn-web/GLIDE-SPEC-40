@@ -421,11 +421,14 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         )
         self.assertFalse(synthetic_record.is_training_eligible())
 
-        # 4. Predictor does NOT prematurely promote to TRAINED_LINEAR even with 20 records
+        # 4. Predictor does NOT promote with synthetic records or fewer than 16 records
         predictor = FormulationPredictor()
-        records = [real_record] * 20
-        promoted = predictor.fit(records)
-        self.assertFalse(promoted, "Model must not promote to TRAINED_LINEAR prior to Phase 3 regression engine")
+        promoted_synth = predictor.fit([synthetic_record] * 20)
+        self.assertFalse(promoted_synth, "Model must never promote to TRAINED_LINEAR with synthetic records")
+        self.assertEqual(predictor.state, ModelState.AWAITING_PILOT_DATA)
+
+        promoted_under_threshold = predictor.fit([real_record] * 10)
+        self.assertFalse(promoted_under_threshold, "Model must not promote with < 16 eligible records")
         self.assertEqual(predictor.state, ModelState.AWAITING_PILOT_DATA)
 
     def test_doe_batch_qc_complete_linkage(self):
@@ -507,6 +510,156 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         self.assertEqual(linked.process_conditions.fill_temperature_c, 75.0)
         self.assertEqual(linked.process_conditions.shear_speed_rpm, 3200.0)
         self.assertTrue(linked.is_training_eligible(verified_raw_materials=True))
+
+        if os.path.exists(test_dir):
+            shutil.rmtree(test_dir)
+
+    def test_synthetic_coefficient_recovery(self):
+        """Phase 3 [M4 Engine]: Verify OLS recovers known linear response coefficients within 1e-3."""
+        from src.modeling.regression import MixtureRegressionModel
+        import numpy as np
+
+        model = MixtureRegressionModel("Test Hardness")
+        # True equation: y = 800.0 + 50.0*u1 - 30.0*v1 - 2.0*T
+        # Generate 16 sample grid
+        u1_vals = [0.6, 0.7, 0.8, 0.7]
+        v1_vals = [0.5, 0.6, 0.7, 0.6]
+        t_vals = [75.0, 80.0, 85.0, 80.0]
+
+        X_rows = []
+        y_rows = []
+        for i in range(4):
+            for j in range(4):
+                u = u1_vals[i]
+                v = v1_vals[j]
+                t = t_vals[(i + j) % 4]
+                y = 800.0 + 50.0 * u - 30.0 * v - 2.0 * t
+                X_rows.append([u, v, t])
+                y_rows.append(y)
+
+        X = np.array(X_rows)
+        y = np.array(y_rows)
+
+        metrics = model.fit(X, y)
+        self.assertAlmostEqual(metrics.intercept, 800.0, places=2)
+        self.assertAlmostEqual(metrics.coefficients[0], 50.0, places=2)
+        self.assertAlmostEqual(metrics.coefficients[1], -30.0, places=2)
+        self.assertAlmostEqual(metrics.coefficients[2], -2.0, places=2)
+        self.assertGreaterEqual(metrics.r_squared, 0.999)
+        self.assertLess(metrics.loocv_rmse, 0.05)
+
+        # Test prediction method
+        pred_val, margin = model.predict(syn_wax=17.0 * 0.7, dimethicone=28.0 * 0.6, fill_temp=80.0)
+        expected = 800.0 + 50.0 * 0.7 - 30.0 * 0.6 - 2.0 * 80.0
+        self.assertAlmostEqual(pred_val, expected, places=1)
+
+    def test_synthetic_data_cannot_promote_production_model(self):
+        """Phase 3 [Safety Gate]: Synthetic test records cannot promote model to TRAINED_LINEAR."""
+        predictor = FormulationPredictor()
+        complete_hardness = HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30)
+        complete_transfer = TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")
+
+        synthetic_records = [
+            BatchQCRecord(
+                batch_id=f"SYNTH-BATCH-{i:02d}",
+                trial_id=f"DOE-EXP-{i:02d}",
+                formula_id="GLIDE-REV73-PILOT",
+                revision="Rev.7.3",
+                test_date="2026-09-12",
+                operator="Simulator",
+                hardness_gf=820.0,
+                transfer_g_10c=0.045,
+                data_origin=DataOrigin.SYNTHETIC_TEST,
+                hardness_sop=complete_hardness,
+                transfer_sop=complete_transfer
+            )
+            for i in range(20)
+        ]
+
+        promoted = predictor.fit(synthetic_records)
+        self.assertFalse(promoted)
+        self.assertEqual(predictor.state, ModelState.AWAITING_PILOT_DATA)
+
+        # Calling predict() must return None with Rule #6 warning
+        pred = predictor.predict(12.0, 5.0, 17.0, 11.0, 80.0)
+        self.assertIsNone(pred.hardness_gf)
+        self.assertIsNone(pred.transfer_g)
+        self.assertIn("Property prediction locked", pred.message)
+
+    def test_trained_linear_prediction_output_and_labeling(self):
+        """Phase 3 [M4 & Rule #12]: 16 eligible records with 3 centre-points promote to TRAINED_LINEAR and output mandatory label."""
+        test_dir = "data/test_phase3_tmp"
+        db = FormulationDatabase(data_dir=test_dir)
+
+        complete_hardness = HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30)
+        complete_transfer = TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")
+
+        records = []
+        for i in range(16):
+            trial_id = f"DOE-P3-{i:02d}"
+            batch_id = f"BATCH-P3-{i:02d}"
+            # Ensure at least 4 centre points at 80°C
+            fill_t = 80.0 if i < 4 else (75.0 if i % 2 == 0 else 85.0)
+            syn_w = 12.0 if i < 4 else (10.0 + (i % 6) * 0.8)
+            dim = 17.0 if i < 4 else (14.0 + (i % 5) * 1.5)
+
+            trial = DOETrial(
+                trial_id=trial_id, design_type="Custom",
+                synthetic_wax_pct=syn_w, candelilla_wax_pct=17.0 - syn_w,
+                dimethicone_pct=dim, caprylyl_methicone_pct=28.0 - dim,
+                fill_temperature_c=fill_t, shear_speed_rpm=3000.0, mixing_time_min=20.0
+            )
+            db.save_doe_trial(trial)
+
+            calc = ManufacturingCalculator.generate_manufacturing_formula(
+                active_formula=REV73_TARGET_ACTIVE_FORMULA,
+                material_specs=REV73_RAW_MATERIALS,
+                batch_size_kg=5.0,
+                component_ratios=trial.to_component_ratios()
+            )
+            mfg = ManufacturingBatch(
+                batch_id=batch_id,
+                trial_id=trial_id,
+                formula_id="GLIDE-REV73-PILOT",
+                revision="Rev.7.3",
+                created_date="2026-09-12",
+                operator="Pilot Lead",
+                batch_size_kg=calc.batch_size_kg,
+                total_charge_pct=calc.total_charge_pct,
+                items=calc.items,
+                process_conditions=trial.to_process_condition()
+            )
+            db.save_manufacturing_batch(mfg)
+
+            qc = BatchQCRecord(
+                batch_id=batch_id, trial_id=trial_id, formula_id="GLIDE-REV73-PILOT", revision="Rev.7.3",
+                test_date="2026-09-12", operator="Pilot QC",
+                process_conditions=trial.to_process_condition(),
+                hardness_gf=800.0 + 10.0 * (syn_w - 12.0) - 1.5 * (fill_t - 80.0),
+                transfer_g_10c=0.045 - 0.001 * (syn_w - 12.0) + 0.0005 * (dim - 17.0),
+                drop_point_c=61.5 + 0.2 * (syn_w - 12.0),
+                data_origin=DataOrigin.REAL_PILOT,
+                hardness_sop=complete_hardness,
+                transfer_sop=complete_transfer
+            )
+            db.save_qc_record(qc)
+            records.append(qc)
+
+        predictor = FormulationPredictor()
+        promoted = predictor.fit(records, verified_raw_materials=True, db=db)
+        self.assertTrue(promoted, "Should promote to TRAINED_LINEAR with 16 eligible records and >= 3 centre points")
+        self.assertEqual(predictor.state, ModelState.TRAINED_LINEAR)
+
+        # Run prediction
+        pred = predictor.predict(12.0, 5.0, 17.0, 11.0, 80.0)
+        self.assertIsNotNone(pred.hardness_gf)
+        self.assertIsNotNone(pred.transfer_g)
+        self.assertGreater(pred.confidence_score, 0.5)
+
+        # Rule #12 verification
+        self.assertIn("Predicted", pred.message)
+        self.assertIn("NOT experimental measurement", pred.message)
+        self.assertIn("LOOCV RMSE", pred.message)
 
         if os.path.exists(test_dir):
             shutil.rmtree(test_dir)
