@@ -664,6 +664,111 @@ class TestGLIDESpec40Simulator(unittest.TestCase):
         if os.path.exists(test_dir):
             shutil.rmtree(test_dir)
 
+    def test_optimizer_uncalibrated_returns_rule_candidates(self):
+        """Phase 4 [M5 Optimizer]: Uncalibrated predictor returns rule-based boundary candidates without predictions."""
+        from src.optimization.optimizer import MultiObjectiveOptimizer
+
+        predictor = FormulationPredictor()
+        optimizer = MultiObjectiveOptimizer(predictor=predictor)
+        candidates = optimizer.generate_candidates(top_n=3)
+
+        self.assertEqual(len(candidates), 3)
+        for c in candidates:
+            # Check mixture invariants
+            self.assertAlmostEqual(c.synthetic_wax_pct + c.candelilla_wax_pct, 17.0, places=2)
+            self.assertAlmostEqual(c.dimethicone_pct + c.caprylyl_methicone_pct, 28.0, places=2)
+            # Property predictions must remain None
+            self.assertIsNone(c.predicted_hardness_gf)
+            self.assertIsNone(c.predicted_transfer_g)
+            self.assertGreater(c.estimated_cogs_krw, 0.0)
+            self.assertIn("Uncalibrated", c.prediction_label)
+
+    def test_optimizer_slsqp_convergence_on_trained_model(self):
+        """Phase 4 [M5 Optimizer]: Trained regression model enables SLSQP Pareto search across 3 strategic scenarios."""
+        from src.optimization.optimizer import MultiObjectiveOptimizer
+
+        test_dir = "data/test_phase4_tmp"
+        db = FormulationDatabase(data_dir=test_dir)
+
+        complete_hardness = HardnessSOP(probe_type="2mm Needle", penetration_depth_mm=2.0, test_speed_mm_s=1.0, conditioning_time_min=30)
+        complete_transfer = TransferSOP(substrate_type="Artificial Skin", applied_area_cm2=4.0, applied_pressure_g=500.0, contact_time_s=3.0, test_method="Two stroke")
+
+        records = []
+        for i in range(16):
+            trial_id = f"DOE-P4-{i:02d}"
+            batch_id = f"BATCH-P4-{i:02d}"
+            fill_t = 80.0 if i < 4 else (76.0 if i % 2 == 0 else 84.0)
+            syn_w = 12.0 if i < 4 else (10.0 + (i % 6) * 0.8)
+            dim = 17.0 if i < 4 else (14.0 + (i % 5) * 1.5)
+
+            trial = DOETrial(
+                trial_id=trial_id, design_type="Custom",
+                synthetic_wax_pct=syn_w, candelilla_wax_pct=17.0 - syn_w,
+                dimethicone_pct=dim, caprylyl_methicone_pct=28.0 - dim,
+                fill_temperature_c=fill_t, shear_speed_rpm=3000.0, mixing_time_min=20.0
+            )
+            db.save_doe_trial(trial)
+
+            calc = ManufacturingCalculator.generate_manufacturing_formula(
+                active_formula=REV73_TARGET_ACTIVE_FORMULA,
+                material_specs=REV73_RAW_MATERIALS,
+                batch_size_kg=5.0,
+                component_ratios=trial.to_component_ratios()
+            )
+            mfg = ManufacturingBatch(
+                batch_id=batch_id, trial_id=trial_id, formula_id="GLIDE-REV73-PILOT", revision="Rev.7.3",
+                created_date="2026-09-12", operator="Pilot Lead",
+                batch_size_kg=calc.batch_size_kg, total_charge_pct=calc.total_charge_pct,
+                items=calc.items, process_conditions=trial.to_process_condition()
+            )
+            db.save_manufacturing_batch(mfg)
+
+            qc = BatchQCRecord(
+                batch_id=batch_id, trial_id=trial_id, formula_id="GLIDE-REV73-PILOT", revision="Rev.7.3",
+                test_date="2026-09-12", operator="Pilot QC",
+                process_conditions=trial.to_process_condition(),
+                hardness_gf=810.0 + 8.0 * (syn_w - 12.0) - 1.2 * (fill_t - 80.0),
+                transfer_g_10c=0.046 - 0.0008 * (syn_w - 12.0) + 0.0004 * (dim - 17.0),
+                drop_point_c=61.8 + 0.15 * (syn_w - 12.0),
+                data_origin=DataOrigin.REAL_PILOT,
+                hardness_sop=complete_hardness, transfer_sop=complete_transfer
+            )
+            db.save_qc_record(qc)
+            records.append(qc)
+
+        predictor = FormulationPredictor()
+        predictor.fit(records, verified_raw_materials=True, db=db)
+        self.assertEqual(predictor.state, ModelState.TRAINED_LINEAR)
+
+        optimizer = MultiObjectiveOptimizer(predictor=predictor)
+        candidates = optimizer.generate_candidates(top_n=3)
+
+        self.assertEqual(len(candidates), 3)
+        scenario_names = [c.scenario_name for c in candidates]
+        self.assertIn("Balanced Baseline", scenario_names)
+        self.assertIn("High-Slip Summer", scenario_names)
+        self.assertIn("High-Payoff Winter", scenario_names)
+
+        for c in candidates:
+            # 1. Mixture constraints
+            self.assertAlmostEqual(c.synthetic_wax_pct + c.candelilla_wax_pct, 17.0, places=2)
+            self.assertAlmostEqual(c.dimethicone_pct + c.caprylyl_methicone_pct, 28.0, places=2)
+            self.assertTrue(75.0 <= c.fill_temperature_c <= 85.0)
+
+            # 2. Predicted values
+            self.assertIsNotNone(c.predicted_hardness_gf)
+            self.assertIsNotNone(c.predicted_transfer_g)
+            self.assertGreater(c.confidence_score, 0.5)
+            self.assertGreater(c.desirability_score, 0.0)
+            self.assertGreater(c.estimated_cogs_krw, 0.0)
+
+            # 3. Rule #12 compliance
+            self.assertIn("Predicted", c.prediction_label)
+            self.assertIn("NOT experimental measurement", c.prediction_label)
+
+        if os.path.exists(test_dir):
+            shutil.rmtree(test_dir)
+
 
 if __name__ == "__main__":
     unittest.main()
