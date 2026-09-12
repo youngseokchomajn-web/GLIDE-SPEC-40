@@ -13,6 +13,7 @@ import argparse
 import csv
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+import numpy as np
 
 # Ensure project root is in sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -132,24 +133,85 @@ def check_and_qualify_pilot(matrix_path: Path, data_dir: Optional[str] = None):
         db.save_qc_record(record)
         records.append(record)
 
-    predictor = FormulationPredictor()
-    success = predictor.fit(records, db)
+    # Step 1: Center-Point Pure Error Analysis (P013, P014, P015, P016)
+    centre_records = [
+        (h, t, d) for r, h, t, d in completed_runs
+        if (r.get("Run_Type") == "Centre" or r.get("DOE_Trial_ID") in ("P013", "P014", "P015", "P016"))
+    ]
+    print(f"[*] Analyzing Center-Point Pure Error across {len(centre_records)} independent batches...")
+    pure_error_pass = True
+    if len(centre_records) >= 3:
+        cp_h = [x[0] for x in centre_records]
+        cp_t = [x[1] for x in centre_records]
+        h_mean, h_std = float(np.mean(cp_h)), float(np.std(cp_h, ddof=1))
+        t_mean, t_std = float(np.mean(cp_t)), float(np.std(cp_t, ddof=1))
+        h_cv = (h_std / h_mean) * 100 if h_mean > 0 else 0
+        t_cv = (t_std / t_mean) * 100 if t_mean > 0 else 0
 
-    if success:
-        print("\n" + "=" * 80)
-        print("  🎉 M4 MULTIVARIATE REGRESSION MODEL EMPIRICALLY QUALIFIED! (TRAINED_LINEAR)")
-        print("=" * 80)
-        for target, metrics in predictor.metrics.items():
-            print(f"\n[Model: {target.upper()}]")
-            print(f"  - R²:        {metrics.r_squared:.4f}")
-            print(f"  - RMSE:      {metrics.rmse:.4f}")
-            print(f"  - LOOCV RMSE:{metrics.loocv_rmse:.4f}")
-            print(f"  - Equation:  y = {metrics.intercept:.2f} + " + " + ".join(
-                [f"({c:.2f} * {name})" for c, name in zip(metrics.coefficients, metrics.feature_names)]
-            ))
+        print(f"    - Hardness Centre Mean: {h_mean:.1f} gf | Std: {h_std:.2f} gf | CV: {h_cv:.2f}%")
+        print(f"    - Transfer Centre Mean: {t_mean:.4f} g  | Std: {t_std:.4f} g  | CV: {t_cv:.2f}%")
+        if h_cv > 20.0 or t_cv > 25.0:
+            print("    [!] WARNING: Center-point batch-to-batch variation is high (CV > threshold).")
+            pure_error_pass = False
+    else:
+        print(f"    [!] Insufficient genuine center-point replicates ({len(centre_records)}/3 minimum).")
+        pure_error_pass = False
+
+    # Step 2: Fit M4 Multivariate Predictor
+    predictor = FormulationPredictor()
+    fit_success = predictor.fit(records, db)
+
+    # Step 3: Statistical Qualification Decision Matrix
+    print("\n" + "=" * 80)
+    print("  GLIDE-SPEC 40 M4 STATISTICAL QUALIFICATION AUDIT")
+    print("=" * 80)
+
+    checklist = []
+    # Gate 1: Observation Count
+    g1_pass = len(completed_runs) >= FormulationPredictor.MIN_ELIGIBLE_PILOT_RECORDS
+    checklist.append(("Observation Count (>= 16)", g1_pass, f"{len(completed_runs)}/16 runs"))
+
+    # Gate 2: Independent Center Replicates
+    g2_pass = len(centre_records) >= FormulationPredictor.MIN_CENTRE_POINT_REPLICATES
+    checklist.append(("Center-Point Replicates (>= 3)", g2_pass, f"{len(centre_records)} independent batches"))
+
+    # Gate 3: Pure Error / Repeatability
+    checklist.append(("Batch Repeatability (CV <= 20%)", pure_error_pass, "Acceptable Pure Error" if pure_error_pass else "High Pure Error"))
+
+    # Gate 4: Lineage & DB Integrity
+    checklist.append(("End-to-End Lineage Verified", fit_success, "Trial -> Mfg -> QC Complete"))
+
+    # Gate 5: Goodness of Fit & LOOCV
+    loocv_pass = True
+    for target, metrics in predictor.metrics.items():
+        t_pass = metrics.r_squared >= 0.40 and metrics.loocv_rmse < (metrics.rmse * 2.5)
+        if not t_pass:
+            loocv_pass = False
+        checklist.append((
+            f"Model [{target.upper()}] Fit Adequacy",
+            t_pass,
+            f"R²={metrics.r_squared:.3f}, RMSE={metrics.rmse:.2f}, LOOCV={metrics.loocv_rmse:.2f}"
+        ))
+
+    print(f"\n{'Qualification Gate':<40} {'Status':<10} {'Details'}")
+    print("-" * 80)
+    overall_pass = True
+    for gate_name, status, details in checklist:
+        st_str = "PASS" if status else "FAIL"
+        if not status:
+            overall_pass = False
+        print(f"{gate_name:<40} {st_str:<10} {details}")
+    print("-" * 80)
+
+    if overall_pass and fit_success:
+        print("\n  🎉 VERDICT: PASS - M4 MULTIVARIATE REGRESSION EMPIRICALLY QUALIFIED!")
+        print("  Model promoted to: TRAINED_LINEAR")
+        print("  Next Step: Execute 1 Independent Confirmation Run to lock Production Model.\n")
         return True
     else:
-        print("\n[!] M4 Model Fit failed qualification criteria.")
+        print("\n  ❌ VERDICT: FAIL - Pilot data did NOT meet statistical qualification gates.")
+        print("  Model status remains: AWAITING_PILOT_DATA / UNQUALIFIED")
+        print("  Action Required: Investigate pure error, measurement outliers, or process deviations.\n")
         return False
 
 
