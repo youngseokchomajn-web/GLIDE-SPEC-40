@@ -1,4 +1,4 @@
-# Community Evidence Registry — v0.2
+# Community Evidence Registry — v0.3
 
 ## Purpose
 
@@ -10,6 +10,7 @@ Anecdotes must not be converted directly into universal product claims. Each obs
 
 | Field | Record |
 |---|---|
+| Evidence ID | Stable ID used by later decisions/specifications |
 | Source | URL / platform / thread |
 | Date | publication date |
 | Athlete context | runner type, distance, experience if available |
@@ -23,9 +24,10 @@ Anecdotes must not be converted directly into universal product claims. Each obs
 | Positive signal | what users liked |
 | Negative signal | what users disliked |
 | Switching behavior | previous/current alternative |
-| Evidence class | direct report / comparison / repeated pattern / expert interpretation |
+| Evidence class | direct report / comparison / repeated pattern / retailer review / expert interpretation |
 | Confidence | low / medium / high |
 | Strategic implication | hypothesis generated |
+| What it does not prove | explicit limitation |
 
 ## Interpretation rules
 
@@ -37,11 +39,18 @@ Anecdotes must not be converted directly into universal product claims. Each obs
 6. Differences by body area must not be collapsed into one generic anti-chafe problem.
 7. Contradictory reports are valuable: they may reveal user, environment, formulation, or application differences.
 8. Community evidence should generate questions for controlled testing and user interviews.
-9. Community evidence must remain traceable to an evidence ID so later product requirements can cite the originating observation.
+9. Every usable observation must have a stable evidence ID so later product requirements and decisions can cite its origin.
+10. Retailer reviews are useful for discovering recurring experience dimensions, but review samples are not representative market surveys.
 
 ## Current evidence set
 
-The first structured pass contains **10 individual cases** in `community_cases_v0.1.md`, covering:
+- **Pass 1:** 10 individually preserved cases in `community_cases_v0.1.md`.
+- **Pass 2:** 15 individually preserved cases in `community_round2_2026-09.md`.
+- **Pass 3:** 15 individually preserved cases in `community_round3_2026-09.md`.
+
+The evidence program now contains **40 individually preserved cases across three passes**.
+
+Coverage includes:
 - Vaseline
 - Body Glide
 - Squirrel's Nut Butter
@@ -51,17 +60,22 @@ The first structured pass contains **10 individual cases** in `community_cases_v
 - Trail Toes
 - tape / band-aid / nipple-cover approaches
 - clothing and hydration-vest interventions
-
-The cases intentionally include both positive and negative experiences, including contradictory persistence and reapplication reports.
+- female-specific bra/waistband interfaces
+- sensitive skin
+- cold-weather texture/application
+- rain/high humidity
+- recovery after active chafing
+- price/value and packaging/application UX
 
 ## Priority research signals
 
-The current research program should specifically capture reports about:
+Continue capturing:
 
 - long-duration persistence
 - sweat and humidity
 - rain / water exposure
 - heat
+- dry/cool conditions
 - greasy feel or residue
 - clothing transfer / staining
 - stick versus balm versus petroleum jelly application
@@ -74,25 +88,26 @@ The current research program should specifically capture reports about:
 - recovery/post-run skin experience
 - skin compatibility and adverse reactions
 - willingness-to-pay and value perception
+- packaging reachability and carryability
 
-## Evidence gaps
+## Evidence gaps / next gate
 
-The current set is **not complete**. The most important remaining gaps are:
+The most important remaining gaps are:
 
-1. Balanced body-area coverage, especially feet/toes, waistband, buttocks/gluteal cleft, and underarms.
-2. Balanced climate coverage, especially controlled dry/cool vs hot/dry vs hot/humid vs rain/wet vs cold comparisons.
-3. Better distance/time coverage with explicit time-to-first-symptom and time-to-failure.
-4. More structured price/value and willingness-to-pay observations.
-5. Recovery and post-run evidence.
-6. Skin compatibility/adverse-event reports.
-7. Sensory/application UX including spreadability, cleanup, odor, and carryability.
-
-See `research_audit_v0.1.md` for the completeness audit and the gate before product specification lock.
+1. Korean/local runner evidence and language/cultural differences.
+2. Larger structured price/value and willingness-to-pay sample.
+3. Objective comparative testing of leading incumbents.
+4. Controlled skin compatibility testing.
+5. Controlled friction/persistence testing by temperature and humidity.
+6. Packaging/application prototypes tested with representative body areas.
+7. Post-run recovery formulation evidence.
+8. Regulatory classification and claim boundaries.
 
 ## What the registry does not prove
 
 - It does not establish market prevalence.
 - It does not establish objective competitor superiority/inferiority.
 - It does not establish exact protection duration.
-- It does not establish regulatory or medical claims.
+- It does not establish medical or regulatory claims.
 - It does not replace controlled formulation/performance testing.
+- It does not justify a final product specification by itself.
