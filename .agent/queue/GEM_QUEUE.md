@@ -1,7 +1,7 @@
 # GEM Execution Task Queue
 
 **Governing Protocol:** [`.agent/PROTOCOL.md`](../PROTOCOL.md) | [`.agent/CONTRACTS.md`](../CONTRACTS.md)
-**Last Updated:** 2026-09-13 14:06:25
+**Last Updated:** 2026-09-13 14:15:18
 
 | Task ID | Source ORC | Decision | Status | Actionable | Created At |
 | :--- | :---: | :---: | :---: | :---: | :--- |
@@ -20,3 +20,5 @@
 | [`GEM-TASK-014`](gem_tasks/GEM-TASK-014.yaml) | ORC-014 | `FIX_REQUIRED` | **COMMITTED** | `false` | 2026-09-13T13:00:00+09:00 |
 | [`GEM-TASK-015`](gem_tasks/GEM-TASK-015.yaml) | ORC-015 | `APPROVE` | **COMMITTED** | `false` | 2026-09-13T13:55:00+09:00 |
 | [`GEM-TASK-016`](gem_tasks/GEM-TASK-016.yaml) | ORC-016 | `REJECT` | **COMMITTED** | `false` |  |
+| [`GEM-TASK-017`](gem_tasks/GEM-TASK-017.yaml) | ORC-017 | `DATA_REQUIRED` | **ACKNOWLEDGED_STOP** | `false` | 2026-09-13T14:09:16+09:00 |
+| [`GEM-TASK-018`](gem_tasks/GEM-TASK-018.yaml) | ORC-018 | `EXPERIMENT` | **PENDING** | `true` | 2026-09-13T14:20:00+09:00 |

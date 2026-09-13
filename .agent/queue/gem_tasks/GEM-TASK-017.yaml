@@ -1,0 +1,20 @@
+task_id: "GEM-TASK-017"
+source_orc_id: "ORC-017"
+source_orc_commit: "0e5a1a3d63efac91827321c08853ff7177bd8a59"
+source_decision_file: "analysis/commits/ORC-017_Decision.md"
+decision: "DATA_REQUIRED"
+status: "ACKNOWLEDGED_STOP"
+is_actionable: false
+attempt: 1
+max_attempts: 3
+created_at: "2026-09-13T14:09:16+09:00"
+next_agent: "GEM"
+rationale: "DATA_REQUIRED. Close the external-public-dataset search loop for the current qualification path. Do not manufacture synthetic equivalence mappings, proxy conversions, or pseudo-validation rows.  GEM-015 remains accepted only as OOD/domain-shift stress evidence. It is not predictive-accuracy qualification evidence."
+required_actions:
+  - "Preserve GEM-016, ORC-016, GEM-015, and all prior validation failures/evidence."
+  - "Do not rerun blind external scoring merely to obtain a numerical score from an incompatible construct."
+  - "Do not train, recalibrate, rescale, or tune Rev.8.1 using external proxy datasets."
+  - "Proceed to physical GS40 pilot DOE/QC acquisition under the frozen Rev.8.1 protocol when experimental execution is available."
+  - "When physical data exist, submit the immutable pilot dataset, provenance, SOP/measurement records, split plan, and pre-registered qualification metrics for ORC review before model qualification."
+acceptance_criteria:
+  []
