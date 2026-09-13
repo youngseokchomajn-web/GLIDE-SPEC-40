@@ -11,8 +11,8 @@ import os
 import sys
 from datetime import datetime
 
-INTERVAL_SECONDS = 10
-TOTAL_DURATION_HOURS = 1
+INTERVAL_SECONDS = 180
+TOTAL_DURATION_HOURS = 10
 MAX_ITERATIONS = (TOTAL_DURATION_HOURS * 3600) // INTERVAL_SECONDS
 
 LOG_FILE = "analysis/watcher.log"
@@ -75,7 +75,7 @@ def main():
                     log_event(f"⚠️ GEM Task Dispatch/Execution failed: {e}")
             last_known_remote = current_remote
         else:
-            log_event(f"Heartbeat #{iteration}/{MAX_ITERATIONS} (10s): Remote unchanged ({last_known_remote[:7]}). Monitoring...")
+            log_event(f"Heartbeat #{iteration}/{MAX_ITERATIONS} (3m): Remote unchanged ({last_known_remote[:7]}). Monitoring...")
 
     log_event("=== Watcher Daemon Finished 10-Hour Window ===")
 
