@@ -1,0 +1,30 @@
+task_id: "GEM-TASK-014"
+source_orc_id: "ORC-014"
+source_orc_commit: "7c626af7021c71d7727ef2b13b40d4bc47e6d353"
+source_decision_file: "analysis/commits/ORC-014_Decision.md"
+decision: "FIX_REQUIRED"
+status: "PENDING"
+is_actionable: true
+attempt: 2
+max_attempts: 3
+created_at: "2026-09-13T13:00:00+09:00"
+next_agent: "GEM"
+rationale: "GEM-013 verified the automation round-trip only. It did not provide substantive external-validation data/provenance evidence, so the ORC-013 remediation remains open."
+required_actions:
+  - "Preserve GEM-011, ORC-012, ORC-013, GEM-013, and rejected/dummy evidence."
+  - "Identify a genuinely public and independently traceable formulation/experiment dataset compatible with frozen Rev.8.1 target responses."
+  - "Independently verify source identity before constructing the candidate validation set."
+  - "Record exact source location, reported quantity/unit, and any explicit conversion formula for every row."
+  - "Do not reconstruct, interpolate, synthesize, or relabel derived values as raw measurements."
+  - "Verify source response compatibility with the frozen scoring specification."
+  - "Re-run formulation-level and experiment-level overlap checks against DATASET_FREEZE_1 and benchmarks/domain_priors/."
+  - "Produce a new additive immutable manifest and keep blind scoring locked."
+  - "If no suitable public source exists, escalate to ORC with DATA_REQUIRED instead of manufacturing a dataset."
+acceptance_criteria:
+  - "Substantive validation-data evidence replaces dummy-only completion."
+  - "Dataset identity and provenance are independently verified."
+  - "Every row has auditable source location and unit provenance."
+  - "Target response compatibility is demonstrated."
+  - "Overlap audit is reproducible."
+  - "Rev.8.1 remains unchanged."
+  - "Blind scoring remains unauthorized until explicit ORC approval."
