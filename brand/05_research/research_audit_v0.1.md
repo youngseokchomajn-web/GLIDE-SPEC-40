@@ -1,4 +1,4 @@
-# Brand Research Audit — v0.1
+# Brand Research Audit — v0.2
 
 Date: 2026-09-13
 
@@ -24,87 +24,40 @@ Check whether the current brand-planning evidence chain is missing a material ca
 | Reapplication behavior | Added | Explicitly captured where reported; contradictory intervals retained |
 | Application format | Added | Stick/balm, wipes, roll-on, tape/band-aid alternatives |
 | Residue/clothing transfer | Added | Staining/greasy tradeoff captured |
-| Price/value | Partial | Some community signals exist, but not enough structured cases yet |
-| Gender/anatomy segmentation | Partial | Male-specific and sports-bra/nipple cases present; broader sex/body/anatomy segmentation still needed |
-| Climate segmentation | Partial | Heat/wet/cold signals present; dry/cold/hot-humid matrix not yet balanced |
-| Distance/time segmentation | Partial | 14.5 mi, 15 mi, 24 mi, 50K, marathon/ultra context; controlled time-to-failure still absent |
-| Recovery/post-run | Missing | Community evidence currently focuses mainly on prevention/protection |
-| Skin compatibility/adverse reactions | Missing | Needs dedicated evidence pass; do not infer from “works/doesn't work” |
+| Price/value | Partial | Community signals exist; structured willingness-to-pay remains open |
+| Gender/anatomy segmentation | Improved | International + Korean sports-bra/waistband and groin/thigh cases; balanced sampling still needed |
+| Climate segmentation | Partial | Heat/wet/cold signals present; balanced matrix still needed |
+| Distance/time segmentation | Improved | Korean cases add 10K and ~20 km/2 h reports; controlled time-to-failure still absent |
+| Recovery/post-run | Missing | Separate evidence pass still required |
+| Skin compatibility/adverse reactions | Missing | Dedicated evidence/testing still required |
 | Sensory UX | Partial | Greasy/dry/brittle/smell signals present; texture, spreadability, cleanup need more evidence |
 | Packaging/carryability | Partial | Wipes/roll-on/carrying small container mentioned; broader pack/aid-station workflow missing |
-| Regulatory/claim boundary | Covered as constraint | Community reports are not treated as regulatory evidence |
+| Regulatory/claim boundary | Covered as constraint | Korean MFDS labeling/claims rules must be mapped to final intended function |
 | Controlled performance standards | Missing by design | Must be established through technical/R&D work, not community anecdotes |
 
-## Important missing research passes
+## New Korean evidence pass
 
-### 1. Body-area matrix
+`brand/05_research/korean_runner_evidence_round1_2026-09.md` adds four traceable Korean/local signals:
 
-Need balanced cases for:
-- inner thigh
-- groin
-- buttocks/gluteal cleft
-- nipples
-- underarms
-- sports-bra contact
-- waistband/pack contact
-- feet/toes/shoe interface
+- sweat-related Vaseline wash-off
+- clothing-motion contribution to groin/thigh friction
+- perceived duration limitation around 20 km / 2 h in one runner report
+- local marathon guidance that already recommends Vaseline for chafing prevention
 
-For each, record the same fields and identify whether formulation, clothing, tape, or equipment is the dominant intervention.
+These strengthen the relevance of the problem in Korea but do not establish prevalence, objective efficacy, or superiority.
 
-### 2. Condition matrix
+## Gate-closure plan
 
-Build evidence across:
-- dry/cool
-- hot/dry
-- hot/humid
-- rain/wet
-- cold
-- sweat-heavy indoor/treadmill if relevant
+`brand/05_research/gate_closure_plan_v0.1.md` now defines the remaining sequence:
 
-Do not infer missing cells from adjacent conditions.
-
-### 3. Distance/time matrix
-
-Separate:
-- 5–10K
-- half marathon
-- marathon
-- 50K
-- 100K+
-
-Capture time-to-first-symptom and time-to-failure whenever users report it.
-
-### 4. User-behavior matrix
-
-Capture:
-- initial application amount
-- application timing before start
-- reapplication timing
-- whether product is carried
-- aid-station/drop-bag behavior
-- whether user changes clothing or tape instead of product
-- why they stay with an imperfect incumbent
-
-### 5. Failure taxonomy
-
-Do not use “doesn't work” as a single label. Classify failure as:
-- friction breakthrough
-- product migration
-- sweat dilution/wash-off
-- water exposure
-- heat softening/melting
-- cold hardening/brittleness
-- residue/grease
-- clothing staining/transfer
-- odor/sensory issue
-- application difficulty
-- reapplication difficulty
-- skin irritation/compatibility
-- equipment/garment interaction
-
-### 6. Recovery evidence
-
-The current brand architecture includes PROTECT → PERFORM → RECOVER → OPTIMIZE, but the community evidence collected so far is overwhelmingly about protection. Recovery should be researched separately rather than assumed from the protection problem.
+1. structured Korean runner interviews/survey
+2. price/value and willingness-to-pay measurement
+3. matched incumbent testing
+4. skin compatibility screening
+5. temperature/humidity friction and persistence testing
+6. application-format prototypes
+7. independent recovery research
+8. Korean regulatory classification/claim mapping
 
 ## Decision integrity check
 
@@ -120,8 +73,8 @@ The following conclusions remain valid as working hypotheses, but none should be
 
 Before locking the first-product specification, require:
 
-1. More individual community cases, especially missing body-area/condition cells.
-2. Structured user interviews or survey work to estimate prevalence and willingness-to-pay.
+1. Balanced Korean/local runner evidence.
+2. Structured prevalence and willingness-to-pay data.
 3. Controlled technical tests translating recurring failure modes into measurable requirements.
 4. Competitive product testing under matched conditions.
 5. Clear separation between user-reported benefit, measured performance, and regulatory claim language.
