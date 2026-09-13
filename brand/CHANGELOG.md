@@ -1,5 +1,46 @@
 # Brand Planning Changelog
 
+## v0.6 — 2026-09-13
+
+A fourth community-evidence pass expanded Korean and global runner discovery before the structured survey is fielded.
+
+### Added
+
+- `brand/05_research/community_round4_2026-09.md`
+  - 18 individually preserved community cases
+  - Korean 10 km, 20 km/2 h, 30 km+, wet-weather, garment-migration, and apparel-substitution reports
+  - global ultrarunning cases covering sports-bra friction, tape switching, carryability, reapplication, heat-dependent handling, residue/staining, and contradictory incumbent experiences
+
+### New evidence signals
+
+- Garment migration can reintroduce skin-to-skin friction even when topical protection is applied.
+- Apparel and adhesive barriers are direct substitutes/competitors for topical anti-chafe products.
+- Long-event logistics make carryability, reachability, and reapplication part of functional product performance.
+- Heat and sweat can change both perceived persistence and application/rheology.
+- Anatomical site can determine which solution works; one product need not solve all sites.
+- Users may accept premium apparel or specialized products when they solve several problems simultaneously.
+- Contradictory reports remain substantial across Vaseline, Body Glide, Squirrel's Nut Butter, 2Toms, tape, and apparel.
+
+### Changed
+
+- Korean/local evidence gate is now richer but still not closed; structured prevalence and balanced sampling remain required.
+- Survey requirements should explicitly measure substitute behavior, garment migration, reapplication logistics, and body-area-specific solution switching.
+
+### Evidence interpretation
+
+The new pass strengthens the hypothesis that the product problem is a **skin–clothing–equipment–environment system problem**, not merely a lubricant-selection problem. It does not establish prevalence, objective performance, superiority, exact duration, medical benefit, or regulatory claim eligibility.
+
+### Remaining gates
+
+1. Balanced Korean/local runner interviews or survey.
+2. Structured price/value and willingness-to-pay evidence.
+3. Matched objective testing against petroleum jelly and leading specialized formats.
+4. Skin compatibility testing.
+5. Temperature/humidity friction and persistence testing.
+6. Application-format prototypes and reachability testing.
+7. Independent recovery evidence.
+8. Korean regulatory classification and claim mapping.
+
 ## v0.5 — 2026-09-13
 
 The first Korean/local runner evidence pass was completed and the remaining pre-product-lock gates were converted into a concrete closure plan.
@@ -127,66 +168,11 @@ These remain candidate decisions until balanced evidence and controlled testing 
 
 ## v0.2 — 2026-09-13
 
-Community evidence was moved from a schema-only state into an initial traceable evidence set, and a completeness audit was added.
-
-### Added
-
-- `brand/05_research/community_cases_v0.1.md`
-  - 10 individually preserved community cases
-- `brand/05_research/research_audit_v0.1.md`
-  - coverage audit and explicit research gaps
-
-### Changed
-
-- `community_evidence_registry.md` upgraded from v0.1 to v0.2.
-- Added odor/sensory, cold texture, recovery, skin compatibility, and willingness-to-pay as research priorities.
-
-### Strategic interpretation reinforced
-
-- There is no evidence yet for a universal anti-chafe winner.
-- Persistence is conditional on heat, sweat, water, motion, clothing/equipment, body area, and application behavior.
-- Reapplication is part of the real operating system.
-- Lubricants compete with tape, band-aids, garments, compression, and equipment changes.
-- The opportunity hypothesis remains scenario-based endurance skin care, not simply “better Vaseline.”
+A community evidence set and completeness audit were added.
 
 ## v0.1 — 2026-09-13
 
 Initial brand-planning workspace created inside the GLIDE-SPEC-40 repository.
-
-### Added
-
-- brand strategy
-- brand origin hypothesis
-- positioning hypothesis
-- runner journey framework
-- runner pain-point research framework
-- market-gap hypothesis
-- competitor landscape
-- first product concept
-- candidate performance requirements
-- brand DNA
-- global expansion framework
-
-### Strategic decisions captured
-
-- Initial beachhead: marathon and ultra-distance runners.
-- Working category: Endurance / Performance Skin Care.
-- Anti-chafe is treated as a function, not the whole brand category.
-- Core conceptual variables: TIME × MOTION × ENVIRONMENT.
-- Long-term product journey: PROTECT → PERFORM → RECOVER → OPTIMIZE.
-- Brand differentiation hypothesis: design from the conditions of sport rather than adapt ordinary skincare to sport.
-
-### Explicitly not finalized
-
-- brand name
-- slogan
-- final target segment
-- final product specification
-- formula
-- numerical performance thresholds
-- regulatory claims
-- packaging
-- market-size or pricing assumptions
 
 ## Versioning rule
 
