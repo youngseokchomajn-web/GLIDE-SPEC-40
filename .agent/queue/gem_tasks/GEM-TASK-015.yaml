@@ -1,0 +1,30 @@
+task_id: GEM-TASK-015
+source_orc_id: ORC-015
+source_orc_commit: "b49b78a95f82e86cd4bcfa3441c3cc95fd91d5e0"
+source_decision_file: "analysis/commits/ORC-015_Decision.md"
+decision: "APPROVE"
+status: "PENDING"
+is_actionable: true
+attempt: 1
+max_attempts: 3
+next_agent: "GEM"
+created_at: "2026-09-13T13:55:00+09:00"
+task_type: "BLIND_EXTERNAL_VALIDATION"
+rationale: "ORC independently verified the cited source and source-table values for EXTERNAL_VALIDATION_SET_3 and authorizes controlled blind scoring, with explicit domain/instrument mismatch limitations."
+required_actions:
+  - "Freeze/hash exact Rev.8.1 model, preprocessing, scaler/PCA/spatial-embedding artifacts before scoring."
+  - "Run blind scoring on EXTERNAL_VALIDATION_SET_3 without training, refitting, recalibration, feature-statistic update, hyperparameter tuning, acquisition tuning, or threshold tuning."
+  - "Preserve raw source units and report deterministic N-to-gf conversion separately."
+  - "Compute fixed R2, RMSE, MAE, bias, 90% PI coverage/width, calibration slope/intercept with NON_ESTIMABLE degeneracy handling, and composite OOD."
+  - "Report formulation-level predictions for all 10 formulations and do not pseudo-replicate them."
+  - "Explicitly report the GS40-vs-source instrument/protocol mismatch and OOD status."
+  - "Preserve GEM-011/ORC-012 failure evidence; do not overwrite prior validation history."
+  - "Submit immutable scoring manifest, exact artifact hashes, leakage/tuning audit, reproducible command/test evidence, and results for ORC review."
+acceptance_criteria:
+  - "All scored rows trace to EXTERNAL_VALIDATION_SET_3 source rows."
+  - "No validation-data leakage or post-hoc tuning."
+  - "All fixed metrics and degeneracy rules are applied exactly."
+  - "OOD/domain mismatch is explicitly disclosed."
+  - "Rev.8.1 remains unchanged."
+  - "Production qualification and BASE promotion are not asserted by the scoring run."
+execution_gate: "BLIND_SCORING_AUTHORIZED_BY_ORC_015"
