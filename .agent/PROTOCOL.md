@@ -64,6 +64,7 @@
   - 추가 실험(EXPERIMENT) 또는 추가 데이터(DATA_REQUIRED) 지시
   - 연구 방향 결정 및 수렴(CONVERGED) 판정
 - **원칙:** ORC는 원칙적으로 직접 코드를 작성하지 않는다.
+- **세부 실행 SOP:** ORC의 자율 운영 절차, `orc 작동` 트리거 규약, 10-point 체크리스트 및 validation gate는 [`docs/ORC_OPERATION_PROTOCOL.md`](../docs/ORC_OPERATION_PROTOCOL.md)를 따른다.
 
 ---
 
