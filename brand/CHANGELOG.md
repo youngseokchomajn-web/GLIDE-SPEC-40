@@ -1,5 +1,53 @@
 # Brand Planning Changelog
 
+## v0.8 — 2026-09-13
+
+Round 5 findings were converted from research observations into a preliminary technical-validation architecture and the gate-closure sequence was updated accordingly.
+
+### Added
+
+- `brand/05_research/technical_validation_matrix_v0.1.md`
+  - maps recurring failure modes to measurable technical questions
+  - defines the working system as `skin × product × garment × equipment × motion × sweat/water × time`
+  - separates bench method development, matched incumbent comparison, UX validation, and field validation
+  - prohibits numerical thresholds until method variance and incumbent baselines are known
+  - requires every final product requirement to link to evidence IDs and/or controlled test IDs
+
+### Changed
+
+- `brand/05_research/gate_closure_plan_v0.1.md` upgraded in place to v0.2
+  - Round 5 variables incorporated into the gate sequence
+  - technical validation matrix added as the starting architecture for incumbent/candidate testing
+  - benchmark measurements expanded beyond friction to persistence, migration, transfer, sensory/application and reapplication burden where justified
+  - numerical acceptance thresholds explicitly deferred until baseline data exist
+- `brand/05_research/research_audit_v0.1.md` upgraded in place to v0.3
+  - controlled performance architecture is now tracked as an explicit research category
+  - Round 5 system-level findings and remaining gates updated
+
+### Decision impact
+
+The project is now ready to move from broad community discovery toward two parallel evidence tracks:
+
+1. **Human evidence:** Korean runner survey + qualitative interviews to establish prevalence, failure context, switching, spend and price sensitivity.
+2. **Technical evidence:** repeatable bench methods and matched incumbent testing derived from the failure taxonomy.
+
+Neither track alone is sufficient for product lock.
+
+### Evidence interpretation
+
+The technical matrix is a test architecture, not a claim of efficacy. It intentionally leaves formulation, format, duration thresholds, superiority claims, price and SKU open until measurements and user evidence support them.
+
+### Remaining gates
+
+1. Field Korean runner survey and 20–30 qualitative interviews.
+2. Structured price/value and willingness-to-pay analysis.
+3. Bench method development and matched incumbent comparison.
+4. Skin compatibility testing.
+5. Controlled temperature/moisture/friction/persistence matrix.
+6. Application-format and reachability validation.
+7. Independent recovery evidence.
+8. Korean regulatory classification and claim mapping.
+
 ## v0.7 — 2026-09-13
 
 Community Evidence Round 5 was incorporated into the brand research decision chain, and the Korean runner survey protocol was upgraded before fielding.
