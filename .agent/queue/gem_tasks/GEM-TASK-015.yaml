@@ -3,12 +3,12 @@ source_orc_id: "ORC-015"
 source_orc_commit: "b49b78a95f82e86cd4bcfa3441c3cc95fd91d5e0"
 source_decision_file: "analysis/commits/ORC-015_Decision.md"
 decision: "APPROVE"
-status: "PENDING"
-is_actionable: true
+status: "COMMITTED"
+is_actionable: false
 attempt: 1
 max_attempts: 3
 created_at: "2026-09-13T13:55:00+09:00"
-claimed_at: "2026-09-13T13:51:08+09:00"
+claimed_at: "2026-09-13T13:54:10+09:00"
 next_agent: "GEM"
 rationale: "ORC independently verified the cited source and source-table values for EXTERNAL_VALIDATION_SET_3 and authorizes controlled blind scoring, with explicit domain/instrument mismatch limitations."
 required_actions:
