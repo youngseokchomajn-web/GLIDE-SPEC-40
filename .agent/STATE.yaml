@@ -1,7 +1,7 @@
-version: "1.2.0"
-phase: "Phase 2.5 - Bidirectional Task Queue"
-system_status: "OPERATIONAL"
-automation_level: "LEVEL 2.5 - Bidirectional Event & Task Dispatch (ORC <-> GEM Queues Operational)"
+version: "1.3.0"
+phase: "Phase 3 - Closed-Loop Automation Ready"
+system_status: "EXECUTOR_OPERATIONAL"
+automation_level: "LEVEL 2.9 - Bidirectional Queue & Executor Operational (Loop Closure Ready)"
 active_baseline: "Rev.8.1 (docs/REV8.1_BASELINE.md)"
 
 last_message:
@@ -16,7 +16,7 @@ current_cycle:
   attempt: 1
   max_attempts: 3
   status: "ACKNOWLEDGED_STOP"
-  last_gem_commit: "a08f4c5980e85abc41fdd4e7a48daa45a6d6c3f8"
+  last_gem_commit: "7b9c629fcaad7d15a9926d57ba7fc3188e632d43"
   last_orc_decision: "ORC-003"
 
 guardrails:

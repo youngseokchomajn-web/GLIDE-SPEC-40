@@ -96,3 +96,28 @@ status: "ACKNOWLEDGED_STOP"
                     existing = True
                     break
         assert existing is True
+
+    def test_all_seed_tasks_have_valid_40_hex_git_commits(self):
+        """Invariant: Every GEM task YAML must have an authentic 40-char hex SHA that exists in git."""
+        import glob
+        import re
+        import subprocess
+
+        hex_pattern = re.compile(r"^[0-9a-f]{40}$")
+        gem_tasks = glob.glob(".agent/queue/gem_tasks/*.yaml")
+        assert len(gem_tasks) >= 2, "Seed tasks GEM-TASK-002 and GEM-TASK-003 must exist"
+
+        for task_path in gem_tasks:
+            source_sha = None
+            with open(task_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("source_orc_commit:"):
+                        source_sha = line.split(":", 1)[1].strip().strip('"').strip("'")
+                        break
+            
+            assert source_sha is not None, f"source_orc_commit missing in {task_path}"
+            assert hex_pattern.match(source_sha), f"source_orc_commit '{source_sha}' in {task_path} is not a valid 40-char hex SHA"
+            
+            # Verify git existence
+            res = subprocess.run(["git", "cat-file", "-e", f"{source_sha}^{{commit}}"], capture_output=True)
+            assert res.returncode == 0, f"Git commit {source_sha} does not exist in repository"

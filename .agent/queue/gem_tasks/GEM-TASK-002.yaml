@@ -1,6 +1,7 @@
 task_id: "GEM-TASK-002"
 source_orc_id: "ORC-002"
-source_orc_commit: "5503be98a38808a4c80e6545abbb1d95a779c064-orc002"
+source_orc_commit: "f23ee431d1a265fccfc8ac4dbf7004415b13082b"
+traceability_note: "Corrected from synthetic backfill string '5503be98a38808a4c80e6545abbb1d95a779c064-orc002' to authentic Git SHA 'f23ee431d1a265fccfc8ac4dbf7004415b13082b' per GEM-007 review."
 source_decision_file: "analysis/commits/ORC-002_Decision.md"
 decision: "REJECT"
 status: "ACKNOWLEDGED_STOP"
