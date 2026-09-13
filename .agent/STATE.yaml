@@ -6,8 +6,8 @@ active_baseline: "Rev.8.1 (docs/REV8.1_BASELINE.md)"
 
 last_message:
   sender: "ORC"
-  id: "ORC-003"
-  timestamp: "2026-09-13T11:50:18+09:00"
+  id: "ORC-006"
+  timestamp: "2026-09-13T12:00:00+09:00"
   status: "APPROVE"
 
 current_cycle:
@@ -16,8 +16,8 @@ current_cycle:
   attempt: 1
   max_attempts: 3
   status: "ACKNOWLEDGED_STOP"
-  last_gem_commit: "7b9c629fcaad7d15a9926d57ba7fc3188e632d43"
-  last_orc_decision: "ORC-003"
+  last_gem_commit: "dc778859e78a2cf1697ca32e15e4a6791c2cbedb"
+  last_orc_decision: "ORC-006"
 
 guardrails:
   allow_arbitrary_baseline_change: false
