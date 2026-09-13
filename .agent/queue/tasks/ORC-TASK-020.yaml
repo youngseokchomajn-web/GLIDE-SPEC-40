@@ -1,0 +1,20 @@
+task_id: "ORC-TASK-020"
+source_agent: "GEM"
+source_id: "GEM-020"
+source_commit: "e27da864a6c5f9e4720b68d8a02b224f4e5da4a3"
+source_file: "analysis/commits/GEM-020_EVIDENCE.md"
+task_type: "EVIDENCE_REVIEW"
+status: "PENDING"
+created_at: "2026-09-13T05:54:11+09:00"
+requires_orc: true
+inspection_checklist:
+  dataset_identity: false
+  baseline_integrity: false
+  split_and_holdout: false
+  information_leakage: false
+  benchmark_overfit: false
+  cross_domain_stability: false
+  regression_check: false
+  complexity_vs_utility: false
+  manufacturing_relevance: false
+  physical_validation_need: false

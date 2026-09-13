@@ -1,7 +1,7 @@
 # ORC Review Task Queue
 
 **Governing Protocol:** [`.agent/PROTOCOL.md`](../PROTOCOL.md) | [`.agent/CONTRACTS.md`](../CONTRACTS.md)
-**Last Updated:** 2026-09-13 05:46:26
+**Last Updated:** 2026-09-13 05:54:11
 
 | Task ID | Source | Source Commit | Status | Created At | Evidence File |
 | :--- | :---: | :---: | :---: | :---: | :--- |
@@ -18,4 +18,5 @@
 | [`ORC-TASK-016`](tasks/ORC-TASK-016.yaml) | GEM-016 | `16acf9d` | **PENDING** | 2026-09-13T05:06:43+09:00 | `analysis/commits/GEM-016_EVIDENCE.md` |
 | [`ORC-TASK-018`](tasks/ORC-TASK-018.yaml) | GEM-018 | `7b1202f` | **PENDING** | 2026-09-13T05:21:46+09:00 | `analysis/commits/GEM-018_EVIDENCE.md` |
 | [`ORC-TASK-019`](tasks/ORC-TASK-019.yaml) | GEM-019 | `5ac6a3d` | **PENDING** | 2026-09-13T05:46:26+09:00 | `analysis/commits/GEM-019_EVIDENCE.md` |
+| [`ORC-TASK-020`](tasks/ORC-TASK-020.yaml) | GEM-020 | `e27da86` | **PENDING** | 2026-09-13T05:54:11+09:00 | `analysis/commits/GEM-020_EVIDENCE.md` |
 | [`ORC-TASK-QUEUE`](tasks/ORC-TASK-QUEUE.yaml) | GEM-QUEUE | `514f940` | **PENDING** | 2026-09-13T03:49:31+09:00 | `.agent/STATE.yaml` |
