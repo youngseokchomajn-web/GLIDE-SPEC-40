@@ -1,5 +1,50 @@
 # Brand Planning Changelog
 
+## v1.0 — 2026-09-13
+
+A sixth public-web evidence pass was completed and formalized as a scalable hypothesis/failure-context layer. This changes the research sequence: public evidence should be expanded before spending effort on large primary surveys, while primary research remains necessary for representative prevalence, WTP, and structured choice.
+
+### Added
+
+- `brand/05_research/public_web_evidence_round6_2026-09.md`
+  - 12 individually preserved public-web cases
+  - heavy-sweat and long-run failure
+  - garment inseam/seam/fit effects
+  - sports-bra and hydration-vest interactions
+  - reachability constraints
+  - sensory/transfer/staining trade-offs
+  - hot/humid reapplication behavior
+  - cost/value switching
+  - topical vs apparel/adhesive alternatives
+
+### New evidence signals
+
+- Public-web cases continue to support the system-level unit `skin × product × garment × equipment × motion × sweat/water × time`.
+- Clothing geometry and fit can be causal or dominant enough that a topical product is not the correct intervention.
+- High-shear anatomical interfaces can produce switching toward adhesive barriers.
+- Reachability can determine product format choice even when a topical product is otherwise preferred.
+- Reapplication is an operational behavior that can depend on weather and event logistics.
+- Sensory/transfer burdens can cause switching even when protection is perceived as adequate.
+- Cost/value can move users from specialized products to petroleum jelly without proving either product objectively superior.
+
+### Research strategy change
+
+The project will now use three evidence layers:
+
+1. **Public-web evidence:** broad discovery, failure taxonomy, hypothesis generation, contradiction preservation.
+2. **Primary human evidence:** representative prevalence, segmentation, actual spend, WTP, and structured concept choice.
+3. **Technical evidence:** controlled friction/persistence/environment/application/compatibility testing.
+
+Primary survey work should target questions that public-web data cannot reliably answer rather than duplicating already-observed failure narratives.
+
+### Evidence boundary
+
+Round 6 does not establish prevalence, objective efficacy, exact duration, superiority, clinical benefit, regulatory eligibility, or population-level WTP.
+
+### Next action
+
+Expand the public-web dataset systematically using the existing schema, then identify the smallest set of unresolved high-value questions for primary research. In parallel, begin incumbent technical test-method development rather than waiting for the survey to finish.
+
 ## v0.9 — 2026-09-13
 
 The Korean runner research protocol was converted into a field-ready survey instrument so the next step can be actual data collection rather than further informal question design.
