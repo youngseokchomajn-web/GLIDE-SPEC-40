@@ -6,7 +6,7 @@ and solid volume fraction limits) with zero experimental cost (₩0).
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 import numpy as np
 
 from src.modeling.feature_engine import GS40FeatureEngine, FormulationFeatureVector
@@ -24,7 +24,7 @@ class VirtualCandidate:
 
 class VirtualFormulationGenerator:
     """
-    Vectorized Monte Carlo / Latin-Hypercube virtual formulation screening generator.
+    Vectorized Monte Carlo virtual formulation screening generator.
     Enforces Rev.7.3 Hard Constraints:
       - Total Wax: 17.0 wt% (SynWax 9.0 ~ 15.0%, Candelilla 2.0 ~ 8.0%)
       - Total Silicone: 28.0 wt% (Dimethicone 12.0 ~ 22.0%, Caprylyl 6.0 ~ 16.0%, MQ 1.0 ~ 3.0%)
@@ -37,7 +37,9 @@ class VirtualFormulationGenerator:
     def generate_candidates(
         cls,
         n_samples: int = 10000,
-        random_seed: int = 42
+        random_seed: int = 42,
+        max_returned: int = 2000,
+        fixed_powder: bool = False
     ) -> List[VirtualCandidate]:
         rng = np.random.default_rng(random_seed)
 
@@ -46,68 +48,92 @@ class VirtualFormulationGenerator:
         can_wax = 17.0 - syn_wax
 
         # 2. Silicone Sub-Mixture (Sum = 28.0 wt%)
-        mq_resin = rng.uniform(1.0, 3.0, size=n_samples)
-        dimeth = rng.uniform(12.0, 20.0, size=n_samples)
-        caprylyl = 28.0 - (dimeth + mq_resin)
+        if fixed_powder:
+            mq_resin = np.full(n_samples, 2.0)
+            dimeth = rng.uniform(12.0, 22.0, size=n_samples)
+            caprylyl = 28.0 - dimeth
+        else:
+            mq_resin = rng.uniform(1.0, 3.0, size=n_samples)
+            dimeth = rng.uniform(12.0, 20.0, size=n_samples)
+            caprylyl = 28.0 - (dimeth + mq_resin)
 
         # 3. Powder Sub-Mixture (Sum = 28.0 wt%)
-        # Base: Porous Silica 10%, Aerosil 2%, PMSSQ 8%, BN 3%, ZnO 5%
-        p_silica = rng.uniform(8.5, 11.5, size=n_samples)
-        f_silica = rng.uniform(1.5, 2.5, size=n_samples)
-        pmssq = rng.uniform(6.5, 9.5, size=n_samples)
-        bn = rng.uniform(2.2, 3.8, size=n_samples)
-        zno = 28.0 - (p_silica + f_silica + pmssq + bn)
+        if fixed_powder:
+            p_silica = np.full(n_samples, 10.0)
+            f_silica = np.full(n_samples, 2.0)
+            pmssq = np.full(n_samples, 8.0)
+            bn = np.full(n_samples, 3.0)
+            zno = np.full(n_samples, 5.0)
+        else:
+            p_silica = rng.uniform(8.5, 11.5, size=n_samples)
+            f_silica = rng.uniform(1.5, 2.5, size=n_samples)
+            pmssq = rng.uniform(6.5, 9.5, size=n_samples)
+            bn = rng.uniform(2.2, 3.8, size=n_samples)
+            zno = 28.0 - (p_silica + f_silica + pmssq + bn)
 
         # 4. Ester & Active Phase (Sum = 27.0 wt%)
-        active_pres = rng.uniform(1.0, 2.0, size=n_samples)
-        ab_ester = 27.0 - active_pres
+        if fixed_powder:
+            active_pres = np.full(n_samples, 1.0)
+            ab_ester = np.full(n_samples, 24.0)
+        else:
+            active_pres = rng.uniform(1.0, 2.0, size=n_samples)
+            ab_ester = 27.0 - active_pres
 
         # 5. Process Fill Temperature (75.0 to 85.0 °C)
         fill_temp = rng.uniform(75.0, 85.0, size=n_samples)
 
+        # Vectorized Pre-Filters
+        valid_zno = (zno >= 3.8) & (zno <= 6.2)
+        valid_cap = (caprylyl >= 5.0) & (caprylyl <= 15.0)
+        valid_fsil = (f_silica >= 1.5)
+        pre_valid_mask = valid_zno & valid_cap & valid_fsil
+
+        # Sample indices to construct objects for (mix of valid and invalid for auditing)
+        valid_indices = np.where(pre_valid_mask)[0]
+        invalid_indices = np.where(~pre_valid_mask)[0]
+
+        n_valid_keep = min(len(valid_indices), int(max_returned * 0.85))
+        n_invalid_keep = min(len(invalid_indices), max_returned - n_valid_keep)
+
+        selected_indices = np.concatenate([
+            valid_indices[:n_valid_keep],
+            invalid_indices[:n_invalid_keep]
+        ])
+
         candidates = []
-        for i in range(n_samples):
-            cid = f"VIRT-CAND-{i+1:06d}"
+        for idx in selected_indices:
+            cid = f"VIRT-CAND-{idx+1:06d}"
             w = {
-                "Synthetic Wax": round(float(syn_wax[i]), 2),
-                "Candelilla Wax": round(float(can_wax[i]), 2),
-                "Dimethicone": round(float(dimeth[i]), 2),
-                "Caprylyl Methicone": round(float(caprylyl[i]), 2),
-                "MQ Resin Solution": round(float(mq_resin[i]), 2),
-                "Porous Silica": round(float(p_silica[i]), 2),
-                "Silica Dimethyl Silylate": round(float(f_silica[i]), 2),
-                "PMSSQ": round(float(pmssq[i]), 2),
-                "Boron Nitride": round(float(bn[i]), 2),
-                "Zinc Oxide": round(float(zno[i]), 2),
-                "C12-15 Alkyl Benzoate": round(float(ab_ester[i]), 2),
-                "Active / Preservative": round(float(active_pres[i]), 2),
+                "Synthetic Wax": round(float(syn_wax[idx]), 2),
+                "Candelilla Wax": round(float(can_wax[idx]), 2),
+                "Dimethicone": round(float(dimeth[idx]), 2),
+                "Caprylyl Methicone": round(float(caprylyl[idx]), 2),
+                "MQ Resin Solution": round(float(mq_resin[idx]), 2),
+                "Porous Silica": round(float(p_silica[idx]), 2),
+                "Silica Dimethyl Silylate": round(float(f_silica[idx]), 2),
+                "PMSSQ": round(float(pmssq[idx]), 2),
+                "Boron Nitride": round(float(bn[idx]), 2),
+                "Zinc Oxide": round(float(zno[idx]), 2),
+                "C12-15 Alkyl Benzoate": round(float(ab_ester[idx]), 2),
+                "Active / Preservative": round(float(active_pres[idx]), 2),
             }
-            temp = round(float(fill_temp[i]), 1)
+            temp = round(float(fill_temp[idx]), 1)
 
             feat = GS40FeatureEngine.extract_from_weights(w, fill_temp_c=temp)
 
             rejections = []
-            # Physical Filter 1: Zinc Oxide bounds (must be 4.0 - 6.0%)
             if not (3.8 <= w["Zinc Oxide"] <= 6.2):
                 rejections.append(f"Zinc Oxide out of bounds ({w['Zinc Oxide']}%)")
-
-            # Physical Filter 2: Caprylyl bounds
             if not (5.0 <= w["Caprylyl Methicone"] <= 15.0):
                 rejections.append(f"Caprylyl Methicone out of bounds ({w['Caprylyl Methicone']}%)")
-
-            # Physical Filter 3: Fumed silica percolation threshold (>= 1.5%)
             if w["Silica Dimethyl Silylate"] < 1.5:
                 rejections.append("Fumed silica below percolation threshold (<1.5%)")
-
-            # Physical Filter 4: Solid Volume Fraction Limit (<= 40% to maintain pourability)
             if feat.solid_volume_fraction > 0.40:
                 rejections.append(f"Solid volume fraction excessive ({feat.solid_volume_fraction*100:.1f}% > 40%)")
-
-            # Physical Filter 5: Binder to Powder Ratio (>= 1.50)
             if feat.binder_to_powder_weight_ratio < 1.50:
                 rejections.append(f"Binder/powder ratio deficient ({feat.binder_to_powder_weight_ratio:.2f} < 1.50)")
 
-            is_feas = len(rejections) == 0
+            is_feas = (len(rejections) == 0)
             candidates.append(VirtualCandidate(
                 candidate_id=cid,
                 weights=w,

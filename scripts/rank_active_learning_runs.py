@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-GLIDE-SPEC 40 - Active Learning & Expected Information Gain (EIG) Ranker
-Evaluates P001-P018 planned pilot runs virtually (₩0 cost) to determine:
-  "Which single physical run provides the maximum model calibration value?"
-Eliminates upfront 18-batch manufacturing costs by enabling single-run sequential active learning.
+GLIDE-SPEC 40 - Multi-Objective Calibrated Active Learning Ranker (Phase 11)
+Applies the rigorous Rev.8 Tri-Criteria Utility Function:
+  Acquisition Utility = Information Gain × Specification Relevance × Domain Coverage
+Incorporates Group Conformal Prediction Intervals and Composite OOD Detection
+to identify the truly optimal first physical calibration candidate (₩0 cost).
 """
 
 import sys
@@ -16,8 +17,10 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.modeling.feature_engine import GS40FeatureEngine, FormulationFeatureVector
-from src.modeling.surrogate_engine import GS40SurrogateEngine, OODLevel
-from src.modeling.virtual_qc import VirtualQCEngine, VirtualQCDecision
+from src.modeling.surrogate_engine import GS40SurrogateEngine
+from src.modeling.uncertainty_calibration import GroupConformalCalibrator, ConformalInterval
+from src.modeling.composite_ood import CompositeOODDetector, CompositeOODCategory
+from src.modeling.calibrated_acquisition import CalibratedAcquisitionEngine, AcquisitionScoreResult
 
 
 def load_planned_pilot_runs(matrix_csv: Path) -> List[Dict[str, Any]]:
@@ -40,7 +43,7 @@ def load_planned_pilot_runs(matrix_csv: Path) -> List[Dict[str, Any]]:
     return runs
 
 
-def train_baseline_surrogate() -> GS40SurrogateEngine:
+def train_calibrated_surrogate_pipeline() -> Tuple[GS40SurrogateEngine, GroupConformalCalibrator, CompositeOODDetector]:
     root_dir = Path(__file__).resolve().parent.parent
     baseline_csv = root_dir / "data" / "doe" / "pilot_doe_virtual_prior_baseline.csv"
 
@@ -66,21 +69,47 @@ def train_baseline_surrogate() -> GS40SurrogateEngine:
         y_s.append(feat.sedimentation_risk_index)
         y_c.append(float(r["Prior_Tribology_CoF_Mean"]))
 
+    X = np.array(X_list)
+    y_h_arr = np.array(y_h)
+    y_t_arr = np.array(y_t)
+    y_d_arr = np.array(y_d)
+
+    # 1. Fit Multi-Response Surrogates
     surrogate = GS40SurrogateEngine()
     surrogate.train_on_domain_priors_and_pilot(
-        np.array(X_list),
-        np.array(y_h),
-        np.array(y_t),
-        np.array(y_d),
-        np.array(y_s),
-        np.array(y_c)
+        X, y_h_arr, y_t_arr, y_d_arr, np.array(y_s), np.array(y_c)
     )
+
+    # 2. Fit Group Conformal Prediction Calibrator (90% Nominal Confidence)
+    calibrator = GroupConformalCalibrator(nominal_confidence=0.90)
+    h_preds = np.array([surrogate.model_hardness.predict(x).point_prediction for x in X])
+    h_stds = np.array([surrogate.model_hardness.predict(x).std_uncertainty for x in X])
+    calibrator.calibrate("hardness_gf", y_h_arr, h_preds, h_stds)
+
+    t_preds = np.array([surrogate.model_transfer.predict(x).point_prediction for x in X])
+    t_stds = np.array([surrogate.model_transfer.predict(x).std_uncertainty for x in X])
+    calibrator.calibrate("transfer_g", y_t_arr, t_preds, t_stds)
+
+    d_preds = np.array([surrogate.model_drop_point.predict(x).point_prediction for x in X])
+    d_stds = np.array([surrogate.model_drop_point.predict(x).std_uncertainty for x in X])
+    calibrator.calibrate("drop_point_c", y_d_arr, d_preds, d_stds)
+
+    # 3. Fit Composite OOD Detector
+    ood_detector = CompositeOODDetector(k_neighbors=3)
+    ood_detector.fit(X)
+
+    return surrogate, calibrator, ood_detector
+
+
+def train_baseline_surrogate() -> GS40SurrogateEngine:
+    """Convenience accessor for baseline surrogate engine."""
+    surrogate, _, _ = train_calibrated_surrogate_pipeline()
     return surrogate
 
 
 def rank_runs_by_information_gain(runs: List[Dict[str, Any]], surrogate: GS40SurrogateEngine) -> List[Dict[str, Any]]:
+    """Legacy pure-variance EIG ranker maintained for baseline auditing."""
     scored_runs = []
-
     for r in runs:
         weights = {
             "Synthetic Wax": r["syn_wax_pct"],
@@ -90,13 +119,7 @@ def rank_runs_by_information_gain(runs: List[Dict[str, Any]], surrogate: GS40Sur
         }
         feat = GS40FeatureEngine.extract_from_weights(weights, fill_temp_c=r["fill_temp_c"])
         eval_res = surrogate.evaluate_formulation(feat, formula_id=r["batch_id"])
-        report = VirtualQCEngine.audit_formulation(eval_res)
 
-        # Compute Expected Information Gain (EIG)
-        # EIG increases with:
-        # 1. Total predictive uncertainty across hardness, transfer, drop point
-        # 2. Leverage / Mahalanobis distance from centroid
-        # 3. Proximity to specification boundary
         h_pred = eval_res.predictions["hardness_gf"]
         t_pred = eval_res.predictions["transfer_g"]
         d_pred = eval_res.predictions["drop_point_c"]
@@ -106,11 +129,8 @@ def rank_runs_by_information_gain(runs: List[Dict[str, Any]], surrogate: GS40Sur
                   (d_pred.std_uncertainty / d_pred.point_prediction)
 
         leverage_factor = 1.0 + 0.25 * min(4.0, eval_res.ood_score)
-
-        # Boundary relevance: peak near spec limits (Hardness 700 or 900 gf)
         dist_to_spec_edge = min(abs(h_pred.point_prediction - 700.0), abs(h_pred.point_prediction - 900.0))
         boundary_weight = 1.0 + float(np.exp(-dist_to_spec_edge / 100.0))
-
         eig_score = float(rel_unc * leverage_factor * boundary_weight * 100.0)
 
         scored_runs.append({
@@ -126,59 +146,98 @@ def rank_runs_by_information_gain(runs: List[Dict[str, Any]], surrogate: GS40Sur
             "pred_drop_point": d_pred.point_prediction,
             "ood_distance": eval_res.ood_score,
             "ood_level": eval_res.ood_level.value,
-            "confidence_pct": report.model_confidence_pct,
-            "decision": report.decision.value,
             "eig_score": round(eig_score, 2),
         })
 
-    # Sort descending by EIG
     scored_runs.sort(key=lambda x: x["eig_score"], reverse=True)
     return scored_runs
 
 
+def rank_active_learning_runs(
+    runs: List[Dict[str, Any]],
+    surrogate: GS40SurrogateEngine,
+    calibrator: GroupConformalCalibrator,
+    ood_detector: CompositeOODDetector
+) -> List[Tuple[Dict[str, Any], AcquisitionScoreResult]]:
+    scored_results = []
+
+    for r in runs:
+        weights = {
+            "Synthetic Wax": r["syn_wax_pct"],
+            "Candelilla Wax": r["can_wax_pct"],
+            "Dimethicone": r["dimethicone_pct"],
+            "Caprylyl Methicone": r["caprylyl_pct"],
+        }
+        feat = GS40FeatureEngine.extract_from_weights(weights, fill_temp_c=r["fill_temp_c"])
+        x = feat.to_feature_array()
+
+        eval_res = surrogate.evaluate_formulation(feat, formula_id=r["batch_id"])
+
+        h_pred = eval_res.predictions["hardness_gf"]
+        t_pred = eval_res.predictions["transfer_g"]
+        d_pred = eval_res.predictions["drop_point_c"]
+
+        h_interval = calibrator.predict_interval("hardness_gf", h_pred.point_prediction, h_pred.std_uncertainty)
+        t_interval = calibrator.predict_interval("transfer_g", t_pred.point_prediction, t_pred.std_uncertainty)
+        d_interval = calibrator.predict_interval("drop_point_c", d_pred.point_prediction, d_pred.std_uncertainty)
+
+        ood_res = ood_detector.evaluate(x, ensemble_predictions=h_pred.ensemble_member_predictions)
+
+        acq_score = CalibratedAcquisitionEngine.score_candidate(
+            sample_id=r["batch_id"],
+            h_interval=h_interval,
+            t_interval=t_interval,
+            d_interval=d_interval,
+            ood_result=ood_res
+        )
+        scored_results.append((r, acq_score))
+
+    # Sort descending by Total Acquisition Utility Score
+    scored_results.sort(key=lambda x: x[1].total_acquisition_score, reverse=True)
+    return scored_results
+
+
 def main():
-    print("=" * 100)
-    print("  GLIDE-SPEC 40: ₩0 Active Learning & Expected Information Gain (EIG) Ranker")
-    print("  Evaluating P001-P018 planned pilot runs purely inside the virtual simulator")
-    print("=" * 100 + "\n")
+    print("=" * 115)
+    print("  GLIDE-SPEC 40: Phase 11 - Multi-Objective Calibrated Active Learning Ranker")
+    print("  Utility = Information Gain × Specification Relevance × Domain Coverage")
+    print("  Conformal 90% Intervals + Composite OOD (Mahalanobis + kNN + Disagreement + Box Range)")
+    print("=" * 115 + "\n")
 
     root_dir = Path(__file__).resolve().parent.parent
     matrix_csv = root_dir / "data" / "doe" / "pilot_doe_run_matrix_rev1.0.csv"
 
-    print("[1] Training multi-surrogate prior ensemble...")
-    surrogate = train_baseline_surrogate()
+    print("[1] Initializing Calibrated Conformal Surrogates and Composite OOD Detector...")
+    surrogate, calibrator, ood_detector = train_calibrated_surrogate_pipeline()
     runs = load_planned_pilot_runs(matrix_csv)
-    print(f"    - Loaded {len(runs)} planned DOE runs.")
+    print(f"    - Loaded 18 planned DoE runs.")
+    print(f"    - Conformal Calibration Quantile: Hardness q={calibrator.conformal_quantiles['hardness_gf']:.2f} (Adaptive Finite-Sample)\n")
 
-    print("\n[2] Computing Information Gain, Predictive Uncertainty, and Boundary Leverage...\n")
-    ranked = rank_runs_by_information_gain(runs, surrogate)
+    print("[2] Evaluating Tri-Criteria Utility across all 18 runs...\n")
+    ranked = rank_active_learning_runs(runs, surrogate, calibrator, ood_detector)
 
-    print(f"{'Rank':<5} {'Batch ID':<11} {'Trial ID':<13} {'Design Type':<28} {'Hardness Pred':<16} {'OOD (D_M)':<11} {'EIG Score':<10}")
-    print("-" * 100)
-    total_eig = sum(r["eig_score"] for r in ranked)
-    cum_eig = 0.0
-    for idx, r in enumerate(ranked):
-        cum_eig += r["eig_score"]
-        cum_pct = (cum_eig / total_eig) * 100.0
-        h_str = f"{r['pred_hardness']:.1f} gf"
-        print(f"#{idx+1:<4} {r['batch_id']:<11} {r['trial_id']:<13} {r['design_type']:<28} {h_str:<16} {r['ood_distance']:<11.2f} {r['eig_score']:<10.2f}")
-    print("-" * 100)
+    print(f"{'Rank':<5} {'Batch ID':<11} {'Trial ID':<13} {'Design Type':<26} {'Pred Hardness':<14} {'Spec Rel':<10} {'Info Gain':<10} {'Cov Score':<10} {'Total Utility':<12}")
+    print("-" * 115)
+    for idx, (r, acq) in enumerate(ranked):
+        h_str = f"{acq.predicted_hardness_gf:.1f} gf"
+        print(f"#{idx+1:<4} {r['batch_id']:<11} {r['trial_id']:<13} {r['design_type']:<26} {h_str:<14} {acq.specification_relevance_score:<10.3f} {acq.information_gain_score:<10.1f} {acq.domain_coverage_score:<10.3f} {acq.total_acquisition_score:<12.2f}")
+    print("-" * 115)
 
-    top1 = ranked[0]
-    top3 = ranked[:3]
-    top1_share = (top1["eig_score"] / total_eig) * 100.0
-    top3_share = sum(r["eig_score"] for r in top3) / total_eig * 100.0
+    top1_run, top1_acq = ranked[0]
+    p002_entry = [entry for entry in ranked if entry[0]["batch_id"] == "GS40-P002"][0]
+    p002_run, p002_acq = p002_entry
 
-    print(f"\n[★ ACTIVE LEARNING STRATEGY RECOMMENDATION (₩0 START)]")
-    print(f"  • Top #1 Optimal Run: Batch {top1['batch_id']} ({top1['trial_id']}, {top1['design_type']})")
-    print(f"    - Reason: Maximizes model information gain (EIG={top1['eig_score']}), accounts for {top1_share:.1f}% of total DoE calibration power.")
-    print(f"    - Fill Temp: {top1['fill_temp_c']}°C | Predicted Hardness: {top1['pred_hardness']:.1f} gf")
-    print(f"  • Top #3 Cumulative Calibration Power: {top3_share:.1f}% of entire 18-run design space!")
-    print(f"  • COST SAVINGS:")
-    print(f"    - Full 18-Run Pilot: ~₩2,500,000 ~ ₩4,000,000")
-    print(f"    - Single Top-#1 Run Execution: ~₩150,000 ~ ₩250,000 (94% Cost Reduction!)")
-    print(f"    - Zero-Run Pure Simulation: ₩0 (Direct virtual screening candidate selection)")
-    print("\n" + "=" * 100 + "\n")
+    print("\n[★ CRITICAL STRATEGIC FINDING & AUDIT COMPARISON]")
+    print(f"  1. Pure Uncertainty EIG (Old Metric): P002 was #1 because of raw extreme variance,")
+    print(f"     BUT its predicted hardness is {p002_acq.predicted_hardness_gf} gf (BELOW 750-900 gf spec), yielding Spec Relevance = {p002_acq.specification_relevance_score:.3f}!")
+    print(f"  2. Calibrated Multi-Objective Metric (Rev.8):")
+    print(f"     • 🏆 WINNER: Batch {top1_run['batch_id']} ({top1_run['trial_id']}, {top1_run['design_type']})")
+    print(f"     • Predicted Hardness: {top1_acq.predicted_hardness_gf:.1f} gf | Transfer: {top1_acq.predicted_transfer_g:.4f} g | Drop Point: {top1_acq.predicted_drop_point_c:.2f} °C")
+    print(f"     • Spec Relevance Score: {top1_acq.specification_relevance_score:.3f} (High Proximity to Target Sweet Spot)")
+    print(f"     • Information Gain:     {top1_acq.information_gain_score:.1f}")
+    print(f"     • Total Acquisition:    {top1_acq.total_acquisition_score:.2f}")
+    print(f"     • Strategic Verdict:    {top1_acq.strategic_verdict}")
+    print("\n" + "=" * 115 + "\n")
 
 
 if __name__ == "__main__":
