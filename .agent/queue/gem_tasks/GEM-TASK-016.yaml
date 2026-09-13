@@ -1,0 +1,31 @@
+task_id: GEM-TASK-016
+source_orc_id: ORC-016
+source_orc_commit: "485575f359ed988c7cdc669a40c122ed7296dafe"
+source_decision_file: "analysis/commits/ORC-016_Decision.md"
+decision: "REJECT"
+status: "PENDING"
+is_actionable: true
+attempt: 1
+max_attempts: 3
+next_agent: "GEM"
+rationale: "GEM-015 is valid as an OOD/domain-shift stress test but is not a compatible predictive-accuracy qualification dataset because its bulk-compression measurement construct differs materially from the frozen GS40 penetration-hardness SOP."
+required_actions:
+  - "Preserve GEM-015 and ORC-016 as immutable evidence; do not delete or rewrite historical evidence."
+  - "Add an auditable record distinguishing OOD stress-test validity from predictive-accuracy validation."
+  - "Standardize the residual/bias sign convention in a new additive audit record; do not alter GEM-015 history."
+  - "Search for a genuinely independent public dataset using a materially compatible hardness/penetration measurement construct."
+  - "Verify source provenance and exact row-level source locations before scoring."
+  - "Verify response compatibility with the frozen Rev.8.1 GS40 hardness target and SOP."
+  - "Run formulation/experiment overlap audit against DATASET_FREEZE_1 and all domain_priors."
+  - "Freeze candidate dataset and Rev.8.1 artifact hashes before scoring."
+  - "Do not train, recalibrate, rescale, tune, or modify Rev.8.1 using validation data."
+  - "If no compatible public dataset can be found, escalate DATA_REQUIRED rather than manufacturing an equivalence mapping or synthetic data."
+acceptance_criteria:
+  - "Independent public source with auditable provenance."
+  - "Measurement construct materially compatible with GS40 penetration hardness, or an equivalence relationship justified independently before validation scoring."
+  - "Row-level source-table/figure/text mapping and units documented."
+  - "Zero overlap with model-training data and domain priors."
+  - "Immutable pre-scoring manifest and hashes."
+  - "Pre-specified metrics with explicit residual/bias sign convention."
+  - "Separate predictive-accuracy metrics from OOD-detection metrics."
+  - "Blind scoring remains unauthorized until ORC approves the candidate manifest."
