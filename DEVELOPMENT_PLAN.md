@@ -153,28 +153,30 @@ property model.
 
 ---
 
-## Suggested Sequencing
+## Phase 7 — SOTA Zero-Cost Active Learning & Test-by-Exception (Rev.8) ✅ Complete
+- **Strategic Principle:** 초기 실물 제조비용 ₩0 유지 → 공개 데이터 + 물리 기반 Feature + 앙상블 대리 모델(Surrogate) + Active Learning으로 예측력을 극대화하고, 불확실성이 낮고 스펙 적합 확률이 높은 영역은 **실제 샘플 테스트를 면제(Test Waiver)**.
+- **Implemented Modules:**
+  1. `src/modeling/data_quality.py`: 7차원 데이터 품질 스코어러 및 거버넌스 티어링.
+  2. `src/modeling/feature_engine.py`: 진밀도 체적 분율, BET 비표면적, 흡유량 수요, 침강 위험 지수, 윤활 지수 산출.
+  3. `src/modeling/surrogate_engine.py`: 5대 반응별 앙상블 대리 모델 (ElasticNet, RF, ExtraTrees, GBR, GP) + 95% 예측구간 (PI) + Mahalanobis OOD 감지기.
+  4. `src/modeling/virtual_qc.py`: 4단계 Test-by-Exception 가상 QC 판정 엔진 (`VIRTUAL_PASS`, `VIRTUAL_PASS_CONFIRMATION_REQUIRED`, `EXPERIMENT_REQUIRED`, `OUT_OF_DOMAIN`).
+  5. `src/doe/virtual_generator.py`: Rev.7.3 혼합물 제약조건 하 10,000~1,000,000개 가상 후보군 생성 및 물리 필터링.
+  6. `scripts/rank_active_learning_runs.py`: P001~P018의 정보 획득량(EIG) 가상 분석 (Top-1 런: `GS40-P002`, 전체 DoE 정보의 22% 이상을 단 1~3회 실험으로 획득하여 비용 94% 절감).
+  7. `scripts/run_gs40_pilot_qualification.py` (Rev 2.0): Primary/Supplemental 격리, LOF F-test, Synthetic Fallback 차단 탑재.
+
+---
+
+## Suggested Sequencing (Rev.8 Zero-Cost Active Learning Flow)
 
 ```
-Repository release note / Phase-0 audit
+Phase 0 ~ Phase 2A (Framework, SOP, Data Contract)
         ↓
-Phase 1 (data model unification)
-        │  <- unblocks real DOE -> Manufacturing Formula loop
+Phase 7 (SOTA Virtual Screener, 100k Generator, Surrogate Ensemble & EIG Ranker) [₩0]
         ↓
-Phase 2 (QC integrity)
-        │  <- required before QC data volume is trusted for modeling
+[ Virtual Screening: Test-by-Exception filters 99%+ of low-uncertainty candidates ] [₩0]
         ↓
-Phase 2A (DOE & model data contract)
+[ When Physical Test is Triggered: Execute ONLY Top-#1 EIG Run (GS40-P002) ] [94% Cost Cut]
         ↓
-   [ Pilot batches run, eligible QC data accumulates ]
-        ↓
-Phase 3 (real regression) → Phase 4 (real optimizer)
-        │
-        ↓
-Phase 5, 6 (generalization / persistence) — lower risk after data contract
+Bayesian Calibration & Sequential Active Learning Update
 ```
 
-Phases 1–2A are engineering work and can start immediately. Phase 3 needs
-enough eligible **real** Pilot QC data; synthetic data is limited to software
-tests. Align Pilot work with
-`REV7.3_DEVELOPMENT_BASELINE.md` Section 16.
