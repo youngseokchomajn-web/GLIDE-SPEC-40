@@ -1,0 +1,22 @@
+task_id: "GEM-TASK-004"
+source_orc_id: "ORC-004"
+source_orc_commit: "6b1643066361b285805791aec986acf09c09d035"
+source_decision_file: "analysis/commits/ORC-004_Decision.md"
+decision: "APPROVE"
+status: "ACKNOWLEDGED_STOP"
+is_actionable: false
+attempt: 1
+max_attempts: 3
+created_at: "2026-09-13T12:17:39+09:00"
+next_agent: "GEM"
+rationale: "GEM-007 implemented the bidirectional task-dispatch boundary: formal ORC decisions are parsed into GEM tasks, actionable decisions are limited to EXPERIMENT/FIX_REQUIRED/INVESTIGATE, stop decisions are acknowledged without execution, and duplicate ORC commits are suppressed by source commit. The implementation is governance automation only and does not authorize any scientific/model baseline change. The later GEM-008 correction confirms GEM-TASK-002 now points to the authentic ORC-002 Git SHA."
+required_actions:
+  - "Retain the strict actionable-vs-stop decision boundary."
+  - "Retain full source_orc_commit as the idempotency key."
+  - "Do not reinterpret ORC decisions inside the GEM dispatcher."
+  - "Preserve the corrected authentic Git SHA traceability for GEM-TASK-002."
+acceptance_criteria:
+  - "Each ORC decision commit produces at most one corresponding GEM task."
+  - "APPROVE/REJECT/HOLD/DATA_REQUIRED/BLOCKED/CONVERGED remain non-actionable."
+  - "EXPERIMENT/FIX_REQUIRED/INVESTIGATE remain actionable."
+  - "Scientific baseline qualification is not inferred from dispatcher tests."

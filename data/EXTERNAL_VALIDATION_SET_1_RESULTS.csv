@@ -1,0 +1,5 @@
+sample_id,y_actual,y_pred,residual,pi_lower_90,pi_upper_90,pi_covered,d_composite,ood_flag
+L1_CONTROL,904.5,786.66,117.84,784.57,788.74,False,18.453,True
+L2_ALKENONE_OZO,798.0,786.66,11.34,784.57,788.74,False,18.453,True
+L3_ALKENONE_MICRO,759.0,786.66,-27.66,784.57,788.74,False,18.453,True
+L4_ALKENONE_CAN,802.5,786.66,15.84,784.57,788.74,False,18.453,True
