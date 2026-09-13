@@ -1,5 +1,56 @@
 # Brand Planning Changelog
 
+## v0.7 — 2026-09-13
+
+Community Evidence Round 5 was incorporated into the brand research decision chain, and the Korean runner survey protocol was upgraded before fielding.
+
+### Added / incorporated
+
+- `brand/05_research/community_round5_2026-09.md`
+  - 16 individually preserved failure-context cases
+  - Korean sweat/wash-off, garment migration, and distance/time reports
+  - global heat/humidity, sports-bra, hydration-vest, pack, sensory, reapplication, and non-topical substitution cases
+- `brand/05_research/korean_runner_interview_survey_v0.1.md` updated in place to v0.2
+  - primary failure unit expanded to `skin × product × garment × equipment × motion × sweat/water × time`
+  - separate capture of symptom onset vs unacceptable protection/failure
+  - explicit garment migration, seams, straps, bra bands, vest/pack contact, and reachability variables
+  - explicit topical vs adhesive vs apparel vs equipment substitution measurement
+  - sensory/cleanup and carry/reapplication variables strengthened
+  - non-topical/keep-current option added to concept trade-off design
+  - community-derived failure taxonomy explicitly separated from prevalence or efficacy claims
+  - v0.1 citation placeholder removed
+
+### New evidence signals
+
+- The most useful unit of analysis is increasingly the **system interaction**, not the topical product alone.
+- Mileage is an insufficient standalone durability variable; time, sweat/water, temperature, motion, garment migration, and equipment contact can change the failure context.
+- High-shear anatomical interfaces may lead users to adhesive, clothing, or equipment solutions rather than another topical product.
+- Sensory attributes such as grease/wet feel, odor, staining, and cleanup can drive switching even when users perceive protection as adequate.
+- Reachability and reapplication opportunity are functional constraints, especially for long events.
+- Female-specific bra/waistband and hydration-vest interfaces warrant explicit cells rather than being pooled into generic body-area data.
+
+### Changed
+
+- The Korean runner evidence gate is still **open**, but the next survey/interview instrument now directly measures the highest-value failure-system variables surfaced by five community passes.
+- Survey analysis will distinguish product failure from clothing/fit failure, equipment interaction, application/reapplication failure, skin compatibility, and sensory/cleanup objections.
+- Non-topical substitutes are treated as real alternatives in product-choice and price/value research.
+- No new numerical duration, superiority, medical, or regulatory claim has been adopted.
+
+### Evidence interpretation
+
+The fifth pass strengthens the working hypothesis that GLIDE-SPEC 40 should be designed and validated around the **skin–clothing–equipment–environment system**. It does not establish prevalence, objective friction reduction, exact persistence, comparative superiority, clinical benefit, or regulatory claim eligibility.
+
+### Remaining gates
+
+1. Balanced Korean/local runner survey and interviews.
+2. Structured price/value and willingness-to-pay evidence.
+3. Matched objective testing against petroleum jelly and leading specialized formats.
+4. Skin compatibility testing.
+5. Temperature/humidity friction and persistence testing.
+6. Application-format prototypes and reachability testing.
+7. Independent recovery evidence.
+8. Korean regulatory classification and claim mapping.
+
 ## v0.6 — 2026-09-13
 
 A fourth community-evidence pass expanded Korean and global runner discovery before the structured survey is fielded.
