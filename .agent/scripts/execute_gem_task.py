@@ -278,6 +278,12 @@ Evidence:
                 rc_p, out_p, err_p = run_cmd(["git", "push", "origin", "main"])
                 if rc_p == 0:
                     print(f"[+] Successfully pushed {gem_id} scientific commit to origin/main. Re-entry initiated!")
+                    try:
+                        sys.path.insert(0, ".agent/scripts")
+                        from notify import send_push_notification
+                        send_push_notification("GLIDE-SPEC-40 (GEM)", f"🔔 {gem_id} 작업 완료! 지금 ChatGPT에 'orc 작동'이라고 입력하세요.", priority="urgent", tags="rocket,bell")
+                    except Exception:
+                        pass
                 else:
                     print(f"[!] Push failed: {err_p or out_p}")
             else:
@@ -366,6 +372,12 @@ Evidence:
                 rc_p, out_p, err_p = run_cmd(["git", "push", "origin", "main"])
                 if rc_p == 0:
                     print(f"[+] Successfully pushed {gem_id} commit to origin/main. Round-trip re-entry initiated!")
+                    try:
+                        sys.path.insert(0, ".agent/scripts")
+                        from notify import send_push_notification
+                        send_push_notification("GLIDE-SPEC-40 (GEM)", f"🔔 {gem_id} 작업 완료! 지금 ChatGPT에 'orc 작동'이라고 입력하세요.", priority="urgent", tags="rocket,bell")
+                    except Exception:
+                        pass
                 else:
                     print(f"[!] Push failed: {err_p or out_p}")
             else:

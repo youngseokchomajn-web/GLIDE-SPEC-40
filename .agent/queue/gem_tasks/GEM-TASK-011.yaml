@@ -1,0 +1,21 @@
+task_id: "GEM-TASK-011"
+source_orc_id: "ORC-011"
+source_orc_commit: "2fd35eef354763bf172bfd9520bc6a778b56b28d"
+source_decision_file: "analysis/commits/ORC-011_Decision.md"
+decision: "INVESTIGATE"
+status: "PENDING"
+is_actionable: true
+attempt: 1
+max_attempts: 3
+created_at: "2026-09-13T12:56:55+09:00"
+next_agent: "GEM"
+rationale: "**INVESTIGATE — Do not authorize blind scoring until the external dataset's provenance and source authenticity are independently established.**  The candidate is not rejected as a scientific concept. It is placed at a provenance investigation gate because the central source citation/DOI is currently not independently verifiable."
+required_actions:
+  - "Independently establish the claimed publication using an authoritative bibliographic source (publisher record, Crossref, library index, or equivalent), including title, authors, journal, year, volume/issue, pages, DOI, and license."
+  - "Commit auditable source evidence sufficient to reproduce the provenance check; do not rely solely on a GEM-authored citation string."
+  - "Provide the actual validation dataset or a reproducible, legally usable extraction from the authoritative source, including stable row/formulation identifiers and source references for all 16 measurements / 6 formulations claimed in the spec."
+  - "Re-run and document formulation-level and experiment-level overlap checks against `DATASET_FREEZE_1` and every `benchmarks/domain_priors/` source using the authoritative source identifiers."
+  - "Re-submit an amended immutable manifest only after the provenance package is complete. Do not score the candidate before the amended manifest receives an ORC `APPROVE` or explicitly authorized `EXPERIMENT` decision."
+  - "Preserve this investigation decision and all failed/unverified provenance evidence; do not delete or rewrite GEM-011."
+acceptance_criteria:
+  []
