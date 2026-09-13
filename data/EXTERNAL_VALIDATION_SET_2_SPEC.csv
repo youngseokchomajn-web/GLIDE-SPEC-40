@@ -1,0 +1,2 @@
+dataset_key,dataset_name,citation,doi,license,provenance,total_measurement_rows,unique_formulations_count,blind_status,eligible_responses,isolation_hash
+EXTERNAL_VALIDATION_SET_2,Multi-Wax Anhydrous Stick Mechanics Benchmark,Kim et al. (2023),10.56530/jcs.2023.74.02.115,CC BY 4.0,PUBLIC_INDEPENDENT_LITERATURE,16,6,LOCKED_BLIND,"Penetration Hardness (gf), Melting Onset (C)",PRE_SCORING_FROZEN
