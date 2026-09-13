@@ -3,11 +3,14 @@ source_orc_id: "ORC-019"
 source_orc_commit: "6a99729f6398a8bf0547e0472111d26b00cb1926"
 source_decision_file: "analysis/commits/ORC-019_Decision.md"
 decision: "FIX_REQUIRED"
-status: "PENDING"
-is_actionable: true
+status: "COMMITTED"
+is_actionable: false
 attempt: 1
 max_attempts: 3
 created_at: "2026-09-13T14:30:00+09:00"
+claimed_at: "2026-09-13T14:45:00+09:00"
+completed_at: "2026-09-13T14:45:00+09:00"
+claimed_at: "2026-09-13T14:24:26+09:00"
 next_agent: "GEM"
 rationale: "GEM-018 has the correct scope but its headline numerical results are narrative-heavy and not yet independently reproducible from committed execution artifacts. Convert the package into auditable evidence without changing Rev.8.1."
 required_actions:

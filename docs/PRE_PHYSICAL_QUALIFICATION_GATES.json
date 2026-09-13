@@ -1,0 +1,51 @@
+{
+  "version": "1.0.0",
+  "effective_date": "2026-09-13",
+  "status": "IMMUTABLE_PRE_PHYSICAL_FREEZE",
+  "target_product": "GLIDE-SPEC 40 (GS40)",
+  "governing_sop": "SOP-GS40-VAL-001",
+  "gates": {
+    "n_primary_completed": {
+      "required_threshold": 16,
+      "comparison": ">=",
+      "batch_scope": "GS40-P001 through GS40-P016",
+      "synthetic_substitution_allowed": false,
+      "description": "Minimum completed primary physical pilot batches"
+    },
+    "n_center_replicates": {
+      "required_threshold": 3,
+      "comparison": ">=",
+      "batch_scope": "GS40-P013 through GS40-P016",
+      "description": "Minimum pure replicate center batches for Lack-of-Fit and Pure Error estimation"
+    },
+    "repeatability_cv_center_pct": {
+      "required_threshold": 4.0,
+      "comparison": "<=",
+      "unit": "percent",
+      "description": "Maximum allowable coefficient of variation across physical center replicates"
+    },
+    "lack_of_fit_p_value": {
+      "required_threshold": 0.05,
+      "comparison": ">=",
+      "description": "F-test p-value for Lack-of-Fit (p >= 0.05 indicates model is structurally adequate)"
+    },
+    "group_cv_r2": {
+      "required_threshold": 0.85,
+      "comparison": ">=",
+      "description": "Minimum Group-CV R^2 across physical formulation vertices"
+    },
+    "conformal_pi_coverage_pct": {
+      "required_threshold": 85.0,
+      "comparison": ">=",
+      "unit": "percent",
+      "nominal_level": 90.0,
+      "description": "Minimum empirical coverage of 90% conformal prediction intervals"
+    }
+  },
+  "epistemic_firewall": {
+    "virtual_data_substitutes_physical": false,
+    "external_proxy_qualifies_production": false,
+    "n_physical_sticks_baseline": 0,
+    "production_status_before_physical": "NOT_QUALIFIED"
+  }
+}
