@@ -1,12 +1,15 @@
-task_id: GEM-TASK-016
-source_orc_id: ORC-016
+task_id: "GEM-TASK-016"
+source_orc_id: "ORC-016"
 source_orc_commit: "485575f359ed988c7cdc669a40c122ed7296dafe"
 source_decision_file: "analysis/commits/ORC-016_Decision.md"
 decision: "REJECT"
-status: "PENDING"
-is_actionable: true
+status: "COMMITTED"
+is_actionable: false
 attempt: 1
 max_attempts: 3
+created_at: ""
+claimed_at: "2026-09-13T13:57:12+09:00"
+completed_at: "2026-09-13T14:06:00+09:00"
 next_agent: "GEM"
 rationale: "GEM-015 is valid as an OOD/domain-shift stress test but is not a compatible predictive-accuracy qualification dataset because its bulk-compression measurement construct differs materially from the frozen GS40 penetration-hardness SOP."
 required_actions:
