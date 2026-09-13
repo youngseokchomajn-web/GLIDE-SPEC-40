@@ -1,8 +1,8 @@
 # GLIDE-SPEC-40 Multi-Agent Operational Protocol
 
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Effective Date:** 2026-09-13  
-**Governing Standard:** Operational & Collaboration Protocol between GEM & ORC  
+**Governing Standard:** Operational & Collaboration Protocol between GEM & ORC (Added Level 2 Dispatcher & Queue)  
 **Scope:** GitHub Repository `youngseokchomajn-web/GLIDE-SPEC-40`
 
 ---
@@ -199,3 +199,20 @@ GEM이 지표 개선(예: "RMSE 8% 개선")을 보고하더라도 ORC는 다음 
    - **Phase 2 (분석 자동화):** GEM commit → 자동 test/benchmark → ORC review → ORC commit
    - **Phase 3 (개발 루프):** GEM ↔ ORC 주기적 왕복
    - **Phase 4 (수렴):** `CONVERGED` 도달 시 루프 완전 종료
+
+---
+
+## 9. ORC 작업 큐 및 Level 2 이벤트 디스패치 규격
+
+1. **Dispatcher 원칙:** GitHub Actions는 판단자가 아니라 오직 이벤트 감지 및 큐 발행자(Dispatcher)로 기능한다.
+2. **ORC 작업 큐:** `.agent/queue/tasks/` 및 `.agent/queue/ORC_QUEUE.md`에 비동기 작업(`STATUS: PENDING`)을 등록한다.
+3. **중복 생성 방지:** 동일 `source_commit`에 대한 중복 태스크 생성을 원천 차단한다.
+4. **루프 차단:** `ORC-*`, `SYSTEM-*`, `BASE-*` 및 `[skip ci]` 커밋은 큐 생성 대상에서 제외한다.
+5. **계약 준수:** ORC는 `.agent/CONTRACTS.md`에 명시된 Input/Output 계약과 10대 체크리스트를 준수하여 독립 판정을 내린다.
+
+---
+
+## Version History
+- **v1.1.0 (2026-09-13):** Level 2 자동화 인프라(ORC Queue, Dispatcher, Contracts, 중복 및 루프 방지) 추가.
+- **v1.0.0 (2026-09-13):** 초기 프로토콜 및 GEM-ORC 거버넌스 수립.
+

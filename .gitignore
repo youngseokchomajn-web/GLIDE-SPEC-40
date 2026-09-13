@@ -43,3 +43,5 @@ Thumbs.db
 
 # Local runtime logs / temp SQLite
 *.sqlite3-journal
+analysis/*.log
+
