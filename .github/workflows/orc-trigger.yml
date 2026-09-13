@@ -1,0 +1,40 @@
+name: ORC Queue Dispatcher
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  dispatch-orc-task:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Queue Dispatcher
+        run: |
+          python .agent/scripts/dispatch_orc_queue.py HEAD
+
+      - name: Commit and Push Task Queue (if modified)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain .agent/queue)" ]; then
+            git add .agent/queue
+            git commit -m "SYSTEM-QUEUE: dispatch ORC review task [skip ci]"
+            git push origin main
+          else
+            echo "No new queue tasks generated."
+          fi
