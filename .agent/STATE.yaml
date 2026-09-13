@@ -1,0 +1,27 @@
+version: "1.0.0"
+phase: "Phase 1 - Observation"
+system_status: "INITIALIZED"
+active_baseline: "Rev.8.1 (docs/REV8.1_BASELINE.md)"
+
+last_message:
+  sender: "SYSTEM"
+  id: "SYSTEM-001"
+  timestamp: "2026-09-13T11:30:00+09:00"
+  status: "INITIALIZED"
+
+current_cycle:
+  cycle_id: 1
+  task_id: null
+  attempt: 1
+  max_attempts: 3
+  status: "WAITING_FOR_ORC_INSTRUCTION"
+  last_gem_commit: null
+  last_orc_decision: null
+
+guardrails:
+  allow_arbitrary_baseline_change: false
+  preserve_failure_evidence: true
+  max_consecutive_fix_attempts: 3
+  strict_data_segregation:
+    training_freeze: "DATASET_FREEZE_1"
+    blind_validation: "EXTERNAL_VALIDATION_SET_1"
