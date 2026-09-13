@@ -81,3 +81,15 @@ This log preserves the reasoning chain behind strategic decisions. It is intenti
 **Decision:** Use **Long-Run Friction Shield** as the provisional beachhead problem, **Endurance Skin Protection** as the category logic, and **TIME × MOTION × ENVIRONMENT** as the design lens. Do not yet lock the final anatomical cell, format, formula, duration, or performance claim. Use Korean primary research to select the specific beachhead scenario.
 
 **What would change this decision:** Korean runner research identifies another recurring failure scenario with materially stronger problem intensity, switching behavior, economic value, or strategic defensibility.
+
+## D009 — Stop broad discovery and move to first-product concept definition
+
+**Observation:** The public-web/community evidence passes have converged on S1 as the leading beachhead. The strongest falsification question — whether S1 is primarily an apparel/fit problem that does not require a product-level solution — did not overturn the model. Evidence instead supports S1 as a skin–garment interface problem in which topical protection is one controllable component. S2 remains a differentiated adjacent scenario, while S3 is best treated as a cross-cutting UX/maintenance requirement.
+
+**Reasoning:** Additional generic community collection is now unlikely to materially change the beachhead decision. Continuing discovery without a specific falsification question would add documentation more than decision value.
+
+**Decision:** Move from broad discovery to **first-product concept v0.3**. S1 is the leading first-product beachhead; S2 is preserved as an adjacent scenario; S3 is a cross-cutting product UX requirement. Technical/formulation work is downstream of the concept decision.
+
+**What this decision does not establish:** Korean prevalence, market size, WTP, objective performance, exact duration, superiority, final formula, final format, packaging, price, or regulatory claim eligibility.
+
+**What would change this decision:** Strong evidence that S2/new S4 is materially stronger, S1 is mostly solvable by apparel/fit alone, a materially different recurring mechanism dominates, or the system-level skin × product × garment × equipment × motion × sweat/water × time model is contradicted.
