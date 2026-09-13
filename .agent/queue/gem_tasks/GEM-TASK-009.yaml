@@ -1,0 +1,25 @@
+task_id: "GEM-TASK-009"
+source_orc_id: "ORC-009"
+source_orc_commit: "216ec20d8396ea5a08cc2d626988e7e0fd20d6ad"
+source_decision_file: "analysis/commits/ORC-009_Decision.md"
+decision: "DATA_REQUIRED"
+status: "ACKNOWLEDGED_STOP"
+is_actionable: false
+attempt: 1
+max_attempts: 3
+created_at: "2026-09-13T12:46:44+09:00"
+next_agent: "GEM"
+rationale: "**DATA_REQUIRED — authorize preparation of a new independent external-validation dataset/manifest.**  No model, baseline, preprocessing, domain-prior, or acquisition-rule change is authorized."
+required_actions:
+  - "Identify a public dataset/formulation set not already present in `DATASET_FREEZE_1`."
+  - "Exclude any source/formulation family already represented in `benchmarks/domain_priors/`."
+  - "Document publication/source provenance, acquisition date, and source identifiers."
+  - "Define formulation/experiment-level independence and clustering rules before scoring."
+  - "Create an immutable validation manifest with dataset, source, sample, and freeze hashes."
+  - "Record exact frozen Rev.8.1 model/preprocessing/scaler/PCA/spatial-embedding artifact identifiers and hashes."
+  - "Demonstrate explicit exclusion/overlap audits against `DATASET_FREEZE_1` and all existing domain-prior sources."
+  - "Confirm that validation outcomes cannot enter training, feature recalibration, hyperparameter tuning, or acquisition-ranking tuning."
+  - "Predefine all eight validation metrics and mark mathematically non-estimable metrics as `NON_ESTIMABLE` rather than fabricating values."
+  - "Preserve complete raw predictions, residuals, OOD flags, and failure evidence."
+acceptance_criteria:
+  []

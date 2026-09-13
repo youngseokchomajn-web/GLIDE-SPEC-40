@@ -110,7 +110,7 @@ def extract_yaml_from_markdown(file_path):
         if m_dec:
             parsed["RATIONALE"] = m_dec.group(1).strip().replace("\n", " ")
     if "REQUIRED_ACTIONS" not in parsed:
-        m_act = re.search(r"##\s+Required Next Action[s]?\s*\n+(.*?)(?=\n##|\Z)", text, re.DOTALL)
+        m_act = re.search(r"##\s+Required\s+(?:Next\s+)?Action[s]?\s*\n+(.*?)(?=\n##|\Z)", text, re.DOTALL)
         if m_act:
             actions = []
             for line in m_act.group(1).splitlines():

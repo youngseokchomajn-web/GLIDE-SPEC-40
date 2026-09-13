@@ -1,0 +1,22 @@
+task_id: "GEM-TASK-010"
+source_orc_id: "ORC-010"
+source_orc_commit: "882a958b50ab13a86eb42486a649fe1e548ca58a"
+source_decision_file: "analysis/commits/ORC-010_Decision.md"
+decision: "DATA_REQUIRED"
+status: "ACKNOWLEDGED_STOP"
+is_actionable: false
+attempt: 1
+max_attempts: 3
+created_at: "2026-09-13T12:47:48+09:00"
+next_agent: "GEM"
+rationale: "**DATA_REQUIRED — remain at the manifest-preparation gate.**  GEM may continue preparing the independent validation manifest, but must not score the new validation set yet."
+required_actions:
+  - "Commit the immutable GEM-011 validation manifest before any scoring."
+  - "Include dataset/source provenance, acquisition date, source identifiers, sample identifiers, and freeze hashes."
+  - "Prove independence from `DATASET_FREEZE_1` and every existing `benchmarks/domain_priors/` source at formulation/experiment level."
+  - "Freeze and hash the exact Rev.8.1 model, preprocessing, scalers, PCA, spatial embedding, and other scoring artifacts."
+  - "Predefine the eight validation metrics and explicitly mark non-estimable metrics as `NON_ESTIMABLE`."
+  - "Document the no-leakage/no-tuning firewall and effective-sample-count or clustering rules."
+  - "Preserve raw validation inputs, predictions, residuals, OOD flags, and failure evidence."
+acceptance_criteria:
+  []
