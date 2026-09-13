@@ -5,6 +5,7 @@ import sys
 TOPIC = "glide40-ysys"
 
 def send_push_notification(title, message, priority="high", tags="bell"):
+    # 1. Send to ntfy.sh mobile push
     try:
         cmd = [
             "curl", "-s",
@@ -15,6 +16,15 @@ def send_push_notification(title, message, priority="high", tags="bell"):
             f"https://ntfy.sh/{TOPIC}"
         ]
         subprocess.run(cmd, timeout=5, check=False)
+    except Exception:
+        pass
+
+    # 2. Send macOS native desktop banner notification
+    try:
+        clean_msg = message.replace('"', '\\"').replace("'", "")
+        clean_title = title.replace('"', '\\"').replace("'", "")
+        osa_cmd = f'display notification "{clean_msg}" with title "{clean_title}" sound name "Glass"'
+        subprocess.run(["osascript", "-e", osa_cmd], timeout=3, check=False)
     except Exception:
         pass
 
