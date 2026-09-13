@@ -1,4 +1,4 @@
-# Brand Research Audit — v0.2
+# Brand Research Audit — v0.3
 
 Date: 2026-09-13
 
@@ -16,56 +16,64 @@ Check whether the current brand-planning evidence chain is missing a material ca
 | Runner journey | Covered | Preparation → running → late-stage → finish/recovery |
 | Market/competitor landscape | Covered | Multiple incumbent anti-chafe solutions recognized |
 | Community evidence schema | Covered | Context-preserving registry exists |
-| Individual community evidence | Added v0.1 | 10 cases entered in community_cases_v0.1.md |
-| Contradictory reports | Added | Persistence and reapplication conflicts intentionally preserved |
-| Body-area differences | Added | Nipples, inner thighs, groin, armpits, sports-bra/equipment interface |
-| Weather/environment | Added | Heat, sweat, wet conditions, cold, humid/wet regional context where reported |
-| Clothing/equipment interaction | Added | Garment fit, hydration vest, sports bra, shirt movement |
-| Reapplication behavior | Added | Explicitly captured where reported; contradictory intervals retained |
-| Application format | Added | Stick/balm, wipes, roll-on, tape/band-aid alternatives |
-| Residue/clothing transfer | Added | Staining/greasy tradeoff captured |
+| Individual community evidence | Expanded | Five research passes now inform the registry and survey design |
+| Contradictory reports | Covered | Persistence, sensory response, and switching conflicts intentionally preserved |
+| Body-area differences | Covered | Nipples, inner thighs, groin, armpits, sports-bra/equipment interface |
+| Weather/environment | Covered | Heat, sweat, wet conditions, cold, humid/wet regional context where reported |
+| Clothing/equipment interaction | Covered | Garment fit/migration, seams, hydration vest, sports bra, pack movement |
+| Reapplication behavior | Covered | Reapplication, carryability and reachability explicitly captured |
+| Application format | Covered | Stick/balm, wipes, roll-on, tape/band-aid and apparel/equipment alternatives |
+| Residue/clothing transfer | Covered | Staining/greasy/dry/sensory tradeoffs captured |
 | Price/value | Partial | Community signals exist; structured willingness-to-pay remains open |
 | Gender/anatomy segmentation | Improved | International + Korean sports-bra/waistband and groin/thigh cases; balanced sampling still needed |
 | Climate segmentation | Partial | Heat/wet/cold signals present; balanced matrix still needed |
-| Distance/time segmentation | Improved | Korean cases add 10K and ~20 km/2 h reports; controlled time-to-failure still absent |
+| Distance/time segmentation | Improved | Korean and global cases add multiple time/distance failure contexts; controlled time-to-failure still absent |
 | Recovery/post-run | Missing | Separate evidence pass still required |
 | Skin compatibility/adverse reactions | Missing | Dedicated evidence/testing still required |
-| Sensory UX | Partial | Greasy/dry/brittle/smell signals present; texture, spreadability, cleanup need more evidence |
-| Packaging/carryability | Partial | Wipes/roll-on/carrying small container mentioned; broader pack/aid-station workflow missing |
+| Sensory UX | Improved | Greasy/dry/brittle/smell, staining, cleanup and application burden now explicit |
+| Packaging/carryability | Improved | Reachability, reapplication and event logistics now explicit |
 | Regulatory/claim boundary | Covered as constraint | Korean MFDS labeling/claims rules must be mapped to final intended function |
-| Controlled performance standards | Missing by design | Must be established through technical/R&D work, not community anecdotes |
+| Controlled performance architecture | Added | `technical_validation_matrix_v0.1.md` converts failure modes into test questions; thresholds remain open |
 
-## New Korean evidence pass
+## Round 5 synthesis
 
-`brand/05_research/korean_runner_evidence_round1_2026-09.md` adds four traceable Korean/local signals:
+The fifth community pass strengthens the working model that failure is a system event:
 
-- sweat-related Vaseline wash-off
-- clothing-motion contribution to groin/thigh friction
-- perceived duration limitation around 20 km / 2 h in one runner report
-- local marathon guidance that already recommends Vaseline for chafing prevention
+`skin × product × garment × equipment × motion × sweat/water × time`
 
-These strengthen the relevance of the problem in Korea but do not establish prevalence, objective efficacy, or superiority.
+Important new implications:
+
+- mileage alone is insufficient as a durability variable;
+- high-shear interfaces may switch users to adhesive or non-topical solutions;
+- garment migration and seams can create failure even when a topical product is present;
+- sensory burden, staining, odor, cleanup and reachability can trigger switching;
+- female sports-bra/under-bra interfaces deserve explicit sampling rather than pooled analysis;
+- product and apparel/equipment solutions must be analyzed as substitutes and complements.
+
+These are hypothesis-generating signals only.
 
 ## Gate-closure plan
 
-`brand/05_research/gate_closure_plan_v0.1.md` now defines the remaining sequence:
+The closure sequence is now:
 
-1. structured Korean runner interviews/survey
-2. price/value and willingness-to-pay measurement
-3. matched incumbent testing
-4. skin compatibility screening
-5. temperature/humidity friction and persistence testing
-6. application-format prototypes
-7. independent recovery research
-8. Korean regulatory classification/claim mapping
+1. field structured Korean runner survey + 20–30 qualitative interviews
+2. analyze actual spend, price sensitivity and switching behavior
+3. develop repeatable bench methods from recurring failure modes
+4. measure petroleum jelly and leading specialized incumbents under matched conditions
+5. test candidate formats for application/reapplication/reachability
+6. run qualified skin-compatibility screening
+7. conduct controlled temperature/moisture/friction/persistence matrix
+8. run separate recovery JTBD/evidence work
+9. map Korean cosmetic classification and claim wording
+10. link every final product requirement to evidence and/or controlled test IDs
 
 ## Decision integrity check
 
-The following conclusions remain valid as working hypotheses, but none should be upgraded to product claims solely from community evidence:
+The following remain working hypotheses and must not be upgraded to product claims solely from community evidence:
 
 - Do not position the brand simply as “sports Vaseline.”
 - Endurance runners remain a useful beachhead because duration, repetitive motion, sweat/moisture and equipment interactions create observable skin-use scenarios.
-- TIME × MOTION × ENVIRONMENT is a useful abstraction, but clothing/equipment and body area must remain explicit sub-variables.
+- TIME × MOTION × ENVIRONMENT remains useful, but clothing/equipment, body area and interface type must remain explicit sub-variables.
 - The opportunity may be a scenario-based skin system rather than another generic anti-chafe product, but this requires validation.
 - Duration superiority is not established; persistence must be tested comparatively.
 
@@ -74,8 +82,10 @@ The following conclusions remain valid as working hypotheses, but none should be
 Before locking the first-product specification, require:
 
 1. Balanced Korean/local runner evidence.
-2. Structured prevalence and willingness-to-pay data.
+2. Structured prevalence, behavior and willingness-to-pay data.
 3. Controlled technical tests translating recurring failure modes into measurable requirements.
 4. Competitive product testing under matched conditions.
-5. Clear separation between user-reported benefit, measured performance, and regulatory claim language.
-6. Explicit linkage from each major product requirement back to evidence IDs and/or controlled test results.
+5. Skin compatibility evidence appropriate to intended use.
+6. Application/reapplication/reachability validation for the selected format.
+7. Clear separation between user-reported benefit, measured performance, and regulatory claim language.
+8. Explicit linkage from each major product requirement back to evidence IDs and/or controlled test results.
