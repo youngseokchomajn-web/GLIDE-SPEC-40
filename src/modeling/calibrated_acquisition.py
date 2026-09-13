@@ -21,6 +21,8 @@ class AcquisitionScoreResult:
     information_gain_score: float
     specification_relevance_score: float
     domain_coverage_score: float
+    manufacturability_score: float
+    calibration_value_score: float
     predicted_hardness_gf: float
     hardness_conformal_interval: Tuple[float, float]
     predicted_transfer_g: float
@@ -33,6 +35,8 @@ class AcquisitionScoreResult:
 class CalibratedAcquisitionEngine:
     """
     Ranks experimental candidates for physical execution selection.
+    Applies Rev.8.1 Tri-Criteria + Manufacturability utility function:
+      Utility = InfoGain × SpecRelevance × DomainCoverage × Manufacturability × CalibrationValue
     """
 
     # Rev.7.3 Target Center and Desired Tolerance
@@ -52,30 +56,27 @@ class CalibratedAcquisitionEngine:
         h_interval: ConformalInterval,
         t_interval: ConformalInterval,
         d_interval: ConformalInterval,
-        ood_result: CompositeOODResult
+        ood_result: CompositeOODResult,
+        fill_temp_c: float = 80.0,
+        sedimentation_risk: float = 1.0,
+        diversity_bonus: float = 1.0
     ) -> AcquisitionScoreResult:
         # 1. Information Gain Component (Total Conformal Uncertainty Width)
-        # Wider conformal width = higher potential model reduction upon physical feedback
         rel_w_h = h_interval.interval_width / max(10.0, h_interval.point_prediction)
         rel_w_t = t_interval.interval_width / max(0.005, t_interval.point_prediction)
         rel_w_d = d_interval.interval_width / max(10.0, d_interval.point_prediction)
         info_gain = float(rel_w_h + rel_w_t + rel_w_d) * 100.0
 
         # 2. Specification Relevance Component (Gaussian Proximity to Rev.7.3 Sweet Spot)
-        # Penalizes runs whose prediction is far below/above spec (e.g. Hardness < 700 gf)
         h_dev = (h_interval.point_prediction - cls.TARGET_HARDNESS_GF) / cls.TOLERANCE_HARDNESS_GF
         t_dev = (t_interval.point_prediction - cls.TARGET_TRANSFER_G) / cls.TOLERANCE_TRANSFER_G
         d_dev = (d_interval.point_prediction - cls.TARGET_DROP_POINT_C) / cls.TOLERANCE_DROP_POINT_C
 
-        # Scaled between 0.05 and 1.0
-        # Hardness is prioritized (weight 2.0 in distance)
         dist_sq = 2.0 * (h_dev ** 2) + 1.0 * (t_dev ** 2) + 1.0 * (d_dev ** 2)
         spec_relevance = float(np.exp(-0.5 * dist_sq))
-        # Ensure minimum baseline relevance so boundary runs still carry some value
         spec_relevance = max(0.05, min(1.0, spec_relevance))
 
         # 3. Domain Coverage Component (OOD Decay Factor)
-        # If deeply Out-of-Domain, domain coverage penalty reduces utility
         ood_score = ood_result.composite_score
         if ood_result.category == CompositeOODCategory.IN_DOMAIN:
             domain_cov = 1.0
@@ -85,8 +86,16 @@ class CalibratedAcquisitionEngine:
             domain_cov = float(np.exp(-1.0 * (ood_score - 1.0)))
         domain_cov = max(0.10, min(1.0, domain_cov))
 
-        # Total Acquisition Utility = InfoGain * SpecRelevance * DomainCoverage
-        total_utility = info_gain * spec_relevance * domain_cov
+        # 4. Manufacturability Component (Process Window Proximity: optimal 80°C fill, low settling)
+        temp_penalty = 0.10 * min(3.0, abs(fill_temp_c - 80.0) / 5.0)
+        settle_penalty = 0.10 * max(0.0, sedimentation_risk - 1.0)
+        manufacturability = max(0.60, min(1.0, 1.0 - temp_penalty - settle_penalty))
+
+        # 5. Calibration Value / Diversity Component
+        calibration_val = max(0.50, min(1.50, diversity_bonus))
+
+        # Total Acquisition Utility = InfoGain * SpecRelevance * DomainCoverage * Manufacturability * CalibrationVal
+        total_utility = info_gain * spec_relevance * domain_cov * manufacturability * calibration_val
 
         # Strategic Evaluation Verdict
         if spec_relevance >= 0.60 and info_gain >= 30.0 and domain_cov >= 0.70:
@@ -104,6 +113,8 @@ class CalibratedAcquisitionEngine:
             information_gain_score=round(info_gain, 2),
             specification_relevance_score=round(spec_relevance, 3),
             domain_coverage_score=round(domain_cov, 3),
+            manufacturability_score=round(manufacturability, 3),
+            calibration_value_score=round(calibration_val, 3),
             predicted_hardness_gf=round(h_interval.point_prediction, 1),
             hardness_conformal_interval=(round(h_interval.calibrated_lower, 1), round(h_interval.calibrated_upper, 1)),
             predicted_transfer_g=round(t_interval.point_prediction, 4),

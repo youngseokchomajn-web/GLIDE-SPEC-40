@@ -6,15 +6,23 @@ sedimentation risk, and thermal crystallization features).
 """
 
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 import csv
 import numpy as np
 
 
+class FeatureProvenance(str, Enum):
+    MEASURED = "MEASURED"
+    DERIVED_PHYSICAL = "DERIVED_PHYSICAL"
+    DERIVED_EMPIRICAL = "DERIVED_EMPIRICAL"
+    HYPOTHESIS = "HYPOTHESIS"
+
+
 @dataclass
 class FormulationFeatureVector:
-    # 1. Raw Formulation Input Features
+    # 1. Raw Formulation Input Features (MEASURED)
     syn_wax_pct: float
     candelilla_wax_pct: float
     peg8_beeswax_pct: float
@@ -29,7 +37,7 @@ class FormulationFeatureVector:
     zinc_oxide_pct: float
     active_preservative_pct: float
 
-    # 2. Process & Thermal History Features
+    # 2. Process & Thermal History Features (MEASURED)
     fill_temperature_c: float
     cooling_rate_c_min: float
     homogenizer_shear_rpm: float
@@ -56,6 +64,10 @@ class FormulationFeatureVector:
     fumed_silica_percolation_ratio: float
     sedimentation_risk_index: float
     slip_lubricity_index: float
+
+    # 6. Extended Manufacturing Parameters (Defaults)
+    mixing_temperature_c: float = 88.0
+    hold_time_min: float = 20.0
 
     # Raw dictionary representation for ML tabular models
     def to_dict(self) -> Dict[str, float]:
@@ -100,6 +112,88 @@ class FormulationFeatureVector:
     def feature_names(cls) -> List[str]:
         dummy = GS40FeatureEngine.extract_from_weights({}, 80.0, 2.5, 2500.0)
         return list(dummy.to_dict().keys())
+
+    def evaluate_3tier_feasibility(self) -> Tuple[bool, List[str]]:
+        """
+        Evaluates formulation against Rev.7.3 3-tier constraints:
+          Tier 1: Composition (Mass balance & component sub-system limits)
+          Tier 2: Manufacturing (Fill temp, mixing temp, cooling rate, hold time)
+          Tier 3: Physical Mechanics (Solid fraction, binder demand, percolation, sedimentation)
+        """
+        rejections = []
+
+        # Tier 1: Composition Constraints
+        tot_mass = (
+            self.syn_wax_pct + self.candelilla_wax_pct + self.peg8_beeswax_pct +
+            self.dimethicone_pct + self.caprylyl_methicone_pct + self.mq_resin_solution_pct +
+            self.alkyl_benzoate_pct + self.porous_silica_pct + self.fumed_silica_pct +
+            self.pmssq_pct + self.boron_nitride_pct + self.zinc_oxide_pct +
+            self.active_preservative_pct
+        )
+        if abs(tot_mass - 100.0) > 0.5:
+            rejections.append(f"Composition: Total formulation mass {tot_mass:.2f}% deviates from 100.0%")
+        if not (16.0 <= self.total_wax_wt_pct <= 18.0):
+            rejections.append(f"Composition: Total wax {self.total_wax_wt_pct:.1f}% outside Rev.7.3 16-18% range")
+        if not (26.0 <= self.total_silicone_wt_pct <= 30.0):
+            rejections.append(f"Composition: Total silicone {self.total_silicone_wt_pct:.1f}% outside Rev.7.3 26-30% range")
+        if not (26.0 <= self.total_powder_wt_pct <= 30.0):
+            rejections.append(f"Composition: Total powder {self.total_powder_wt_pct:.1f}% outside Rev.7.3 26-30% range")
+
+        # Tier 2: Manufacturing Constraints
+        if not (74.0 <= self.fill_temperature_c <= 86.0):
+            rejections.append(f"Manufacturing: Fill temperature {self.fill_temperature_c:.1f}°C outside 74-86°C window")
+        if not (83.0 <= self.mixing_temperature_c <= 92.0):
+            rejections.append(f"Manufacturing: Mixing temperature {self.mixing_temperature_c:.1f}°C outside 83-92°C window")
+        if not (0.5 <= self.cooling_rate_c_min <= 6.0):
+            rejections.append(f"Manufacturing: Cooling rate {self.cooling_rate_c_min:.1f}°C/min outside 0.5-6.0°C/min range")
+        if self.hold_time_min > 60.0:
+            rejections.append(f"Manufacturing: Hold time {self.hold_time_min:.1f} min exceeds maximum 60.0 min")
+
+        # Tier 3: Physical Mechanics Constraints
+        if self.solid_volume_fraction > 0.40:
+            rejections.append(f"Physical: Solid volume fraction excessive ({self.solid_volume_fraction*100:.1f}% > 40.0%)")
+        if self.binder_to_powder_weight_ratio < 1.50:
+            rejections.append(f"Physical: Binder/powder ratio deficient ({self.binder_to_powder_weight_ratio:.2f} < 1.50)")
+        if self.fumed_silica_pct < 1.5:
+            rejections.append(f"Physical: Fumed silica {self.fumed_silica_pct:.1f}% below percolation threshold (>=1.5%)")
+        if self.sedimentation_risk_index > 2.0:
+            rejections.append(f"Physical: Stokes-Bingham sedimentation risk {self.sedimentation_risk_index:.2f} exceeds threshold (<=2.0)")
+
+        return (len(rejections) == 0, rejections)
+
+
+FEATURE_PROVENANCE_MAP: Dict[str, FeatureProvenance] = {
+    "syn_wax_pct": FeatureProvenance.MEASURED,
+    "candelilla_wax_pct": FeatureProvenance.MEASURED,
+    "peg8_beeswax_pct": FeatureProvenance.MEASURED,
+    "dimethicone_pct": FeatureProvenance.MEASURED,
+    "caprylyl_methicone_pct": FeatureProvenance.MEASURED,
+    "mq_resin_solution_pct": FeatureProvenance.MEASURED,
+    "alkyl_benzoate_pct": FeatureProvenance.MEASURED,
+    "porous_silica_pct": FeatureProvenance.MEASURED,
+    "fumed_silica_pct": FeatureProvenance.MEASURED,
+    "pmssq_pct": FeatureProvenance.MEASURED,
+    "boron_nitride_pct": FeatureProvenance.MEASURED,
+    "zinc_oxide_pct": FeatureProvenance.MEASURED,
+    "fill_temperature_c": FeatureProvenance.MEASURED,
+    "cooling_rate_c_min": FeatureProvenance.MEASURED,
+    "homogenizer_shear_rpm": FeatureProvenance.MEASURED,
+    "total_powder_wt_pct": FeatureProvenance.DERIVED_PHYSICAL,
+    "total_wax_wt_pct": FeatureProvenance.DERIVED_PHYSICAL,
+    "total_silicone_wt_pct": FeatureProvenance.DERIVED_PHYSICAL,
+    "wax_volume_fraction": FeatureProvenance.DERIVED_PHYSICAL,
+    "silicone_volume_fraction": FeatureProvenance.DERIVED_PHYSICAL,
+    "powder_volume_fraction": FeatureProvenance.DERIVED_PHYSICAL,
+    "solid_volume_fraction": FeatureProvenance.DERIVED_PHYSICAL,
+    "total_particle_surface_area_m2_g": FeatureProvenance.DERIVED_PHYSICAL,
+    "total_oil_absorption_demand_ml_100g": FeatureProvenance.DERIVED_EMPIRICAL,
+    "liquid_to_surface_area_ratio": FeatureProvenance.DERIVED_PHYSICAL,
+    "binder_to_powder_weight_ratio": FeatureProvenance.DERIVED_EMPIRICAL,
+    "wax_crystallization_enthalpy_composite_j_g": FeatureProvenance.HYPOTHESIS,
+    "fumed_silica_percolation_ratio": FeatureProvenance.HYPOTHESIS,
+    "sedimentation_risk_index": FeatureProvenance.DERIVED_PHYSICAL,
+    "slip_lubricity_index": FeatureProvenance.DERIVED_EMPIRICAL,
+}
 
 
 class GS40FeatureEngine:

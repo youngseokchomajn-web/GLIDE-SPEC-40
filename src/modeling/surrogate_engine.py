@@ -73,6 +73,7 @@ class ResponseEnsemble:
             "gradient_boosting": GradientBoostingRegressor(n_estimators=50, max_depth=3, learning_rate=0.08, random_state=42),
             "gaussian_process": GaussianProcessRegressor(
                 kernel=C(1.0, (1e-3, 1e3)) * RBF(10.0, (1e-2, 1e2)) + WhiteKernel(noise_level=1.0),
+                normalize_y=True,
                 n_restarts_optimizer=2,
                 random_state=42
             ),

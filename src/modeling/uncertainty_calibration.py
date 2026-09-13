@@ -115,11 +115,42 @@ class GroupConformalCalibrator:
         self.calibration_reports[response_name] = report
         return report
 
+    def evaluate_multi_level_coverage(
+        self,
+        y_true: np.ndarray,
+        y_pred: np.ndarray,
+        y_std: np.ndarray,
+        levels: List[float] = [0.80, 0.90, 0.95]
+    ) -> Dict[str, Dict[str, float]]:
+        """
+        Evaluates empirical coverage across multiple nominal confidence levels (80%, 90%, 95%).
+        """
+        n = len(y_true)
+        scores = np.abs(y_true - y_pred) / np.maximum(1e-4, y_std)
+        results = {}
+        for lvl in levels:
+            alpha = 1.0 - lvl
+            q_idx = min(1.0, np.ceil((n + 1) * (1.0 - alpha)) / n)
+            q = float(np.quantile(scores, min(1.0, max(0.0, q_idx)), method="higher")) if n >= 3 else 1.96
+            lowers = y_pred - q * y_std
+            uppers = y_pred + q * y_std
+            emp_cov = float(np.mean((y_true >= lowers) & (y_true <= uppers))) * 100.0
+            mean_w = float(np.mean(uppers - lowers))
+            results[f"{int(lvl*100)}%"] = {
+                "nominal_pct": lvl * 100.0,
+                "empirical_coverage_pct": round(emp_cov, 2),
+                "conformal_q": round(q, 4),
+                "mean_interval_width": round(mean_w, 3),
+                "coverage_gap_pct": round(emp_cov - (lvl * 100.0), 2)
+            }
+        return results
+
     def predict_interval(
         self,
         response_name: str,
         point_pred: float,
-        point_std: float
+        point_std: float,
+        confidence_level: Optional[float] = None
     ) -> ConformalInterval:
         """Applies calibrated conformal quantile to generate guaranteed PI."""
         q = self.conformal_quantiles.get(response_name, 1.96)
@@ -127,9 +158,11 @@ class GroupConformalCalibrator:
         lower = point_pred - calibrated_half_width
         upper = point_pred + calibrated_half_width
 
+        nom_cov = (confidence_level * 100.0) if confidence_level else (self.nominal_confidence * 100.0)
+
         return ConformalInterval(
             point_prediction=round(point_pred, 3),
-            nominal_coverage_pct=self.nominal_confidence * 100.0,
+            nominal_coverage_pct=nom_cov,
             conformal_quantile_q=round(q, 4),
             calibrated_lower=round(lower, 3),
             calibrated_upper=round(upper, 3),

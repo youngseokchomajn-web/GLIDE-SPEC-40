@@ -54,6 +54,7 @@ class CompositeOODDetector:
         self.train_mean = np.mean(X, axis=0)
         self.feature_mins = np.min(X, axis=0)
         self.feature_maxs = np.max(X, axis=0)
+        self.feature_stds = np.std(X, axis=0)
 
         cov = np.cov(X, rowvar=False)
         cov_reg = cov + np.eye(cov.shape[0]) * 1e-4
@@ -106,14 +107,17 @@ class CompositeOODDetector:
             disagreement_cv = 0.0
         norm_disagree = min(3.0, disagreement_cv / 0.15)  # 15% CV considered high disagreement
 
-        # 4. Hyperbox Bounding Range Violations
+        # 4. Hyperbox Bounding Range Violations (Physically Normalized)
         below = np.maximum(0.0, self.feature_mins - x)
         above = np.maximum(0.0, x - self.feature_maxs)
-        ranges = np.maximum(1e-4, self.feature_maxs - self.feature_mins)
+        ranges = np.maximum(
+            self.feature_maxs - self.feature_mins,
+            np.maximum(self.feature_stds * 2.0, np.maximum(1.0, 0.10 * np.abs(self.train_mean)))
+        )
         rel_violations = (below + above) / ranges
-        box_violations_count = int(np.sum(rel_violations > 0.01))
+        box_violations_count = int(np.sum(rel_violations > 0.05))
         max_violation_pct = float(np.max(rel_violations)) * 100.0 if len(rel_violations) > 0 else 0.0
-        norm_box = min(3.0, max_violation_pct / 20.0)
+        norm_box = min(3.0, max_violation_pct / 25.0)
 
         # Composite Score (weighted combination)
         # Weights: Mahalanobis 35%, kNN 35%, Disagreement 15%, Box 15%
