@@ -4,25 +4,37 @@ All notable changes to the GLIDE-SPEC 40 simulation, modeling, and active learni
 
 ---
 
-## [Rev.8.1] - 2026-09-13 (Commit `bdad5ac` / Tag `Rev8.1-precalibration`)
+## [Rev.8.1] - 2026-09-13 (Commit `5749cc0` / Tag `Rev8.1-precalibration`)
 ### Added
-- **Group Conformal Prediction Engine (`src/modeling/uncertainty_calibration.py`):**
-  - Implemented `GroupKFold` split ensuring zero data leakage between formulation groups.
-  - Implemented locally adaptive non-conformity scores ($s_i = |e_i| / \hat{\sigma}_i$) and finite-sample adaptive quantile computation for guaranteed 90% prediction intervals.
-- **4-Signal Composite Out-of-Domain (OOD) Detector (`src/modeling/composite_ood.py`):**
-  - Integrated Mahalanobis distance ($D_M$), kNN local density, ensemble model disagreement ($CV$), and hyperbox feature bounds violations into a unified index.
-- **Multi-Objective Calibrated Acquisition Engine (`src/modeling/calibrated_acquisition.py`):**
-  - Tri-criteria utility: $\text{Acquisition Score} = \text{InfoGain} \times \text{SpecRelevance} \times \text{DomainCoverage}$.
-  - Corrected classification of `GS40-P002` (Hardness 668.4 gf) from unverified "top winner" to "Boundary Probe".
-  - Identified `GS40-P001` as optimal safe-domain calibration candidate.
-- **100k/1M Virtual Formulation Landscape Mapper (`scripts/run_1m_virtual_landscape.py`):**
-  - Monte Carlo candidate generator across Rev.7.3 mixture space with percolation, solid fraction, and binder checks.
-  - Partitioning into Target Sweet Spot, Specification Boundary, High Uncertainty, and OOD Extrapolation zones.
-- **Automated Testing:** Added `tests/test_conformal_and_composite_ood.py` (47/47 repository tests passing).
+- **Dataset Freeze 1 & Independent Sample Audit (`data/DATASET_FREEZE_1.csv`, `docs/DATASET_INDEPENDENT_SAMPLE_AUDIT.md`):**
+  - Audited 8 public peer-reviewed datasets isolating raw longitudinal/thermal rows from independent formulation clusters.
+  - Clarified that 384 data points in Huynh (2020) correspond to repeated aging/thermal sweeps, mathematically justifying `GroupKFold`.
+- **Feature Engineering v2 & 3-Tier Feasibility Engine (`src/modeling/feature_engine.py`):**
+  - Mapped all 30 features to 4 explicit provenance levels (`MEASURED`, `DERIVED_PHYSICAL`, `DERIVED_EMPIRICAL`, `HYPOTHESIS`).
+  - Added strict 3-tier boundary checking: Composition (Tier 1), Manufacturing (Tier 2), Physical mechanics (Tier 3).
+- **1,000,000 Virtual Candidate Landscape Engine (`scripts/run_1m_virtual_landscape.py`, `virtual_landscape/`):**
+  - Fully vectorized candidate generation and 3-tier physical screening running at 2,094,649 formulations/sec (0.48s total).
+  - Screened 1,000,000 candidates: 640,822 feasible (64.1%), 359,178 rejected into Zone E by physical constraints.
+  - Partitioned evaluated candidates into 5 landscape zones: Zone A (Sweet Spot, 260), Zone B (Boundary, 7,598), Zone C (High Uncertainty, 224), Zone D (OOD Extrapolation, 6,918), Zone E (Infeasible, 359,178).
+  - Exported persistent Parquet datasets and summary report to `virtual_landscape/`.
+- **Multi-Model Benchmark & Group-CV Cross-Validation (`docs/MODEL_BENCHMARK_REPORT.md`):**
+  - Benchmarked ElasticNet, RF, ExtraTrees, GBR, HistGB, GP across 4 folds with zero cross-formulation data leakage.
+  - Validated out-of-fold Conformal Prediction coverage: 80% nominal -> 94.4%, 90% nominal -> 100.0%, 95% nominal -> 100.0%.
+- **Active Learning Information Diversity & Pareto Selection (`scripts/rank_active_learning_runs.py`):**
+  - Computed 30-dimensional normalized Euclidean distance matrix: revealed severe redundancy between `GS40-P004` and `GS40-P011` (distance 2.66), vs. orthogonal exploration between `GS40-P001` and `GS40-P004` (distance 10.63).
+  - Derived 6 non-dominated Pareto front runs.
+  - Formally selected **`GS40-P001` as `GS40_CAL_001`** (Total Utility = 8.77, Rank #1) for single-batch priority manufacturing.
+- **Automated Testing Suite:**
+  - Added `tests/test_audit_governance_and_provenance.py` and `tests/test_1m_landscape_pipeline.py`.
+  - Full suite expanded to 55 tests passing 100% green in 4.08s.
 
-### Changed
-- Refactored `VirtualFormulationGenerator` to support `fixed_powder=True` for pilot subspace alignment.
-- Refined CN102341090B artificial leather CoF and Aerosil R972 yield stress attributions.
+### Fixed
+- **GaussianProcess Target Scaling Bug (`src/modeling/surrogate_engine.py`):**
+  - Added `normalize_y=True` to `GaussianProcessRegressor` inside `ResponseEnsemble`, resolving an unscaled target collapse where GP predicted 114 gf and dragged ensemble hardness mean down from 785 gf to 647 gf. Ensemble hardness now accurately predicts **781.6 gf** (centered in Rev.7.3 750–900 gf spec).
+- **Composite OOD Hyperbox Robust Normalization (`src/modeling/composite_ood.py`):**
+  - Normalized hyperbox bounding ranges using feature standard deviations and means, preventing zero-variance overflow.
+- **Virtual Candidate Formulation Ratio Alignment:**
+  - Corrected silicone ratio calculation so Total Silicone strictly equals 30.0 wt% (28% Dimethicone/Caprylyl + 2% MQ Resin), matching GS40 pilot DoE center.
 
 ---
 
