@@ -1,23 +1,23 @@
-version: "1.1.0"
-phase: "Phase 2 - Automated Task Dispatch"
+version: "1.2.0"
+phase: "Phase 2.5 - Bidirectional Task Queue"
 system_status: "OPERATIONAL"
-automation_level: "LEVEL 2 - Automated Event Detection & Task Queue Dispatch"
+automation_level: "LEVEL 2.5 - Bidirectional Event & Task Dispatch (ORC <-> GEM Queues Operational)"
 active_baseline: "Rev.8.1 (docs/REV8.1_BASELINE.md)"
 
 last_message:
-  sender: "GEM"
-  id: "GEM-002"
-  timestamp: "2026-09-13T11:35:34+09:00"
-  status: "BENCHMARKED"
+  sender: "ORC"
+  id: "ORC-003"
+  timestamp: "2026-09-13T11:50:18+09:00"
+  status: "APPROVE"
 
 current_cycle:
-  cycle_id: 2
-  task_id: "ORC-TASK-002"
+  cycle_id: 3
+  task_id: "GEM-TASK-003"
   attempt: 1
   max_attempts: 3
-  status: "ORC_PENDING"
-  last_gem_commit: "c592056657fa02fc08760d9679bf3d94f4bb921a"
-  last_orc_decision: "ORC-001"
+  status: "ACKNOWLEDGED_STOP"
+  last_gem_commit: "a08f4c5980e85abc41fdd4e7a48daa45a6d6c3f8"
+  last_orc_decision: "ORC-003"
 
 guardrails:
   allow_arbitrary_baseline_change: false

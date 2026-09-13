@@ -11,8 +11,8 @@ import os
 import sys
 from datetime import datetime
 
-INTERVAL_SECONDS = 180
-TOTAL_DURATION_HOURS = 10
+INTERVAL_SECONDS = 10
+TOTAL_DURATION_HOURS = 1
 MAX_ITERATIONS = (TOTAL_DURATION_HOURS * 3600) // INTERVAL_SECONDS
 
 LOG_FILE = "analysis/watcher.log"
@@ -62,7 +62,13 @@ def main():
         if current_remote != last_known_remote:
             log_event(f"🔔 NEW COMMIT DETECTED on origin/main: {current_remote}")
             if "ORC-" in current_remote:
-                log_event(f"🎯 ORC ACTION DETECTED: {current_remote}! Ready for GEM dispatch.")
+                log_event(f"🎯 ORC ACTION DETECTED: {current_remote}! Invoking GEM Task Dispatcher...")
+                try:
+                    subprocess.run(["git", "pull", "origin", "main"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    subprocess.run(["python3", ".agent/scripts/dispatch_gem_task.py", "HEAD"], check=True)
+                    log_event("✅ GEM Task Dispatch completed successfully.")
+                except Exception as e:
+                    log_event(f"⚠️ GEM Task Dispatch failed: {e}")
             last_known_remote = current_remote
         else:
             # Heartbeat log every 60 iterations (10 minutes)

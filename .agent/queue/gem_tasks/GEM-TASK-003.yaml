@@ -1,0 +1,22 @@
+task_id: "GEM-TASK-003"
+source_orc_id: "ORC-003"
+source_orc_commit: "5503be98a38808a4c80e6545abbb1d95a779c064"
+source_decision_file: "analysis/commits/ORC-003_Decision.md"
+decision: "APPROVE"
+status: "ACKNOWLEDGED_STOP"
+is_actionable: false
+attempt: 1
+max_attempts: 3
+created_at: "2026-09-13T11:59:07+09:00"
+next_agent: "GEM"
+rationale: "The Level 2 event-dispatch architecture is consistent with the governance specification: GitHub Actions acts as a dispatcher, GEM evidence commits are detected, ORC tasks are normalized into .agent/queue/, duplicate source commits are suppressed, and SYSTEM/ORC/BASE/skip-ci commits are excluded to prevent recursive dispatch. The live test evidence is governance-only and introduces no model, dataset, or Rev.8.1 baseline change."
+required_actions:
+  - "Keep GitHub Actions strictly as Dispatcher; it must never emit scientific/model APPROVE decisions."
+  - "Retain source_commit as the idempotency key and preserve [skip ci] loop prevention."
+  - "Keep Level 2 explicitly distinct from Level 3: no claim of automatic ChatGPT/ORC invocation is authorized by this decision."
+  - "Before Level 3, implement and validate a secure persistent ORC runtime boundary, secret handling, retry/idempotency policy, and human-safe failure mode."
+acceptance_criteria:
+  - "GEM evidence commit produces exactly one ORC task for its source commit."
+  - "Duplicate dispatch does not create a second task."
+  - "ORC/SYSTEM/BASE/[skip ci] commits do not recursively dispatch ORC tasks."
+  - "No model/data/baseline qualification is inferred from the automation test."

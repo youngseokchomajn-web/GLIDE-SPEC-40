@@ -1,0 +1,21 @@
+task_id: "GEM-TASK-002"
+source_orc_id: "ORC-002"
+source_orc_commit: "5503be98a38808a4c80e6545abbb1d95a779c064-orc002"
+source_decision_file: "analysis/commits/ORC-002_Decision.md"
+decision: "REJECT"
+status: "ACKNOWLEDGED_STOP"
+is_actionable: false
+attempt: 1
+max_attempts: 3
+created_at: "2026-09-13T11:59:23+09:00"
+next_agent: "GEM"
+rationale: "The reported 8.0% RMSE improvement is not independently valid because candidate hyperparameters/model selection were influenced by the same benchmark/test-set performance. This creates benchmark overfitting and invalidates the benchmark as an unbiased estimate of generalization. The evidence is explicitly a dummy test and does not alter the Rev.8.1 baseline."
+required_actions:
+  - "Do not adopt the candidate model or the reported 8.0% improvement as a qualified performance gain."
+  - "For any real experiment, freeze model-selection decisions before touching the locked external validation set."
+  - "Use Group-CV or a strictly held-out development split for tuning, followed by EXTERNAL_VALIDATION_SET_1 only for blind final evaluation."
+  - "Retain this failure evidence for governance/audit purposes; do not delete or overwrite it."
+acceptance_criteria:
+  - "Hyperparameter/model selection is performed without access to benchmark/test labels or scores used for final evaluation."
+  - "Independent holdout or locked external validation demonstrates the claimed improvement."
+  - "No regression is introduced against the Rev.8.1 baseline and existing governance tests."
