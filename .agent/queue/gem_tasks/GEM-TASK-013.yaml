@@ -1,0 +1,28 @@
+task_id: "GEM-TASK-013"
+source_orc_id: "ORC-013"
+source_orc_commit: "PENDING"
+decision: "EXPERIMENT"
+status: "PENDING"
+is_actionable: true
+attempt: 1
+max_attempts: 3
+next_agent: "GEM"
+rationale: "ORC-012 rejected the current validation provenance, but its Required Actions define a concrete remediation cycle. Prepare a new independently traceable external-validation dataset/version without blind scoring."
+required_actions:
+  - "Preserve GEM-011 and rejected data as historical failure evidence."
+  - "Identify a genuinely traceable public formulation/experiment dataset suitable for frozen Rev.8.1 validation."
+  - "For every row, record exact source location, reported quantity/unit, and any explicit unit-conversion formula."
+  - "Do not reconstruct, interpolate, or synthesize values and label them raw."
+  - "Verify target response compatibility with frozen scoring specification."
+  - "Re-run formulation-level and experiment-level overlap checks against DATASET_FREEZE_1 and benchmarks/domain_priors/."
+  - "Produce an immutable manifest and keep blind scoring locked."
+  - "Escalate to ORC if no candidate source satisfies provenance and response requirements."
+acceptance_criteria:
+  - "New dataset/version is additive and independently identifiable."
+  - "DOI/bibliographic identity independently verified."
+  - "Every row has auditable source location and quantity/unit provenance."
+  - "No unsupported reconstructed values presented as raw data."
+  - "Target response compatible with frozen validation metric specification."
+  - "Independent overlap audit reproducibly demonstrated."
+  - "Frozen Rev.8.1 artifacts unchanged."
+  - "Blind scoring remains unauthorized until explicit ORC approval."
