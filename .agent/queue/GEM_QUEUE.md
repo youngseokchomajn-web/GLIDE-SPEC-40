@@ -1,7 +1,7 @@
 # GEM Execution Task Queue
 
 **Governing Protocol:** [`.agent/PROTOCOL.md`](../PROTOCOL.md) | [`.agent/CONTRACTS.md`](../CONTRACTS.md)
-**Last Updated:** 2026-09-13 15:24:19
+**Last Updated:** 2026-09-13 15:50:27
 
 | Task ID | Source ORC | Decision | Status | Actionable | Created At |
 | :--- | :---: | :---: | :---: | :---: | :--- |
@@ -25,3 +25,4 @@
 | [`GEM-TASK-019`](gem_tasks/GEM-TASK-019.yaml) | ORC-019 | `FIX_REQUIRED` | **COMMITTED** | `false` | 2026-09-13T14:30:00+09:00 |
 | [`GEM-TASK-020`](gem_tasks/GEM-TASK-020.yaml) | ORC-020 | `FIX_REQUIRED` | **COMMITTED** | `false` | 2026-09-13T14:48:19+09:00 |
 | [`GEM-TASK-021`](gem_tasks/GEM-TASK-021.yaml) | ORC-021 | `APPROVE THE STATISTICAL-METHOD CORRECTION AS A PRE-SAMPLE DEVELOPMENT DIAGNOSTIC; DO NOT TREAT IT AS PHYSICAL QUALIFICATION OR AS EVIDENCE THAT THE SIMULATOR IS PHYSICALLY VALIDATED.` | **ACKNOWLEDGED_STOP** | `false` | 2026-09-13T15:24:13+09:00 |
+| [`GEM-TASK-022`](gem_tasks/GEM-TASK-022.yaml) | ORC-021 | `APPROVE_WITH_LIMITATIONS` | **COMMITTED** | `false` | 2026-09-13T15:50:00+09:00 |

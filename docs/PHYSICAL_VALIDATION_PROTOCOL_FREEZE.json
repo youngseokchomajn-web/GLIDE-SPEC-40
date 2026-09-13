@@ -1,0 +1,113 @@
+{
+  "version": "1.0.0",
+  "effective_date": "2026-09-13",
+  "protocol_id": "PROTO-GS40-PHYSICAL-VAL-REV1",
+  "status": "FROZEN",
+  "governing_sop": "SOP-GS40-VAL-001",
+  "target_product": "GLIDE-SPEC 40 (GS40) Endurance Skin Protection",
+  "manufacturing_grouping_structure": {
+    "rationale": "Groups for cross-validation and calibration are defined by independent physical manufacturing shifts and lot allocations, rather than purely post-hoc mathematical clusters.",
+    "shifts": {
+      "SHIFT_BLOCK_1": {
+        "shift_id": "SHIFT-01",
+        "description": "Initial setup & benchmark runs",
+        "execution_orders": [1, 2, 3, 4],
+        "batch_ids": ["GS40-P017", "GS40-P011", "GS40-P013", "GS40-P018"],
+        "primary_runs": ["GS40-P011", "GS40-P013"],
+        "supplemental_runs": ["GS40-P017", "GS40-P018"],
+        "centroid_replicates": ["GS40-P013"]
+      },
+      "SHIFT_BLOCK_2": {
+        "shift_id": "SHIFT-02",
+        "description": "Boundary & high-wax compounding run",
+        "execution_orders": [5, 6, 7, 8, 9],
+        "batch_ids": ["GS40-P003", "GS40-P005", "GS40-P008", "GS40-P006", "GS40-P016"],
+        "primary_runs": ["GS40-P003", "GS40-P005", "GS40-P008", "GS40-P006", "GS40-P016"],
+        "supplemental_runs": [],
+        "centroid_replicates": ["GS40-P016"]
+      },
+      "SHIFT_BLOCK_3": {
+        "shift_id": "SHIFT-03",
+        "description": "Vertex extrema & thermal limits compounding run",
+        "execution_orders": [10, 11, 12, 13, 14],
+        "batch_ids": ["GS40-P004", "GS40-P009", "GS40-P012", "GS40-P002", "GS40-P001"],
+        "primary_runs": ["GS40-P004", "GS40-P009", "GS40-P012", "GS40-P002", "GS40-P001"],
+        "supplemental_runs": [],
+        "centroid_replicates": []
+      },
+      "SHIFT_BLOCK_4": {
+        "shift_id": "SHIFT-04",
+        "description": "Verification & duplicate center replicate run",
+        "execution_orders": [15, 16, 17, 18],
+        "batch_ids": ["GS40-P014", "GS40-P010", "GS40-P007", "GS40-P015"],
+        "primary_runs": ["GS40-P014", "GS40-P010", "GS40-P007", "GS40-P015"],
+        "supplemental_runs": [],
+        "centroid_replicates": ["GS40-P014", "GS40-P015"]
+      }
+    }
+  },
+  "split_conformal_calibration_design": {
+    "calibration_split_mode": "INDEPENDENT_HOLD_OUT_BATCHES",
+    "rule": "Calibration nonconformity quantile q_hat is computed strictly on dedicated calibration batches and never on evaluation test folds.",
+    "calibration_set_size_min": 4,
+    "evaluation_set_size_min": 4
+  },
+  "acceptance_gates": {
+    "n_primary_completed": {
+      "threshold": 16,
+      "comparison": ">=",
+      "synthetic_allowed": false
+    },
+    "n_center_replicates": {
+      "threshold": 3,
+      "comparison": ">="
+    },
+    "repeatability_cv_center_pct": {
+      "threshold": 4.0,
+      "comparison": "<="
+    },
+    "lack_of_fit_p_value": {
+      "threshold": 0.05,
+      "comparison": ">="
+    },
+    "group_cv_r2": {
+      "threshold": 0.85,
+      "comparison": ">="
+    },
+    "conformal_pi_coverage_pct": {
+      "threshold": 85.0,
+      "nominal": 90.0,
+      "comparison": ">="
+    }
+  },
+  "brand_requirement_spec_targets": {
+    "category": "Endurance / Performance Skin Care",
+    "application_lens": "TIME x MOTION x ENVIRONMENT",
+    "responses": {
+      "Hardness_gf": {
+        "spec_min": 700.0,
+        "spec_max": 850.0,
+        "nominal": 780.0,
+        "functional_relevance": "Stick mechanical integrity under high temperature and repetitive friction without crumbling"
+      },
+      "Transfer_Index_g": {
+        "spec_min": 0.038,
+        "spec_max": 0.058,
+        "nominal": 0.048,
+        "functional_relevance": "Uniform protective barrier film formation without excessive greasy residue or fabric staining"
+      },
+      "Drop_Point_C": {
+        "spec_min": 60.0,
+        "spec_max": 75.0,
+        "nominal": 63.0,
+        "functional_relevance": "Thermal endurance against pocket heat, sun exposure, and friction-induced melting"
+      },
+      "Friction_CoF": {
+        "spec_min": 0.120,
+        "spec_max": 0.165,
+        "nominal": 0.145,
+        "functional_relevance": "Sustained kinetic friction reduction against skin-on-skin and fabric-on-skin shear"
+      }
+    }
+  }
+}

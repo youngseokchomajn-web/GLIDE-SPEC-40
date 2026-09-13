@@ -1,0 +1,16 @@
+task_id: "GEM-TASK-022"
+source_orc_id: "ORC-021"
+source_orc_commit: "994bcc208b00967dc0d10f1601a18ea19795e0bf"
+source_decision_file: "analysis/commits/ORC-021_Decision.md"
+decision: "APPROVE_WITH_LIMITATIONS"
+status: "COMMITTED"
+is_actionable: false
+attempt: 1
+max_attempts: 3
+created_at: "2026-09-13T15:50:00+09:00"
+claimed_at: "2026-09-13T15:50:30+09:00"
+completed_at: "2026-09-13T15:52:00+09:00"
+next_agent: "ORC"
+rationale: "Delivered frozen validation protocol, independent manufacturing shift structure, and pre-physical sensitivity audit fulfilling ORC-021 Actions 3, 4, 5."
+execution_manifest: "docs/GEM-022_EXECUTION_MANIFEST.md"
+evidence_file: "analysis/commits/GEM-022_EVIDENCE.md"
