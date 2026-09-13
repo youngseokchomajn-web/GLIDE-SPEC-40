@@ -1,0 +1,33 @@
+Parameter,Target_Specification,Actual_Value,Lot_Number_or_Device_ID,CoA_Verified,Unit,Operator_Signoff
+Batch_ID,GS40-P001,GS40-P001,N/A,YES,text,OPERATOR
+Registration_ID,GS40_CAL_001,GS40_CAL_001,N/A,YES,text,OPERATOR
+Trial_ID,DOE-EXP-001,DOE-EXP-001,N/A,YES,text,OPERATOR
+Design_Type,Vertex_HighSyn_HighDim,Vertex_HighSyn_HighDim,N/A,YES,text,OPERATOR
+Synthetic_Wax_wt,15.0,,LOT-SYN-WAX-2026A,PENDING,wt%,
+Candelilla_Wax_wt,2.0,,LOT-CAN-WAX-2026B,PENDING,wt%,
+Dimethicone_100cSt_wt,22.0,,LOT-DIM-100-2026A,PENDING,wt%,
+Caprylyl_Methicone_wt,6.0,,LOT-CAP-METH-2026A,PENDING,wt%,
+MQ_Resin_Solution_wt,2.0,,LOT-MQ-RESIN-2026A,PENDING,wt%,
+Porous_Silica_wt,10.0,,LOT-SIL-POR-2026A,PENDING,wt%,
+Silica_Dimethyl_Silylate_wt,2.0,,LOT-SIL-FUM-2026A,PENDING,wt%,
+PMSSQ_Spherical_wt,8.0,,LOT-PMSSQ-2026A,PENDING,wt%,
+Boron_Nitride_Platelets_wt,3.0,,LOT-BN-PLT-2026A,PENDING,wt%,
+Zinc_Oxide_wt,5.0,,LOT-ZNO-USP-2026A,PENDING,wt%,
+C12-15_Alkyl_Benzoate_wt,24.0,,LOT-AB-EST-2026A,PENDING,wt%,
+Active_Preservative_wt,1.0,,LOT-PRES-2026A,PENDING,wt%,
+Total_Charge_Weight,100.0,,,PENDING,wt%,
+Mixing_Temperature_C,88.0,,PT100_PROBE_01,YES,degC,
+Mixing_Homogenizer_RPM,2500,,HOMO_SHEAR_02,YES,RPM,
+Mixing_Duration_Min,25.0,,TIMER_01,YES,min,
+Fill_Temperature_C,80.0,,THERMO_IR_01,YES,degC,
+Mold_Preheat_Temp_C,45.0,,MOLD_BED_01,YES,degC,
+Cooling_Chamber_Temp_C,10.0,,CHAMBER_10C,YES,degC,
+Cooling_Rate_C_min,2.5,,CALC_DATALOGGER,YES,degC/min,
+Cooling_Duration_Min,45.0,,TIMER_02,YES,min,
+Demold_Temperature_C,20.0,,PROBE_02,YES,degC,
+Hardness_gf,781.6 [775-788],,,PENDING,gf,
+Transfer_g,0.0430 [0.038-0.048],,,PENDING,g,
+Drop_Point_C,62.6 [61.8-63.4],,,PENDING,degC,
+CoF_Bioskin,0.158 [0.145-0.170],,,PENDING,ratio,
+Sedimentation_Check,NO_SETTLING,,,PENDING,visual,
+QC_Release_Verdict,VIRTUAL_TARGET_PENDING_MEASUREMENT,,,PENDING,status,

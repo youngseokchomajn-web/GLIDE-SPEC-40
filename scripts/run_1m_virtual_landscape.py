@@ -287,7 +287,7 @@ def run_1m_virtual_landscape(total_candidates: int = 1_000_000, chunk_size: int 
     assigned_zones = np.where(
         is_ood, "Zone D: OOD Extrapolation",
         np.where(
-            in_target, "Zone A: Target Sweet Spot",
+            in_target, "Zone A: Virtual Target Zone",
             np.where(
                 is_high_unc, "Zone C: High Uncertainty",
                 "Zone B: Specification Boundary"
@@ -336,7 +336,7 @@ def run_1m_virtual_landscape(total_candidates: int = 1_000_000, chunk_size: int 
     df_feasible = df_eval.drop(columns=["feature_array", "feature_vector"], errors="ignore")
     df_feasible.to_parquet(out_dir / "feasible_candidates.parquet", index=False)
 
-    df_target = df_feasible[df_feasible["assigned_zone"] == "Zone A: Target Sweet Spot"]
+    df_target = df_feasible[df_feasible["assigned_zone"] == "Zone A: Virtual Target Zone"]
     df_boundary = df_feasible[df_feasible["assigned_zone"] == "Zone B: Specification Boundary"]
     df_uncertainty = df_feasible[df_feasible["assigned_zone"] == "Zone C: High Uncertainty"]
     df_ood = df_feasible[df_feasible["assigned_zone"] == "Zone D: OOD Extrapolation"]
@@ -349,7 +349,7 @@ def run_1m_virtual_landscape(total_candidates: int = 1_000_000, chunk_size: int 
     # Candidate Summary
     n_eval = len(df_feasible)
     summary_data = [
-        {"zone": "Zone A: Target Sweet Spot", "sample_count": len(df_target), "share_pct": round(len(df_target)/n_eval*100, 2), "strategic_action": "Virtual Release Candidate (₩0 Test Waiver)"},
+        {"zone": "Zone A: Virtual Target Zone", "sample_count": len(df_target), "share_pct": round(len(df_target)/n_eval*100, 2), "strategic_action": "Pre-calibration Virtual Target (Pending GS40-CAL-001)"},
         {"zone": "Zone B: Specification Boundary", "sample_count": len(df_boundary), "share_pct": round(len(df_boundary)/n_eval*100, 2), "strategic_action": "Tolerance Boundary Mapping"},
         {"zone": "Zone C: High Uncertainty", "sample_count": len(df_uncertainty), "share_pct": round(len(df_uncertainty)/n_eval*100, 2), "strategic_action": "Active Learning Acquisition Target"},
         {"zone": "Zone D: OOD Extrapolation", "sample_count": len(df_ood), "share_pct": round(len(df_ood)/n_eval*100, 2), "strategic_action": "Constrain / Do Not Fabricate"},

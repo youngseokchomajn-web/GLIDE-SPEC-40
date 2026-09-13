@@ -3,6 +3,12 @@
 - **Audit Date:** 2026-09-13
 - **Validation Standard:** Group K-Fold (No Leakage, Groups = 15)
 - **Target Responses:** Hardness (gf), Transfer (g), Drop Point (°C)
+- **Real GS40 Physical Samples:** **$N = 0$** (Public prior baseline only)
+
+> [!CAUTION]
+> **RED-TEAM AUDIT NOTICE:**
+> The Group-CV $R^2$ (+1.000) and Conformal empirical coverage (94.4% ~ 100.0%) reported below reflect internal mathematical consistency across **frozen public literature datasets and domain priors only**.
+> They DO NOT prove real-world GS40 stick prediction accuracy. Empirical physical performance remains unvalidated until physical calibration batch `GS40-CAL-001` is manufactured and measured.
 
 ---
 

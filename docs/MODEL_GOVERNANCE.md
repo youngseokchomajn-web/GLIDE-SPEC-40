@@ -8,15 +8,46 @@
 
 ## 1. Fundamental Principles
 
-### Principle 1: Real GS40 Empirical Status
-As of Rev.8.1, the number of physically measured GS40 production or pilot batches is **$N = 0$**.
-- No automated pipeline or documentation may state or imply that the GLIDE-SPEC 40 model has completed empirical physical qualification.
-- All qualification gates require physical experimental verification before production release.
+### Principle 1: Real GS40 Empirical Status & Red-Team Audit
+As of Rev.8.1, the number of physically measured GS40 production or pilot batches is strictly **$N = 0$**.
 
-### Principle 2: Definition & Scope of `VIRTUAL_PASS`
-`VIRTUAL_PASS` is strictly an internal active-learning screening verdict:
-- **What it means:** The candidate formulation is predicted within Rev.7.3 specifications with high statistical confidence ($\ge 90\%$ Conformal Coverage) and low Out-of-Domain distance ($D_{\text{composite}} \le 1.0$) based on available domain priors. It is eligible for physical testing deferral (**Test Waiver Candidate**).
-- **What it DOES NOT mean:** It is NOT a finished product release approval, NOT a Certificate of Analysis (CoA), and NOT an FDA/KFDA/ISO regulatory qualification.
+| Red-Team Audit Item | Current System Status | Scientific Truth / Interpretation |
+|---|:---:|---|
+| **Dataset Freeze** | COMPLETED | 8 public peer-reviewed datasets frozen with DOI/license |
+| **Data Provenance** | COMPLETED | 30 features mapped to 4 explicit provenance levels |
+| **Git Baseline & Tag** | COMPLETED | Committed and tagged at `Rev8.1-precalibration` |
+| **1M Virtual Landscape** | COMPLETED | 1,000,000 candidates screened into 5 zones |
+| **Unit Test Suite** | COMPLETED (55/55) | 100% test pass on physics and calibration pipelines |
+| **Public-Data Group-CV** | IMPLEMENTED | ElasticNet $R^2=1.000$, GP $R^2=0.967$ on public domain priors |
+| **Conformal Coverage** | IMPLEMENTED | 94.4% ~ 100.0% coverage on held-out public folds |
+| **GS40 Empirical Validation** | **NONE (N=0)** | **Zero physical batches fabricated or measured to date** |
+| **Real Stick Conformal Coverage** | **NONE (N=0)** | **No physical prediction intervals confirmed on stick** |
+| **Real Stick OOD Validation** | **UNVERIFIED** | **Behavior on real 28% powder / 17% wax unconfirmed** |
+| **Real Formulation Prediction** | **UNVERIFIED** | **Empirical formulation accuracy pending GS40-CAL-001** |
+
+> [!CAUTION]
+> **MANDATORY SCIENTIFIC FIREWALL:**
+> $R^2 = +1.000$ and $94.4\% \sim 100.0\%$ Conformal Coverage represent mathematical consistency checks on **Public Domain Priors and virtual baselines only**.
+> They MUST NEVER be presented, interpreted, or cited as "GS40 product performance" or "manufacturing success". Empirical physical accuracy remains completely unvalidated until `GS40-CAL-001` is fabricated and measured.
+
+### Principle 2: Definition & Scope of `VIRTUAL_PASS` and Zone A Evolution
+`VIRTUAL_PASS` is strictly an internal computational screening verdict:
+- **Canonical Definition:**
+  > **Internal computational screening pass; not a product release or regulatory qualification.**
+- **Scope & Operational Role:** Eligible as an internal **Test Waiver Candidate** for computational testing deferral under verified prior assumptions.
+- **It DOES NOT mean:** It is NOT a finished product release approval, NOT a Certificate of Analysis (CoA), NOT a release specification QC pass, and NOT an FDA/KFDA/ISO regulatory qualification.
+
+#### Zone A Evolutionary Lifecycle
+To prevent premature release claims, Zone A follows a strict 3-stage evolutionary classification:
+1. **Pre-Calibration Stage (Current, $N=0$):**
+   - Designation: **`Zone A — Virtual Target Zone`**
+   - Meaning: Computational target satisfying Rev.7.3 specs under public prior assumptions. Requires first physical batch calibration.
+2. **Post-First-Calibration Stage ($N=1$, after `GS40-CAL-001`):**
+   - Designation: **`Zone A — Confirmation Candidate`**
+   - Meaning: Formulation bias-corrected by real GS40 residual data; candidate for empirical confirmation test.
+3. **Multi-Batch Validated Stage ($N \ge 16$, post Rev 2.0 Gate):**
+   - Designation: **`Test-by-Exception Eligible`**
+   - Meaning: High empirical confidence established across pilot matrix; physical batch testing may be legally deferred.
 
 ### Principle 3: Zero Synthetic Data Fallbacks in Qualification
 - Qualification of the production response surrogate cannot be achieved using synthetic, simulated, or pseudo-random data.
