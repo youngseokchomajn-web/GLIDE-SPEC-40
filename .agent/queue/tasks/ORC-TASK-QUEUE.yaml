@@ -1,11 +1,11 @@
 task_id: "ORC-TASK-QUEUE"
 source_agent: "GEM"
 source_id: "GEM-QUEUE"
-source_commit: "6c8fe5168c12615602174e5e8d4de9a6a7a3b0fb"
+source_commit: "514f940027db9e62cc05f8fc861a9df52997f2b1"
 source_file: ".agent/STATE.yaml"
 task_type: "EVIDENCE_REVIEW"
 status: "PENDING"
-created_at: "2026-09-13T03:42:19+09:00"
+created_at: "2026-09-13T03:49:31+09:00"
 requires_orc: true
 inspection_checklist:
   dataset_identity: false
