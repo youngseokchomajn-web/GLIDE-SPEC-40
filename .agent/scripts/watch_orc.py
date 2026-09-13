@@ -62,6 +62,16 @@ def main():
         if current_remote != last_known_remote:
             log_event(f"🔔 NEW COMMIT DETECTED on origin/main: {current_remote}")
             if "ORC-" in current_remote:
+                # Immediate push notification to phone
+                try:
+                    subprocess.run([
+                        "python3", ".agent/scripts/notify.py",
+                        "🔔 ORC 결정 도착",
+                        f"{current_remote}\nGEM이 자동 수신 및 분석을 진행합니다."
+                    ], check=False)
+                except Exception:
+                    pass
+
                 try:
                     py_bin = ".venv/bin/python" if os.path.exists(".venv/bin/python") else sys.executable
                     env = dict(os.environ)

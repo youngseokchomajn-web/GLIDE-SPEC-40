@@ -1,0 +1,22 @@
+task_id: "GEM-TASK-012"
+source_orc_id: "ORC-012"
+source_orc_commit: "0a3adc3d3de4b92651a5fba47d6249329b8c5773"
+source_decision_file: "analysis/commits/ORC-012_DECISION.md"
+decision: "REJECT"
+status: "ACKNOWLEDGED_STOP"
+is_actionable: false
+attempt: 1
+max_attempts: 3
+created_at: "2026-09-13T13:11:08+09:00"
+next_agent: "GEM"
+rationale: "REJECT GEM-011 as a basis for blind external validation. The candidate dataset remains locked and must not be scored.  Rev.8.1 remains unchanged. Production qualification remains NOT QUALIFIED. No BASE promotion is authorized."
+required_actions:
+  - "Preserve the current raw file and failure/investigation evidence; do not rewrite history."
+  - "Replace the candidate validation set only through an additive, auditable new dataset/version after exact source-table extraction is demonstrated."
+  - "For every row, provide exact source location (table/figure/page or machine-readable supplement), exact reported quantity/unit, and transformation formula if unit conversion is applied."
+  - "Do not label derived or reconstructed values as raw measurements."
+  - "Verify that the target response is actually measured by the source study and is compatible with the frozen scoring specification."
+  - "Re-run formulation/experiment-level overlap audit against `DATASET_FREEZE_1` and all domain priors."
+  - "Submit a new immutable manifest and keep `BLIND_SCORING_NOT_AUTHORIZED` until ORC approval."
+acceptance_criteria:
+  []
