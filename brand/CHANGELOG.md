@@ -1,5 +1,48 @@
 # Brand Planning Changelog
 
+## v0.5 — 2026-09-13
+
+The first Korean/local runner evidence pass was completed and the remaining pre-product-lock gates were converted into a concrete closure plan.
+
+### Added
+
+- `brand/05_research/korean_runner_evidence_round1_2026-09.md`
+  - 4 individually traceable Korean/local signals
+  - sweat-related Vaseline wash-off
+  - clothing-motion interaction in groin/thigh friction
+  - perceived duration limitation around 20 km / 2 h in one report
+  - Korean marathon guidance recommending Vaseline for chafing prevention
+- `brand/05_research/gate_closure_plan_v0.1.md`
+  - gate-by-gate status
+  - recommended study sequence
+  - competitive benchmark structure
+  - application-format prototype plan
+  - skin compatibility/recovery separation
+  - Korean regulatory/claim mapping requirement
+
+### Changed
+
+- `brand/05_research/research_audit_v0.1.md` upgraded to v0.2.
+- Korean/local evidence is no longer a completely empty gate, but it remains insufficient for prevalence or product decisions.
+- Distance/time coverage now includes Korean 10K and ~20 km/2 h reports, while controlled time-to-failure remains open.
+
+### Evidence interpretation
+
+- Korean community reports reproduce several international hypotheses: sweat-related wash-off, garment-motion contribution, and distance/time-dependent failure.
+- A Korean marathon organizer guide confirms Vaseline is already a locally familiar chafing-prevention recommendation.
+- These signals strengthen problem relevance but do not establish prevalence, objective performance limits, superiority, willingness-to-pay, or regulatory efficacy claims.
+
+### Remaining gates
+
+1. Balanced Korean/local runner interviews or survey.
+2. Structured price/value and willingness-to-pay evidence.
+3. Matched objective testing against petroleum jelly and leading specialized formats.
+4. Skin compatibility testing.
+5. Temperature/humidity friction and persistence testing.
+6. Application-format prototypes and reachability testing.
+7. Independent recovery evidence.
+8. Korean regulatory classification and claim mapping.
+
 ## v0.4 — 2026-09-13
 
 A third community-evidence pass was completed against the remaining gaps from v0.3. The evidence registry was upgraded to 40 individually preserved cases across three passes.
@@ -41,17 +84,6 @@ A third community-evidence pass was completed against the remaining gaps from v0
 - D008 (format/application UX as a first-class performance variable): **candidate, not yet formalized**.
 - D009 (validate topical protection within the skin–clothing–environment system): **candidate, not yet formalized**.
 - No new universal product-performance claim has been adopted.
-
-### Remaining gates before first-product specification lock
-
-1. Korean/local runner evidence.
-2. Larger structured price/value and willingness-to-pay sample.
-3. Objective comparative testing of leading incumbents.
-4. Controlled skin-compatibility testing.
-5. Controlled friction/persistence testing across temperature and humidity.
-6. Packaging/application prototypes with representative body areas.
-7. Post-run recovery formulation evidence.
-8. Regulatory classification and claim boundaries.
 
 ## v0.3 — 2026-09-13
 
