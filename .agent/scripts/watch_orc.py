@@ -62,20 +62,20 @@ def main():
         if current_remote != last_known_remote:
             log_event(f"🔔 NEW COMMIT DETECTED on origin/main: {current_remote}")
             if "ORC-" in current_remote:
-                log_event(f"🎯 ORC ACTION DETECTED: {current_remote}! Invoking GEM Task Dispatcher...")
                 try:
+                    py_bin = ".venv/bin/python" if os.path.exists(".venv/bin/python") else sys.executable
+                    env = dict(os.environ)
+                    env["PYTHONPATH"] = "."
                     subprocess.run(["git", "pull", "origin", "main"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    subprocess.run(["python3", ".agent/scripts/dispatch_gem_task.py", "HEAD"], check=True)
+                    subprocess.run([py_bin, ".agent/scripts/dispatch_gem_task.py", "HEAD"], check=True, env=env)
                     log_event("✅ GEM Task Dispatch completed successfully.")
                     # Automatically trigger executor for actionable tasks
-                    subprocess.run(["python3", ".agent/scripts/execute_gem_task.py"], check=False)
+                    subprocess.run([py_bin, ".agent/scripts/execute_gem_task.py"], check=False, env=env)
                 except Exception as e:
                     log_event(f"⚠️ GEM Task Dispatch/Execution failed: {e}")
             last_known_remote = current_remote
         else:
-            # Heartbeat log every 60 iterations (10 minutes)
-            if iteration % 60 == 0:
-                log_event(f"Heartbeat: {iteration}/{MAX_ITERATIONS} checks completed. Monitoring idle.")
+            log_event(f"Heartbeat #{iteration}/{MAX_ITERATIONS} (10s): Remote unchanged ({last_known_remote[:7]}). Monitoring...")
 
     log_event("=== Watcher Daemon Finished 10-Hour Window ===")
 
