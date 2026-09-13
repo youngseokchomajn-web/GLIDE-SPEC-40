@@ -73,9 +73,9 @@ Before public claims are written, map each claim to:
 
 ## Current evidence interpretation
 
-Korean runner evidence now includes reports of sweat-related Vaseline wash-off, clothing-motion interaction and perceived duration limits. These are hypothesis-generating only. International sports-dermatology literature likewise supports treating friction as a skin–textile/equipment/environment interaction rather than a single-product problem. cite-source-placeholder
+Korean runner evidence now includes reports of sweat-related Vaseline wash-off, clothing-motion interaction and perceived duration limits. These are hypothesis-generating only. International sports-dermatology literature likewise supports treating friction as a skin–textile/equipment/environment interaction rather than a single-product problem.
 
-A 2026 endurance-athlete skin-barrier review identifies prolonged repetitive loading, sweat, clothing/equipment occlusion, thermal and water exposure as interacting stressors. A 2026 review focused on female athletes specifically describes bra-related friction as influenced by duration, fit, textile, climate and chest-strap interactions. These support the test architecture but do not prove any particular formulation will work. 
+A 2026 endurance-athlete skin-barrier review identifies prolonged repetitive loading, sweat, clothing/equipment occlusion, thermal and water exposure as interacting stressors. A 2026 review focused on female athletes describes bra-related friction as influenced by duration, fit, textile, climate and chest-strap interactions. These support the test architecture but do not prove any particular formulation will work.
 
 ## Decision rule
 
