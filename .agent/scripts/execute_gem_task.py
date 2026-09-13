@@ -184,8 +184,8 @@ def execute_task(task_path, dry_run=False):
             else:
                 execution_evidence.append("Scientific validation engine completed successfully.")
                 print(p_val.stdout.strip())
-    else:
-        # Standard dispatcher test verification
+    elif "dummy" in str(td.get("rationale", "")).lower() or "TEST" in task_id or "automation round-trip" in str(td.get("rationale", "")).lower():
+        # Standard dispatcher test verification for infrastructure dummy roundtrip only
         p = subprocess.run([py_exec, "-m", "pytest", "tests/test_orc_to_gem_dispatch.py"], capture_output=True, text=True, env=my_env)
         rc, out, err = p.returncode, p.stdout.strip(), p.stderr.strip()
         if rc != 0:
@@ -193,6 +193,11 @@ def execute_task(task_path, dry_run=False):
             error_msg = f"Self-dispatch test failed: {err or out}"
         else:
             execution_evidence.append(f"Dispatcher verification: PASS ({out.splitlines()[-1]})")
+    else:
+        print(f"[!] Task {task_id} requires substantive GEM research/data intervention. Auto-dummy skipped.")
+        td["status"] = "PENDING"
+        save_gem_task(task_path, td)
+        return False, "SUBSTANTIVE_TASK_REQUIRES_GEM"
 
     if has_error:
         print(f"[!] Execution failed for {task_id}: {error_msg}")

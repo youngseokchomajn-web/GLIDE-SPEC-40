@@ -187,6 +187,12 @@ def dispatch_gem_task(commit_ref="HEAD"):
         print(f"[-] Skip: ORC commit {sha[:7]} is already processed (Idempotency).")
         return False, "DUPLICATE_PREVENTED"
 
+    has_gem_task = any(f.startswith(GEM_TASKS_DIR) for f in files)
+    if has_gem_task:
+        update_gem_queue_index()
+        print("[+] ORC directly committed a GEM task file. Updated queue index.")
+        return True, "DIRECT_GEM_TASK_COMMITTED"
+
     decision_file = locate_orc_decision_file(files)
     if not decision_file:
         print("[-] Skip: No ORC decision markdown file found in commit.")
