@@ -1,5 +1,58 @@
 # Brand Planning Changelog
 
+## v0.4 — 2026-09-13
+
+A third community-evidence pass was completed against the remaining gaps from v0.3. The evidence registry was upgraded to 40 individually preserved cases across three passes.
+
+### Added
+
+- `brand/05_research/community_round3_2026-09.md`
+  - 15 individually preserved community/retailer cases
+  - female-specific bra/waistband interfaces
+  - hydration-vest interaction
+  - sensitive skin and contradictory reactions
+  - cold-state texture/application
+  - rain/high-humidity behavior
+  - post-chafe protection vs prevention
+  - price/value
+  - packaging/reachability
+  - topical vs adhesive barrier switching
+
+### Changed
+
+- `brand/05_research/community_evidence_registry.md` upgraded to v0.3.
+- Evidence IDs and explicit `What it does NOT prove` fields are now required for traceability.
+- Registry now records 40 individual cases across Pass 1, Pass 2, and Pass 3.
+- Evidence gaps were narrowed and converted into explicit pre-product-specification gates.
+
+### New evidence signals
+
+- Skin sensitivity can reverse product preference; contradictory reactions must be preserved.
+- Temperature can change formulation usability, not merely protection performance.
+- Female bra/waistband interfaces and hydration-vest interactions create distinct friction systems.
+- Adhesive barriers can become preferred after repeated topical failure.
+- Prevention and post-chafe recovery are separate jobs-to-be-done.
+- Packaging geometry/reachability can limit an otherwise effective product.
+- Price/value is evaluated against clothing, tape, and inexpensive incumbents, not only other cosmetic products.
+- Retailer reviews show strong positive and negative outliers for the same incumbent product, reinforcing the need for controlled testing.
+
+### Strategic status
+
+- D008 (format/application UX as a first-class performance variable): **candidate, not yet formalized**.
+- D009 (validate topical protection within the skin–clothing–environment system): **candidate, not yet formalized**.
+- No new universal product-performance claim has been adopted.
+
+### Remaining gates before first-product specification lock
+
+1. Korean/local runner evidence.
+2. Larger structured price/value and willingness-to-pay sample.
+3. Objective comparative testing of leading incumbents.
+4. Controlled skin-compatibility testing.
+5. Controlled friction/persistence testing across temperature and humidity.
+6. Packaging/application prototypes with representative body areas.
+7. Post-run recovery formulation evidence.
+8. Regulatory classification and claim boundaries.
+
 ## v0.3 — 2026-09-13
 
 A second community-evidence pass was completed and stored as individually traceable cases, followed by pattern extraction and an evidence-to-decision audit.
@@ -40,10 +93,6 @@ These remain candidate decisions until balanced evidence and controlled testing 
 - first-product performance requirements
 - brand name, slogan, final target segment, formula, numerical thresholds, regulatory claims, packaging, pricing
 
-### Next evidence gate
-
-Before locking the first-product specification, obtain balanced evidence by body area, climate, distance/time, recovery, skin compatibility, sensory UX, and price/value. Then translate recurring failure modes into controlled technical tests.
-
 ## v0.2 — 2026-09-13
 
 Community evidence was moved from a schema-only state into an initial traceable evidence set, and a completeness audit was added.
@@ -52,39 +101,21 @@ Community evidence was moved from a schema-only state into an initial traceable 
 
 - `brand/05_research/community_cases_v0.1.md`
   - 10 individually preserved community cases
-  - source, date, athlete context, conditions, body area, product/solution, outcome, reapplication, switching behavior, confidence, and strategic implication
-  - positive, negative, and contradictory reports retained
 - `brand/05_research/research_audit_v0.1.md`
-  - coverage audit across brand strategy, body area, climate, distance/time, user behavior, failure modes, recovery, sensory UX, packaging, regulatory boundaries, and technical validation
-  - explicit research gaps and product-specification gate
+  - coverage audit and explicit research gaps
 
 ### Changed
 
 - `community_evidence_registry.md` upgraded from v0.1 to v0.2.
-- Registry now links the evidence program to 10 concrete cases and explicitly records remaining evidence gaps.
 - Added odor/sensory, cold texture, recovery, skin compatibility, and willingness-to-pay as research priorities.
 
 ### Strategic interpretation reinforced
 
 - There is no evidence yet for a universal anti-chafe winner.
 - Persistence is conditional on heat, sweat, water, motion, clothing/equipment, body area, and application behavior.
-- Reapplication is part of the real operating system, not merely a secondary convenience.
-- Lubricants compete with tape, band-aids, garments, compression, and equipment changes depending on body area.
-- Residue/clothing transfer is a meaningful tradeoff in some user reports.
-- The opportunity hypothesis is therefore still scenario-based endurance skin care, not simply “better Vaseline.”
-
-### Not changed / still provisional
-
-- marathon/ultra beachhead
-- Endurance / Performance Skin Care working category
-- TIME × MOTION × ENVIRONMENT abstraction
-- PROTECT → PERFORM → RECOVER → OPTIMIZE architecture
-- first-product performance requirements
-- brand name, slogan, final target segment, formula, numerical thresholds, regulatory claims, packaging, pricing
-
-### Next evidence gate
-
-Before locking the first-product specification, obtain more balanced evidence by body area, climate, distance/time, recovery, skin compatibility, sensory UX, and price/value; then translate recurring failure modes into controlled technical tests.
+- Reapplication is part of the real operating system.
+- Lubricants compete with tape, band-aids, garments, compression, and equipment changes.
+- The opportunity hypothesis remains scenario-based endurance skin care, not simply “better Vaseline.”
 
 ## v0.1 — 2026-09-13
 
