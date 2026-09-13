@@ -1,0 +1,25 @@
+task_id: "GEM-TASK-023"
+source_orc_id: "ORC-022"
+source_orc_commit: "6075a42bf2dd3db2fd8080d3c30c674ac0dee01d"
+source_decision_file: "analysis/commits/ORC-022_Decision.md"
+decision: "APPROVE_WITH_LIMITATIONS"
+status: "PENDING"
+is_actionable: true
+attempt: 1
+max_attempts: 3
+created_at: "2026-09-13T15:00:00+09:00"
+next_agent: "GEM"
+rationale: "GEM-022 is accepted as a pre-physical protocol/readiness package, but calibration/evaluation split mapping, actual batch-independence verification fields, brand-target governance reconciliation, and distance-support threshold provenance must be fixed before physical refit/final scoring."
+required_actions:
+  - "Preserve GEM-022 evidence unchanged."
+  - "Freeze exact non-overlapping calibration/evaluation manufacturing-group mapping before physical refit or final scoring."
+  - "Define fields and evidence needed to verify actual manufacturing batch/shift independence after pilot execution."
+  - "Reconcile PHYSICAL_VALIDATION_PROTOCOL_FREEZE brand numerical targets with brand research governance; label them as provisional technical targets unless formally approved product specifications exist."
+  - "Either define provenance and threshold for the Mahalanobis support claim or downgrade it to descriptive diagnostic language."
+  - "Do not modify or tune Rev.8.1 from these virtual diagnostics."
+  - "Keep N_physical=0 and production NOT_QUALIFIED."
+acceptance_criteria:
+  - "Calibration and evaluation groups are explicit and non-overlapping."
+  - "Manufacturing-independence verification is operationally defined before pilot execution."
+  - "Numerical brand targets have one authoritative governance status/source."
+  - "No Rev.8.1 tuning or baseline modification."
