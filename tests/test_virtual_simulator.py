@@ -154,21 +154,24 @@ class TestVirtualSimulator(unittest.TestCase):
         self.assertTrue(thixo_csv.exists(), "fumed_silica_thixotropic_yield_stress.csv must exist")
         with open(thixo_csv, mode="r", encoding="utf-8") as f:
             thixo = list(csv.DictReader(f))
-        self.assertGreaterEqual(len(thixo), 10)
-        # Check 2.0% Aerosil R 972 at 80°C hot fill
-        target_run = [r for r in thixo if float(r["fumed_silica_wt_pct"]) == 2.0 and float(r["temperature_c"]) == 80.0][0]
-        self.assertGreater(float(target_run["bingham_yield_stress_pa"]), 5.0)
-        self.assertEqual(float(target_run["zno_settling_velocity_um_min"]), 0.0)
-        self.assertEqual(target_run["anti_settling_stability_30min_hot_hold"], "STABLE_SUSPENSION")
+        self.assertGreaterEqual(len(thixo), 5)
+        # Check external measurements exist (Kopylov 2011)
+        ext_runs = [r for r in thixo if r["provenance_status"] == "MEASURED_IN_EXTERNAL_SYSTEM"]
+        self.assertGreaterEqual(len(ext_runs), 4)
+        # Check GS40 2.0% is flagged as DERIVED_ESTIMATE / PRE_PILOT_HYPOTHESIS
+        target_run = [r for r in thixo if r["data_point_id"] == "R972-GS40-002"][0]
+        self.assertEqual(target_run["provenance_status"], "DERIVED_ESTIMATE")
+        self.assertEqual(target_run["verification_level"], "PRE_PILOT_HYPOTHESIS")
 
         # 3. Powder friction & slip benchmarks
         fric_csv = powder_dir / "powder_friction_and_slip_benchmarks.csv"
         self.assertTrue(fric_csv.exists(), "powder_friction_and_slip_benchmarks.csv must exist")
         with open(fric_csv, mode="r", encoding="utf-8") as f:
             frics = list(csv.DictReader(f))
-        self.assertGreaterEqual(len(frics), 8)
-        bn_run = [r for r in frics if "BN" in r["powder_trade_name"] and "Bioskin" in r["test_substrate"]][0]
-        self.assertLess(float(bn_run["dynamic_friction_cof"]), 0.15)
+        self.assertGreaterEqual(len(frics), 4)
+        # Check CN102341090B is isolated as formulation test, NOT neat powder
+        patent_run = [r for r in frics if "CN102341090B" in r["test_id"] or "CN102341090B" in r["literature_source_and_context"]][0]
+        self.assertEqual(patent_run["isolation_flag"], "FORMULATION_LEVEL_ONLY_NOT_NEAT_POWDER")
 
         # 4. Raw Material Property DB
         self.assertTrue(raw_mat_csv.exists(), "gs40_raw_material_property_db.csv must exist")
@@ -182,14 +185,21 @@ class TestVirtualSimulator(unittest.TestCase):
             self.assertIn("surface_area_bet_m2_g", mat)
             self.assertIn("yield_stress_contribution_pa", mat)
             self.assertIn("neat_dynamic_cof", mat)
+        # Confirm powders do NOT have false neat CoF values
+        powder_mats = [m for m in materials if m["material_class"] in ("Particulate_Powder", "Active_Powder")]
+        for pm in powder_mats:
+            self.assertEqual(pm["neat_dynamic_cof"], "None")
 
         # 5. Pilot process execution sheet template
         self.assertTrue(exec_sheet_csv.exists(), "pilot_process_execution_sheet_template.csv must exist")
         with open(exec_sheet_csv, mode="r", encoding="utf-8") as f:
             exec_rows = list(csv.DictReader(f))
         self.assertEqual(len(exec_rows), 18)
+        self.assertIn("Sedimentation_Check_30min_Hold", exec_rows[0])
+        self.assertIn("Measured_Glide_CoF_Bioskin", exec_rows[0])
 
 
 if __name__ == "__main__":
     unittest.main()
+
 

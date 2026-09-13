@@ -1,15 +1,7 @@
-test_id,powder_trade_name,powder_class,test_substrate,normal_load_n,sliding_speed_mm_s,static_friction_cof,dynamic_friction_cof,delta_friction_vs_control,lubrication_regime,tactile_feel_descriptor,literature_source
-TRI-POW-001,Tres BN PUHP3002,Boron_Nitride_Platelet,Bioskin_Plate,0.50,10.0,0.165,0.138,-0.182,Solid_Laminar_Shear,Silky_Ultra_Glide,Saint_Gobain_PUHP_Technical_Report_2021
-TRI-POW-002,Tospearl 145A,PMSSQ_Spherical_Resin,Bioskin_Plate,0.50,10.0,0.182,0.155,-0.165,Micro_Ball_Bearing_Rolling,Soft_Focus_Cushion_Glide,Momentive_Tospearl_Tribology_2019
-TRI-POW-003,Sunsphere L-51,Porous_Silica_Sphere,Bioskin_Plate,0.50,10.0,0.285,0.252,-0.068,Porous_Boundary_Drag,Powdery_Velvety_Dry,AGC_SiTech_Sunsphere_Friction_Study
-TRI-POW-004,Aerosil R 972,Hydrophobic_Fumed_Silica,Bioskin_Plate,0.50,10.0,0.380,0.345,0.025,Fractal_Entanglement_Drag,Thixotropic_Dry_Brake,Evonik_Aerosil_Friction_Bulletin
-TRI-POW-005,Z-Cote HP1,Treated_Zinc_Oxide,Bioskin_Plate,0.50,10.0,0.295,0.268,-0.052,Mineral_Boundary_Shear,Smooth_Barrier_Film,BASF_Z_Cote_HP1_Performance_Summary
-TRI-POW-006,Luzenac Pharma Talc,Talc_Lamellar_Platelet,Bioskin_Plate,0.50,10.0,0.245,0.220,-0.100,Lamellar_Cleavage,Classic_Chalky_Slip,Masen_2020_PLOS_ONE
-TRI-POW-007,Covabead LH85,PMMA_Spherical_Beads,Bioskin_Plate,0.50,10.0,0.210,0.185,-0.135,Polymer_Rolling,Velvety_Rolling_Slip,Sensient_Cosmetic_Sensory_2020
-TRI-POW-008,Dry-Flo Plus,Modified_Corn_Starch,Bioskin_Plate,0.50,10.0,0.260,0.235,-0.085,Deformable_Granule,Creamy_Velvet_Cushion,Ingredion_Dry_Flo_Sensory_Analysis
-TRI-POW-009,Control (Bare Substrate),Neat_Substrate_Blank,Bioskin_Plate,0.50,10.0,0.360,0.320,0.000,Polyurethane_Adhesive_Contact,Tacky_Rubbery_High_Friction,Masen_2020_PLOS_ONE
-TRI-POW-010,Tres BN PUHP3002,Boron_Nitride_Platelet,Human_Forearm_In_Vivo,0.50,10.0,0.178,0.149,-0.171,Solid_Laminar_Shear,Silky_Ultra_Glide,Saint_Gobain_PUHP_Technical_Report_2021
-TRI-POW-011,Tospearl 145A,PMSSQ_Spherical_Resin,Human_Forearm_In_Vivo,0.50,10.0,0.195,0.168,-0.152,Micro_Ball_Bearing_Rolling,Soft_Focus_Cushion_Glide,Momentive_Tospearl_Tribology_2019
-TRI-POW-012,Sunsphere L-51,Porous_Silica_Sphere,Human_Forearm_In_Vivo,0.50,10.0,0.305,0.270,-0.050,Porous_Boundary_Drag,Powdery_Velvety_Dry,AGC_SiTech_Sunsphere_Friction_Study
-TRI-POW-013,Luzenac Pharma Talc,Talc_Lamellar_Platelet,Human_Forearm_In_Vivo,0.50,10.0,0.258,0.230,-0.090,Lamellar_Cleavage,Classic_Chalky_Slip,Masen_2020_PLOS_ONE
-TRI-POW-014,Control (Bare Forearm),Neat_Substrate_Blank,Human_Forearm_In_Vivo,0.50,10.0,0.355,0.320,0.000,Natural_Stratum_Corneum,Baseline_Skin_Friction,Masen_2020_PLOS_ONE
+test_id,sample_name,sample_category,test_substrate,normal_load_g,sliding_speed_mm_s,static_friction_cof,dynamic_friction_cof,provenance_level,isolation_flag,literature_source_and_context
+TRI-FORM-001,CN102341090B Formulation with BN,Cosmetic_Composition,Artificial_Leather,100.0,10.0,None,0.138,PUBLIC_PATENT_FORMULATION_MEASURED,FORMULATION_LEVEL_ONLY_NOT_NEAT_POWDER,CN102341090B_Table11_Finished_Formulation_Test
+TRI-FORM-002,CN102341090B Formulation with PMSSQ,Cosmetic_Composition,Artificial_Leather,100.0,10.0,None,0.155,PUBLIC_PATENT_FORMULATION_MEASURED,FORMULATION_LEVEL_ONLY_NOT_NEAT_POWDER,CN102341090B_Table11_Finished_Formulation_Test
+TRI-LIT-001,Pure Dimethicone Fluid (100 cSt),Neat_Silicone_Fluid,Skin_In_Vivo,50.0,10.0,0.220,0.200,PEER_REVIEWED_PUBLIC_MEASUREMENT,VALID_LUBRICATION_PRIOR,Masen_2020_PLOS_ONE
+TRI-LIT-002,Pure Cosmetic Talc Slurry,Neat_Mineral_Powder,Skin_In_Vivo,50.0,10.0,0.250,0.220,PEER_REVIEWED_PUBLIC_MEASUREMENT,VALID_LUBRICATION_PRIOR,Masen_2020_PLOS_ONE
+TRI-LIT-003,Bare Human Skin (Forearm Control),Unlubricated_Skin,Skin_In_Vivo,50.0,10.0,0.360,0.320,PEER_REVIEWED_PUBLIC_MEASUREMENT,BASELINE_CONTROL,Masen_2020_PLOS_ONE
+TRI-GS40-P01,GS-40 Pilot Stick Surface (Target),Anhydrous_Balm_Stick,Bioskin_Plate,100.0,10.0,None,None,PENDING_GS40_PILOT_VERIFICATION,MEASURE_IN_P001_TO_P018,SOP_GS40_PILOT_001_TRIBOLOGY_PROTOCOL
