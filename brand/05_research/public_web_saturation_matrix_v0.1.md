@@ -4,6 +4,16 @@
 
 이 문서는 공개 웹 증거 수집을 무한 반복하지 않기 위한 **포화도(saturation) 관리판**이다.
 
+핵심 원칙은 **Global-first, Korea-localization**이다.
+
+- 공개 웹 데이터는 국가로 제한하지 않는다.
+- 글로벌 자료는 failure mode와 조건의 폭을 발견하고 반복 가설을 만드는 주 데이터층이다.
+- 한국 자료는 글로벌 가설을 한국 러너/기후/사용행동/가격/유통/규제 맥락에서 검증하는 별도 localization layer다.
+- 한국 자료가 부족하다고 글로벌 failure mode를 버리지 않는다.
+- 반대로 글로벌 사례를 한국 시장의 prevalence나 선호도로 일반화하지 않는다.
+
+최근 endurance-athlete 피부 문헌도 러너, 울트라러너, 트라이애슬론, 사이클리스트를 포괄하며 반복적 기계 부하, 땀, 의복/장비의 occlusion, 열·수분 노출 등을 공통 exposure 축으로 다룬다. 이는 국가보다 **운동 환경과 failure mechanism**을 우선 축으로 삼는 현재 연구 구조와 부합한다. citeturn0search0turn0search3
+
 목표는 각 failure cell에 대해 다음을 구분하는 것이다.
 
 - **SEARCH**: 핵심 맥락이나 독립 사례가 부족하여 추가 탐색 필요
@@ -16,27 +26,64 @@
 
 ---
 
-## 1. Saturation rules
+## 1. Evidence architecture
 
-### 1.1 독립성
+### Layer G — Global discovery
+
+국가 제한 없이 다음을 수집한다.
+
+- 러닝/울트라/트라이애슬론/사이클링 커뮤니티
+- 스포츠의학/피부과 문헌
+- 제품 리뷰 및 사용 경험
+- 공개 포럼/인터뷰/장거리 운동 사례
+- 다양한 기후·거리·운동 장비 맥락
+
+목적:
+
+1. failure mode 발견
+2. 조건 변수 발견
+3. 반례/상반된 경험 보존
+4. 기술시험 가설 생성
+
+### Layer K — Korea localization
+
+한국 자료는 별도 태그로 유지한다.
+
+- 한국 러너의 실제 사용 맥락
+- 한국의 계절/고온다습/저온건조 등 환경
+- 국내 제품/유통/가격
+- 한국 러너의 구매·재구매·switching 행동
+- 한국 규제 및 claim 환경
+
+목적은 **글로벌 failure mode를 한국에서 다시 발견하는 것 자체가 아니라, 한국에서의 relevance와 market/product context를 검증하는 것**이다.
+
+### Layer T — Technical validation
+
+글로벌/한국 어느 쪽에서 발견되었는지와 관계없이 반복 가설을 controlled test로 이동시킨다.
+
+---
+
+## 2. Saturation rules
+
+### 2.1 독립성
 
 같은 원문을 재인용한 글, 동일 사건을 복제한 게시물, 동일 작성자의 반복 게시물은 독립 증거로 세지 않는다.
 
-### 1.2 사례 수의 의미
+### 2.2 국가 수와 사례 수의 의미
 
-소스 수는 **빈도/유병률/시장점유율의 추정치가 아니다.** 공개 웹 표본은 선택편향이 크므로, 사례 수는 오직 "이 failure context가 반복적으로 관찰되는가"를 판단하는 보조지표로 사용한다.
+국가 수나 소스 수는 **빈도/유병률/시장점유율의 추정치가 아니다.** 공개 웹 표본은 선택편향이 크므로, 사례 수와 국가 다양성은 오직 "이 failure context가 서로 다른 환경에서도 반복적으로 관찰되는가"를 판단하는 보조지표로 사용한다.
 
-### 1.3 포화 판단
+### 2.3 포화 판단
 
 다음 5개 축에서 반복 신호가 확인되면 해당 cell은 READY_FOR_TEST 후보가 된다.
 
 1. 서로 다른 출처/작성자의 반복 사례
-2. 조건 차이에도 유지되는 핵심 failure mechanism 가설
+2. 서로 다른 지역/환경에서도 유지되는 핵심 failure mechanism 가설
 3. 반례 또는 조건부 성공 사례의 존재 여부 파악
 4. 제품 외 변수(garment/equipment/motion/environment) 분리 가능성
 5. 측정 가능한 기술 질문으로 번역 가능
 
-### 1.4 Survey Gap 판단
+### 2.4 Survey Gap 판단
 
 다음 질문은 공개 웹 자료를 더 모아도 대표적으로 답하기 어렵기 때문에 SURVEY_GAP로 분리한다.
 
@@ -49,35 +96,37 @@
 
 ---
 
-## 2. Failure-cell saturation matrix
+## 3. Failure-cell saturation matrix
 
-| Failure cell | 반복 공개 신호 | 반례/불확실성 | 한국 자료 | 기술시험 후보 | 상태 | 다음 액션 |
-|---|---|---|---|---|---|---|
-| Inner thigh / groin | 강함 | 제품·속옷·inseam·시간 영향 혼재 | 있음 | sweat/water + garment motion + time-to-failure | READY_FOR_TEST | incumbent matched test |
-| Sports bra / under-breast / band | 강함 | fit, bra geometry, tape가 개입 | 있음/부분적 | body-area + garment motion + reapplication | READY_FOR_TEST | 별도 anatomical cell 시험 |
-| Waistband / hip | 중간~강함 | garment fit와 제품 효과 분리 필요 | 있음/부분적 | seam/garment migration | SATURATING | targeted web search + test design |
-| Nipple / chest | 중간 | tape와 topical의 역할이 다름 | 부분적 | adhesive vs topical durability/compatibility | SATURATING | failure-context 보강 후 시험 |
-| Intergluteal / perineal | 강함 | 해부학·의류·땀 조건 영향 | 있음/부분적 | sweat/water + motion + reachability | READY_FOR_TEST | incumbent matched test |
-| Pack / hydration vest back | 강함 | equipment가 원인일 수 있음 | 있음 | equipment-induced garment motion | READY_FOR_TEST | equipment interaction test |
-| Shoulder / strap interface | 중간 | vest/pack geometry 의존 | 부분적 | strap pressure/motion + textile friction | SATURATING | 독립 사례 추가 |
-| Foot / blister-prone areas | 중간 | anti-chafe와 blister 관리가 다른 문제일 수 있음 | 부족 | textile/skin friction + moisture | HOLD | category boundary 먼저 정의 |
-| Seam-created focal friction | 강함 | body area마다 결과 다름 | 있음 | seam/textile friction | READY_FOR_TEST | matched textile test |
-| Garment migration / ride-up | 강함 | 제품 실패가 아닌 apparel failure일 수 있음 | 있음 | garment-motion test | READY_FOR_TEST | system-level test |
-| Heavy sweat / wash-off | 강함 | 일부 사용자는 장시간 성공 | 있음 | sweat/water persistence | READY_FOR_TEST | matched persistence test |
-| Heat / humidity | 강함 | 표준 임계값 없음 | 부분적 | temperature/humidity matrix | READY_FOR_TEST | controlled environment test |
-| Reapplication burden | 강함 | 실제 빈도는 정량화 불가 | 부분적 | application/reapplication UX | READY_FOR_TEST | prototype UX protocol |
-| Reachability | 중간~강함 | anatomy/mobility 차이 | 부분적 | self-application reachability | READY_FOR_TEST | format prototype test |
-| Greasy / wet feel | 강함 | 주관성·개인차 큼 | 부분적 | standardized sensory panel | SATURATING | sensory instrument 설계 |
-| Odor | 중간 | 제품·땀 상호작용 추정 수준 | 부족 | odor/sensory panel | HOLD | 더 강한 evidence가 있을 때 재평가 |
-| Textile transfer / staining | 강함 | 실제 material test 부재 | 있음/부분적 | transfer/staining bench test | READY_FOR_TEST | incumbent textile test |
-| Carryability | 중간~강함 | event logistics에 좌우 | 부분적 | carry/reapplication UX | SATURATING | 대표 format 비교 |
-| Product ranking / incumbent preference | 강함 | 상반된 사용자 경험 다수 | 부분적 | blind/matched incumbent comparison | READY_FOR_TEST | petroleum jelly + leading formats |
+| Failure cell | Global signal | Geographic diversity | Contradiction / uncertainty | Korea evidence | Technical test candidate | Status | Next action |
+|---|---|---|---|---|---|---|---|
+| Inner thigh / groin | Strong | Multi-region | Product·underwear·inseam·time effects mixed | 있음 | sweat/water + garment motion + time-to-failure | READY_FOR_TEST | incumbent matched test |
+| Sports bra / under-breast / band | Strong | Multi-region | fit, bra geometry, tape involved | 있음/부분적 | body-area + garment motion + reapplication | READY_FOR_TEST | separate anatomical-cell test |
+| Waistband / hip | Moderate–strong | Multi-region | garment fit and product effect need separation | 있음/부분적 | seam/garment migration | SATURATING | targeted global search + test design |
+| Nipple / chest | Moderate | Multi-region | tape and topical have different roles | 부분적 | adhesive vs topical durability/compatibility | SATURATING | strengthen failure-context evidence |
+| Intergluteal / perineal | Strong | Multi-region | anatomy·garment·sweat interaction | 있음/부분적 | sweat/water + motion + reachability | READY_FOR_TEST | incumbent matched test |
+| Pack / hydration vest back | Strong | Multi-region | equipment may be causal | 있음 | equipment-induced garment motion | READY_FOR_TEST | equipment interaction test |
+| Shoulder / strap interface | Moderate | Multi-region | vest/pack geometry dependent | 부분적 | strap pressure/motion + textile friction | SATURATING | add independent cases |
+| Foot / blister-prone areas | Moderate | Multi-region | blister management may be a different category | 부족 | textile/skin friction + moisture | HOLD | define category boundary first |
+| Seam-created focal friction | Strong | Multi-region | body-area dependent | 있음 | seam/textile friction | READY_FOR_TEST | matched textile test |
+| Garment migration / ride-up | Strong | Multi-region | may be apparel failure, not product failure | 있음 | garment-motion test | READY_FOR_TEST | system-level test |
+| Heavy sweat / wash-off | Strong | Multi-region | some users report long-duration success | 있음 | sweat/water persistence | READY_FOR_TEST | matched persistence test |
+| Heat / humidity | Strong | Multi-region | no standardized threshold | 부분적 | temperature/humidity matrix | READY_FOR_TEST | controlled environment test |
+| Reapplication burden | Strong | Multi-region | actual frequency not quantifiable from anecdotes | 부분적 | application/reapplication UX | READY_FOR_TEST | prototype UX protocol |
+| Reachability | Moderate–strong | Multi-region | anatomy/mobility differences | 부분적 | self-application reachability | READY_FOR_TEST | format prototype test |
+| Greasy / wet feel | Strong | Multi-region | subjective and individual | 부분적 | standardized sensory panel | SATURATING | sensory instrument design |
+| Odor | Moderate | Limited/mixed | product·sweat interaction mostly inferred | 부족 | odor/sensory panel | HOLD | re-evaluate if stronger evidence appears |
+| Textile transfer / staining | Strong | Multi-region | material-test evidence limited | 있음/부분적 | transfer/staining bench test | READY_FOR_TEST | incumbent textile test |
+| Carryability | Moderate–strong | Multi-region | event logistics vary | 부분적 | carry/reapplication UX | SATURATING | representative format comparison |
+| Product ranking / incumbent preference | Strong | Multi-region | strong contradictory user experiences | 부분적 | blind/matched incumbent comparison | READY_FOR_TEST | petroleum jelly + leading formats |
+
+**주의:** `Multi-region`은 prevalence나 시장 크기를 의미하지 않는다. 단지 동일한 failure context가 서로 다른 지역의 공개 사례에서 관찰되었다는 뜻이다.
 
 ---
 
-## 3. Cross-variable saturation
+## 4. Cross-variable saturation
 
-| Variable | 상태 | 판단 |
+| Variable | Status | Judgment |
 |---|---|---|
 | Time / duration | READY_FOR_TEST | 장시간 실패와 장시간 성공이 모두 관찰되어 controlled comparison 가치가 높음 |
 | Sweat / water | READY_FOR_TEST | wash-off 관련 반복 신호와 반례가 충분히 존재 |
@@ -95,7 +144,7 @@
 
 ---
 
-## 4. What is now saturated enough to stop broad web searching
+## 5. What is now saturated enough to stop broad web searching
 
 현재 다음 영역은 동일한 일반론을 반복 수집하는 것보다 **통제시험 설계/실험 준비가 더 가치가 높다.**
 
@@ -114,7 +163,7 @@
 
 ---
 
-## 5. Where targeted web searching is still justified
+## 6. Where targeted web searching is still justified
 
 ### A. Anatomical gaps
 
@@ -129,15 +178,26 @@
 - foot/blister 영역이 anti-chafe product와 동일한 제품 문제인지 여부
 - recovery use-case와 prevention use-case의 실제 행동 차이
 
-### C. Korean/local gaps
+### C. Geographic gaps
 
-한국 러너의 실제 사용 맥락을 더 찾는 것은 의미가 있지만, 이를 공개 웹 사례 수로 대표성 있는 비율로 변환해서는 안 된다.
+지역은 기본적으로 제한하지 않는다. 다만 특정 지역이 실제 제품/기후/규제 결정에 중요할 경우 별도 localization cell로 수집한다.
+
+우선순위는 필요에 따라:
+
+1. Korea
+2. Japan
+3. North America
+4. Europe
+5. Australia/New Zealand
+6. 기타 endurance-running 시장
+
+순으로 둘 수 있으나, **이 순서는 데이터 품질이나 중요도의 서열이 아니라 localization 작업의 운영 순서일 뿐이다.**
 
 ---
 
-## 6. Survey should not duplicate the web dataset
+## 7. Survey should not duplicate the global web dataset
 
-1차조사는 다음처럼 **웹 자료로 답할 수 없는 질문**에 집중한다.
+1차조사는 다음처럼 **공개 웹 자료로 대표적으로 답할 수 없는 질문**에 집중한다.
 
 - 한국 러너 중 각 failure cell을 실제로 경험하는 비율
 - distance/time/sex/anatomy/weather segment별 차이
@@ -147,11 +207,11 @@
 - 제품 성능이 같을 때 switching을 일으키는 UX 조건
 - topical / tape / apparel / equipment solution의 실제 선택 비율
 
-웹에서 이미 반복적으로 확인된 "어떤 상황에서 어떤 문제가 생길 수 있는가"를 설문에서 다시 장황하게 묻는 것은 피한다.
+글로벌 웹에서 이미 반복적으로 확인된 "어떤 상황에서 어떤 문제가 생길 수 있는가"를 설문에서 다시 장황하게 묻는 것은 피한다.
 
 ---
 
-## 7. Technical test handoff
+## 8. Technical test handoff
 
 READY_FOR_TEST cell은 `technical_validation_matrix_v0.1.md`와 연결한다.
 
@@ -190,7 +250,7 @@ READY_FOR_TEST cell은 `technical_validation_matrix_v0.1.md`와 연결한다.
 
 ---
 
-## 8. Evidence boundary
+## 9. Evidence boundary
 
 이 문서는 공개 웹 사례의 **반복성·조건성·시험 가능성**을 관리하는 문서이지 다음을 주장하는 문서가 아니다.
 
@@ -206,7 +266,7 @@ READY_FOR_TEST cell은 `technical_validation_matrix_v0.1.md`와 연결한다.
 
 ---
 
-## 9. Next gate
+## 10. Next gate
 
 현재 연구 단계의 핵심 질문은 **"더 많은 사례가 필요한가?"가 아니라 "어떤 cell은 시험으로 넘길 만큼 포화되었고, 어떤 cell만 추가 조사해야 하는가?"**이다.
 
