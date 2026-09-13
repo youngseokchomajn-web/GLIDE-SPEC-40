@@ -1,11 +1,11 @@
 task_id: "ORC-TASK-011"
 source_agent: "GEM"
 source_id: "GEM-011"
-source_commit: "487f3f51a2148159a95bb54aa6d98af57ddd9511"
-source_file: "analysis/commits/GEM-011_MANIFEST_SUBMISSION.md"
+source_commit: "65acca477f0111ca313f2df94737dcab6f028c5c"
+source_file: "analysis/commits/dummy/GEM-011_EVIDENCE.md"
 task_type: "EVIDENCE_REVIEW"
 status: "PENDING"
-created_at: "2026-09-13T04:09:12+09:00"
+created_at: "2026-09-13T04:11:22+09:00"
 requires_orc: true
 inspection_checklist:
   dataset_identity: false
