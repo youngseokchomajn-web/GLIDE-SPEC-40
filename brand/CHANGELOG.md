@@ -1,5 +1,48 @@
 # Brand Planning Changelog
 
+## v0.9 — 2026-09-13
+
+The Korean runner research protocol was converted into a field-ready survey instrument so the next step can be actual data collection rather than further informal question design.
+
+### Added
+
+- `brand/05_research/korean_runner_survey_field_instrument_v0.1.md`
+  - screening and runner-profile questions
+  - body-area frequency capture
+  - reconstruction of the most recent meaningful failure event
+  - separate symptom-onset and unacceptable-protection/failure timing
+  - skin/product/garment/equipment/motion/sweat-water variables
+  - reapplication, carryability, reachability, and switching behavior
+  - failure-mode taxonomy derived from five community evidence passes
+  - actual category-spend questions
+  - neutral concept-card price sensitivity exercise
+  - randomized concept trade-off structure with a keep-current option
+  - open-ended diagnostic questions for qualitative interpretation
+  - explicit data-quality and evidence-boundary rules
+
+### Changed
+
+- The project now has a separation between:
+  1. research protocol — what must be learned;
+  2. field instrument — the exact questions used to learn it;
+  3. technical validation matrix — how recurring failures will later be measured objectively.
+- The survey deliberately avoids unsupported numerical duration/performance claims.
+- Non-topical substitutes such as clothing, tape, and equipment changes remain inside the choice architecture instead of treating topical cosmetics as the only category.
+
+### Decision impact
+
+The Korean/local evidence gate can now move from **instrument design** to **field execution**.
+
+However, product specification remains locked. Survey results must still be combined with matched technical testing, skin compatibility evidence, and regulatory mapping before product claims or final formula/format decisions.
+
+### Next gate
+
+1. Pilot the questionnaire with approximately 5–10 qualified runners.
+2. Check comprehension, completion time, response-option gaps, and leading-question risk.
+3. Revise the instrument if pilot data reveal ambiguity.
+4. Field the larger quantitative sample and recruit 20–30 qualitative interviews from variation cells.
+5. Analyze the results against the pre-defined gate criteria.
+
 ## v0.8 — 2026-09-13
 
 Round 5 findings were converted from research observations into a preliminary technical-validation architecture and the gate-closure sequence was updated accordingly.
