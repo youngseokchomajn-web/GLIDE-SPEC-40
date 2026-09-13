@@ -1,4 +1,4 @@
-# Brand Decision Lineage Audit — v0.1
+# Brand Decision Lineage Audit — v0.2
 
 Date: 2026-09-13
 
@@ -10,7 +10,9 @@ This audit is not a new product decision. It is a record-integrity check.
 
 ## 1. Current assessment
 
-The major strategic research chain is substantially recorded and committed, but not every conversational micro-judgment has its own permanent record. The repository contains the major evidence passes, decision log, concept options, gate documents, evidence-gap analyses, and changelog addenda.
+The major strategic research chain is substantially recorded and committed. The repository contains the major evidence passes, decision log, concept options, gate documents, evidence-gap analyses, changelog addenda, and a formal decision-lineage audit.
+
+Round 9 adds recent 2026 community evidence and Korean community evidence to the existing chain without changing the evidence boundary.
 
 Therefore:
 
@@ -18,10 +20,10 @@ Therefore:
 - Major strategic decisions: RECORDED
 - Major reversals: RECORDED
 - Evidence methodology: RECORDED
-- Individual community cases: PARTIALLY RECORDED BY PASS
+- Individual community cases: RECORDED BY PASS, with Round 9 now added
 - Exact provenance for every web observation: PARTIAL; continue improving stable evidence IDs and source records
 - Every conversational micro-judgment: NOT GUARANTEED
-- End-to-end decision lineage: NOW FORMALIZED BY THIS AUDIT
+- End-to-end decision lineage: FORMALIZED AND UPDATED
 
 ## 2. Decision lineage
 
@@ -81,7 +83,7 @@ New evidence/judgment → repeated community/public-web evidence already covers 
 
 Decision → community beachhead analysis replaces the mandatory discovery pilot. The old interview protocol remains preserved as superseded/hold rather than deleted.
 
-Status: RECORDED in commits and `community_beachhead_analysis_v0.1.md` / superseded interview protocol.
+Status: RECORDED.
 
 ### Method reversal — Global-first, Korea-localization
 
@@ -91,11 +93,11 @@ New judgment → public web/community evidence should be exhausted before primar
 
 Decision → global/public web becomes the saturation/discovery layer; Korean evidence is localization evidence, not a mandatory gate.
 
-Status: RECORDED in the public-web saturation matrix and evidence-gap documents.
+Status: RECORDED.
 
 ### Current correction — Korean survey is optional, not the next mandatory gate
 
-The repository contains a Korean runner survey instrument and an execution plan. The instrument remains a reusable localization tool. However, the execution plan must not be treated as the active next step.
+The repository contains a Korean runner survey instrument and an execution plan. The instrument remains a reusable localization tool. The execution plan is explicitly superseded for the current research phase.
 
 Current active rule:
 
@@ -103,34 +105,29 @@ Current active rule:
 
 A Korean survey should only be executed if a specific unresolved decision materially requires it.
 
-## 3. Current product-concept state
+## 3. Round 9 impact on the current concept
 
-### Category architecture
+Round 9 does not overturn the current ranking.
 
-Endurance Skin / Performance Skin is the strategic category direction.
+### S1 — Leading
 
-### Working first-product problem
+Recent global and Korean community evidence reinforces the cluster of:
 
-Long-duration running where time, repeated motion, sweat/moisture and garment/equipment interaction can make skin protection insufficient or inconvenient.
+`long duration × sweat/heat × inner thigh/groin × garment movement/migration × topical + clothing alternatives`
 
-### Current candidate scenarios
+The important refinement is that S1 should not be described as merely a better lubricant. The evidence increasingly points toward **prolonged skin–garment interface protection under endurance conditions**.
 
-- S1: long-duration inner-thigh/groin + high sweat + garment motion
-- S2: long-duration female sports-bra/under-breast/waistband interface
-- S3: maintenance/reapplication/carry/reachability failure
-- S4: unexpected recurring scenario
+### S2 — Principal alternative
 
-### Current ranking
+Recent sports-bra/under-breast/band + equipment cases reinforce a distinct female interface cell and show that tape and garment changes can become substitutes when topical protection is insufficient.
 
-S1 = leading candidate.
+### S3 — Cross-cutting variable
 
-S2 = principal alternative.
+Reapplication remains operationally important, but recent cases show that reapplication can be a response to an underlying garment, sweat, anatomy, or duration failure. Therefore S3 should not automatically determine the product format.
 
-S3 = cross-cutting UX/operational variable; not automatically a format decision.
+### S4 — Open
 
-S4 = open escape hatch.
-
-This is not final product selection.
+Recent intergluteal and other anatomy-specific cases reinforce the need to keep unexpected scenarios eligible to overturn the current ranking.
 
 ## 4. What is already sufficiently answered by public/community evidence
 
@@ -143,6 +140,7 @@ This is not final product selection.
 7. Female sports-bra/under-breast/band interfaces deserve separate treatment.
 8. There is no single incumbent that wins universally across users and conditions.
 9. Generic "anti-chafe for runners" is not sufficient differentiation by itself.
+10. Recent Korean community evidence independently reproduces the broader system-level failure pattern, although it does not establish Korean prevalence.
 
 These remain hypothesis-generating public/community findings, not objective efficacy claims or population prevalence estimates.
 
@@ -195,7 +193,9 @@ For every material research pass:
 
 ## 8. Audit conclusion
 
-The project has a usable historical record for the major research and strategic decisions made so far. The main remaining improvement is not more generic documentation; it is tighter evidence-to-decision provenance for future web passes and explicit recording of any decision reversal.
+The project has a usable historical record for the major research and strategic decisions made so far. Round 9 strengthens the existing S1/S2/S3/S4 model without justifying a final beachhead selection.
+
+The main remaining improvement is not more generic documentation; it is tighter evidence-to-decision provenance for future web passes and explicit recording of any decision reversal.
 
 The active research mode is now:
 
