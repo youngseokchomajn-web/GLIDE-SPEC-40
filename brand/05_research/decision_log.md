@@ -71,3 +71,13 @@ This log preserves the reasoning chain behind strategic decisions. It is intenti
 **Decision:** Keep brand planning under `brand/` while explicitly mapping downstream implications to GLIDE-SPEC 40.
 
 **What would change this decision:** Repository scale or team structure eventually requires a separate brand repository.
+
+## D008 — Do not lock the first product before identifying the beachhead failure scenario
+
+**Observation:** Global/public-web evidence now supports several recurring endurance-skin failure contexts, but it does not establish Korean prevalence, switching behavior, WTP, or which scenario has the highest commercial value. The current product options include long-run friction protection, endurance skin film, sweat-resilient protection, reapplication-first format, and female interface protection.
+
+**Reasoning:** Choosing a formula or format before identifying the highest-value failure scenario risks making the technical solution drive the product definition. The first product should be built around a specific user + situation + failure moment, while the broader Endurance Skin concept remains the category architecture.
+
+**Decision:** Use **Long-Run Friction Shield** as the provisional beachhead problem, **Endurance Skin Protection** as the category logic, and **TIME × MOTION × ENVIRONMENT** as the design lens. Do not yet lock the final anatomical cell, format, formula, duration, or performance claim. Use Korean primary research to select the specific beachhead scenario.
+
+**What would change this decision:** Korean runner research identifies another recurring failure scenario with materially stronger problem intensity, switching behavior, economic value, or strategic defensibility.
