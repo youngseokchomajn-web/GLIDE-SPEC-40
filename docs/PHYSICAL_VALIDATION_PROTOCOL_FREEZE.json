@@ -1,12 +1,12 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "effective_date": "2026-09-13",
   "protocol_id": "PROTO-GS40-PHYSICAL-VAL-REV1",
   "status": "FROZEN",
   "governing_sop": "SOP-GS40-VAL-001",
   "target_product": "GLIDE-SPEC 40 (GS40) Endurance Skin Protection",
   "manufacturing_grouping_structure": {
-    "rationale": "Groups for cross-validation and calibration are defined by independent physical manufacturing shifts and lot allocations, rather than purely post-hoc mathematical clusters.",
+    "rationale": "Groups for cross-validation and calibration are defined by planned independent physical manufacturing shifts and lot allocations. Physical batch independence must be empirically verified post-manufacturing.",
     "shifts": {
       "SHIFT_BLOCK_1": {
         "shift_id": "SHIFT-01",
@@ -46,11 +46,51 @@
       }
     }
   },
+  "manufacturing_independence_verification_schema": {
+    "status": "MANDATORY_POST_PILOT_VERIFICATION",
+    "description": "Required empirical evidence fields to prove batch independence before physical data ingestion is qualified",
+    "required_fields": [
+      "Batch_ID",
+      "Compounding_Vessel_ID",
+      "Wax_Raw_Material_Lot_No",
+      "Silicone_Raw_Material_Lot_No",
+      "Melt_Start_Timestamp",
+      "Pour_End_Timestamp",
+      "Operator_ID",
+      "Witness_QC_ID",
+      "Cleanroom_Temp_C",
+      "Cleanroom_RH_Pct"
+    ],
+    "disqualification_rules": [
+      "Batches sharing the same melt vessel charge without intermediate cleaning/reweighing are collapsed to single degrees of freedom",
+      "Missing operator signature or unrecorded lot number disqualifies batch from primary 16-run physical N count"
+    ]
+  },
   "split_conformal_calibration_design": {
-    "calibration_split_mode": "INDEPENDENT_HOLD_OUT_BATCHES",
-    "rule": "Calibration nonconformity quantile q_hat is computed strictly on dedicated calibration batches and never on evaluation test folds.",
-    "calibration_set_size_min": 4,
-    "evaluation_set_size_min": 4
+    "calibration_split_mode": "STRICT_DISJOINT_SHIFT_PARTITION",
+    "rule": "Calibration nonconformity quantile q_hat is computed strictly on a dedicated calibration shift partition and never shares observations with model training or evaluation folds.",
+    "partitions": {
+      "TRAINING_PARTITION": {
+        "shift_blocks": ["SHIFT_BLOCK_2", "SHIFT_BLOCK_3"],
+        "primary_runs": [
+          "GS40-P003", "GS40-P005", "GS40-P008", "GS40-P006", "GS40-P016",
+          "GS40-P004", "GS40-P009", "GS40-P012", "GS40-P002", "GS40-P001"
+        ],
+        "count": 10
+      },
+      "CALIBRATION_PARTITION": {
+        "shift_blocks": ["SHIFT_BLOCK_4"],
+        "primary_runs": ["GS40-P014", "GS40-P010", "GS40-P007", "GS40-P015"],
+        "count": 4
+      },
+      "BLIND_EVALUATION_PARTITION": {
+        "shift_blocks": ["SHIFT_BLOCK_1"],
+        "primary_runs": ["GS40-P011", "GS40-P013"],
+        "count": 2,
+        "note": "P017 and P018 are supplemental and evaluated independently"
+      }
+    },
+    "disjoint_check": "Training, Calibration, and Evaluation primary run sets are mutually exclusive with zero overlap."
   },
   "acceptance_gates": {
     "n_primary_completed": {
@@ -81,33 +121,39 @@
     }
   },
   "brand_requirement_spec_targets": {
+    "governance_status": "PROVISIONAL_TECHNICAL_VALIDATION_HYPOTHESIS",
+    "description": "Provisional technical verification targets. Final consumer-facing product specifications remain open pending controlled athletic user trials.",
     "category": "Endurance / Performance Skin Care",
     "application_lens": "TIME x MOTION x ENVIRONMENT",
     "responses": {
       "Hardness_gf": {
-        "spec_min": 700.0,
-        "spec_max": 850.0,
+        "provisional_min": 700.0,
+        "provisional_max": 850.0,
         "nominal": 780.0,
         "functional_relevance": "Stick mechanical integrity under high temperature and repetitive friction without crumbling"
       },
       "Transfer_Index_g": {
-        "spec_min": 0.038,
-        "spec_max": 0.058,
+        "provisional_min": 0.038,
+        "provisional_max": 0.058,
         "nominal": 0.048,
         "functional_relevance": "Uniform protective barrier film formation without excessive greasy residue or fabric staining"
       },
       "Drop_Point_C": {
-        "spec_min": 60.0,
-        "spec_max": 75.0,
+        "provisional_min": 60.0,
+        "provisional_max": 75.0,
         "nominal": 63.0,
         "functional_relevance": "Thermal endurance against pocket heat, sun exposure, and friction-induced melting"
       },
       "Friction_CoF": {
-        "spec_min": 0.120,
-        "spec_max": 0.165,
+        "provisional_min": 0.120,
+        "provisional_max": 0.165,
         "nominal": 0.145,
         "functional_relevance": "Sustained kinetic friction reduction against skin-on-skin and fabric-on-skin shear"
       }
     }
+  },
+  "sensitivity_diagnostic_governance": {
+    "status": "DESCRIPTIVE_DEVELOPMENT_DIAGNOSTIC",
+    "mahalanobis_threshold_rule": "DM <= 2.45 represents the maximum distance from design centroid within the 18-run DOE coordinate envelope (chi-square 3-dof 95% critical value = 7.81). This is a descriptive geometric design-support boundary, NOT an empirical claim of physical validation or accuracy."
   }
 }

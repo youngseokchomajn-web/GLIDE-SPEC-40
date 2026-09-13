@@ -42,12 +42,12 @@ def run_pre_physical_sensitivity_audit(
         protocol = json.load(f)
 
     brand_targets = protocol.get("brand_requirement_spec_targets", {}).get("responses", {})
-    h_min = brand_targets.get("Hardness_gf", {}).get("spec_min", 700.0)
-    h_max = brand_targets.get("Hardness_gf", {}).get("spec_max", 850.0)
-    t_min = brand_targets.get("Transfer_Index_g", {}).get("spec_min", 0.038)
-    t_max = brand_targets.get("Transfer_Index_g", {}).get("spec_max", 0.058)
-    d_min = brand_targets.get("Drop_Point_C", {}).get("spec_min", 60.0)
-    d_max = brand_targets.get("Drop_Point_C", {}).get("spec_max", 75.0)
+    h_min = brand_targets.get("Hardness_gf", {}).get("provisional_min", 700.0)
+    h_max = brand_targets.get("Hardness_gf", {}).get("provisional_max", 850.0)
+    t_min = brand_targets.get("Transfer_Index_g", {}).get("provisional_min", 0.038)
+    t_max = brand_targets.get("Transfer_Index_g", {}).get("provisional_max", 0.058)
+    d_min = brand_targets.get("Drop_Point_C", {}).get("provisional_min", 60.0)
+    d_max = brand_targets.get("Drop_Point_C", {}).get("provisional_max", 75.0)
 
     priors_by_batch = {r["Batch_ID"]: r for r in baseline_rows}
 
@@ -156,6 +156,7 @@ def run_pre_physical_sensitivity_audit(
     print(f"    Total pilot runs audited: {len(output_rows)}")
     print(f"    Max Mahalanobis distance DM: {max(float(r['Mahalanobis_Distance_DM']) for r in output_rows):.4f}")
     print(f"    Min Mahalanobis distance DM: {min(float(r['Mahalanobis_Distance_DM']) for r in output_rows):.4f}")
+    print(f"    Epistemic Status: Descriptive geometric development diagnostic only; not empirical physical qualification.")
 
 
 if __name__ == "__main__":
