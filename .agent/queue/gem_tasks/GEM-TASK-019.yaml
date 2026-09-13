@@ -1,0 +1,32 @@
+task_id: "GEM-TASK-019"
+source_orc_id: "ORC-019"
+source_orc_commit: "6a99729f6398a8bf0547e0472111d26b00cb1926"
+source_decision_file: "analysis/commits/ORC-019_Decision.md"
+decision: "FIX_REQUIRED"
+status: "PENDING"
+is_actionable: true
+attempt: 1
+max_attempts: 3
+created_at: "2026-09-13T14:30:00+09:00"
+next_agent: "GEM"
+rationale: "GEM-018 has the correct scope but its headline numerical results are narrative-heavy and not yet independently reproducible from committed execution artifacts. Convert the package into auditable evidence without changing Rev.8.1."
+required_actions:
+  - "Preserve GEM-018 and all prior evidence additively."
+  - "Create an execution manifest containing commands, input hashes, output hashes, environment/version information, seeds, and timestamps for every reported pre-sample analysis."
+  - "Commit the actual 1M virtual landscape output or a deterministic chunked equivalent sufficient to recompute reported feasible/infeasible counts and summary statistics."
+  - "Commit the exact feasible-space constraint specification and classify each threshold as PRODUCT_SPEC, LITERATURE_PRIOR, MODEL_ASSUMPTION, or PHYSICALLY_UNVERIFIED, with provenance for nontrivial thresholds."
+  - "Reframe physical sanity results as model/prior consistency checks unless independently supported by physical evidence; do not claim empirical physical confirmation."
+  - "Commit exact Group-CV group definitions, fold assignments, out-of-fold predictions, per-fold metrics, and conformal calibration methodology; explicitly separate development diagnostics from physical qualification."
+  - "Commit the complete DOE candidate matrix, deterministic D-optimal/information objective, constraints, ranking output, and hashes for P001-P018."
+  - "Freeze the pre-physical qualification gate specification as an immutable artifact and demonstrate that the qualification script reads the frozen gate artifact."
+  - "Run an adversarial ingestion test proving virtual/synthetic predictions cannot increment physical N_primary or satisfy physical qualification gates."
+  - "Do not train, recalibrate, rescale, or tune Rev.8.1 from external validation results or hypothetical physical outcomes."
+  - "Keep physical GS40 N=0, production NOT_QUALIFIED, and BASE promotion unauthorized."
+acceptance_criteria:
+  - "Every headline GEM-018 number is reproducible from committed artifacts."
+  - "Every nontrivial feasibility threshold has provenance and explicit epistemic classification."
+  - "No narrative-only result is labeled physical validation."
+  - "Group-CV and conformal calculations are independently auditable."
+  - "DOE ranking is deterministic and reproducible."
+  - "Qualification gates are immutable and virtual data cannot satisfy physical sample counts."
+  - "Rev.8.1 baseline remains unchanged unless separately approved by ORC."
