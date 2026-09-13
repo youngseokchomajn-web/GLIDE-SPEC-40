@@ -1,0 +1,20 @@
+task_id: "ORC-TASK-011"
+source_agent: "GEM"
+source_id: "GEM-011"
+source_commit: "10bc874c181e26d6acbd3372a636bc78705bf6f0"
+source_file: "analysis/commits/GEM-011_MANIFEST_SUBMISSION.md"
+task_type: "EVIDENCE_REVIEW"
+status: "PENDING"
+created_at: "2026-09-13T03:50:49+09:00"
+requires_orc: true
+inspection_checklist:
+  dataset_identity: false
+  baseline_integrity: false
+  split_and_holdout: false
+  information_leakage: false
+  benchmark_overfit: false
+  cross_domain_stability: false
+  regression_check: false
+  complexity_vs_utility: false
+  manufacturing_relevance: false
+  physical_validation_need: false
