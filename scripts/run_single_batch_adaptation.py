@@ -52,7 +52,11 @@ def main():
         return
 
     # 1. Initialize Pipeline
-    print("\n[1] Initializing Calibrated Domain Prior Ensemble & Composite OOD Guardrails...")
+    print("\n[!] NOTICE: Running in HYPOTHETICAL DEMONSTRATION MODE.")
+    print(f"    Inputs ({args.hardness} gf, {args.transfer} g, {args.drop_point} °C) are virtual simulation values")
+    print(f"    to verify adaptation mathematics. Physical GS40 calibration count remains strictly N = 0.\n")
+
+    print("[1] Initializing Domain Prior Ensemble & Composite OOD Guardrails...")
     surrogate, calibrator, ood_detector = train_calibrated_surrogate_pipeline()
     adaptor = GS40DomainAdaptor(surrogate, ood_detector)
 

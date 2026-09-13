@@ -53,6 +53,35 @@ To prevent premature release claims, Zone A follows a strict 3-stage evolutionar
 - Qualification of the production response surrogate cannot be achieved using synthetic, simulated, or pseudo-random data.
 - The qualification engine (`src/modeling/qualification_gate.py`) strictly enforces that all $N \ge 16$ required calibration runs originate from authenticated physical pilot batch records.
 
+### Principle 4: Six-Stage Model Qualification Lifecycle
+A single physical batch (`GS40-CAL-001`) does NOT qualify the model as "Calibrated".
+Model evolution must strictly adhere to the following 6-stage lifecycle progression:
+
+```text
+1. [Prior Model] (N = 0, Pre-Calibration Baseline)
+   └─ Public literature + domain priors. All predictions are virtual hypotheses.
+        │
+        ▼
+2. [CAL-001 Domain Anchor] (N = 1, Single-Batch Baseline)
+   └─ P001 manufactured and measured. Serves as first empirical anchor point.
+        │
+        ▼
+3. [Residual Domain Adaptation] (N = 1)
+   └─ Residual = Actual - Prior calculated. Empirical bias and spatial shrinkage applied.
+        │
+        ▼
+4. [Adaptive Run #2 Selection] (N = 1 ➔ 2)
+   └─ Dynamic active learning re-ranks remaining candidates to select next non-redundant test.
+        │
+        ▼
+5. [Domain Adapted Model] (N = 2 ~ 15)
+   └─ Sequential active learning batches accumulated. Spatial uncertainty progressively reduced.
+        │
+        ▼
+6. [Production Qualification] (N >= 16)
+   └─ Mandatory Rev 2.0 Gatekeeper verification (Repeatability CV <= 4%, Lack-of-Fit p >= 0.05).
+```
+
 ---
 
 ## 2. Statistical Qualification Gatekeeper (Rev 2.0 Gate)

@@ -1,33 +1,38 @@
-Parameter,Target_Specification,Actual_Value,Lot_Number_or_Device_ID,CoA_Verified,Unit,Operator_Signoff
-Batch_ID,GS40-P001,GS40-P001,N/A,YES,text,OPERATOR
-Registration_ID,GS40_CAL_001,GS40_CAL_001,N/A,YES,text,OPERATOR
-Trial_ID,DOE-EXP-001,DOE-EXP-001,N/A,YES,text,OPERATOR
-Design_Type,Vertex_HighSyn_HighDim,Vertex_HighSyn_HighDim,N/A,YES,text,OPERATOR
-Synthetic_Wax_wt,15.0,,LOT-SYN-WAX-2026A,PENDING,wt%,
-Candelilla_Wax_wt,2.0,,LOT-CAN-WAX-2026B,PENDING,wt%,
-Dimethicone_100cSt_wt,22.0,,LOT-DIM-100-2026A,PENDING,wt%,
-Caprylyl_Methicone_wt,6.0,,LOT-CAP-METH-2026A,PENDING,wt%,
-MQ_Resin_Solution_wt,2.0,,LOT-MQ-RESIN-2026A,PENDING,wt%,
-Porous_Silica_wt,10.0,,LOT-SIL-POR-2026A,PENDING,wt%,
-Silica_Dimethyl_Silylate_wt,2.0,,LOT-SIL-FUM-2026A,PENDING,wt%,
-PMSSQ_Spherical_wt,8.0,,LOT-PMSSQ-2026A,PENDING,wt%,
-Boron_Nitride_Platelets_wt,3.0,,LOT-BN-PLT-2026A,PENDING,wt%,
-Zinc_Oxide_wt,5.0,,LOT-ZNO-USP-2026A,PENDING,wt%,
-C12-15_Alkyl_Benzoate_wt,24.0,,LOT-AB-EST-2026A,PENDING,wt%,
-Active_Preservative_wt,1.0,,LOT-PRES-2026A,PENDING,wt%,
-Total_Charge_Weight,100.0,,,PENDING,wt%,
-Mixing_Temperature_C,88.0,,PT100_PROBE_01,YES,degC,
-Mixing_Homogenizer_RPM,2500,,HOMO_SHEAR_02,YES,RPM,
-Mixing_Duration_Min,25.0,,TIMER_01,YES,min,
-Fill_Temperature_C,80.0,,THERMO_IR_01,YES,degC,
-Mold_Preheat_Temp_C,45.0,,MOLD_BED_01,YES,degC,
-Cooling_Chamber_Temp_C,10.0,,CHAMBER_10C,YES,degC,
-Cooling_Rate_C_min,2.5,,CALC_DATALOGGER,YES,degC/min,
-Cooling_Duration_Min,45.0,,TIMER_02,YES,min,
-Demold_Temperature_C,20.0,,PROBE_02,YES,degC,
-Hardness_gf,781.6 [775-788],,,PENDING,gf,
-Transfer_g,0.0430 [0.038-0.048],,,PENDING,g,
-Drop_Point_C,62.6 [61.8-63.4],,,PENDING,degC,
-CoF_Bioskin,0.158 [0.145-0.170],,,PENDING,ratio,
-Sedimentation_Check,NO_SETTLING,,,PENDING,visual,
-QC_Release_Verdict,VIRTUAL_TARGET_PENDING_MEASUREMENT,,,PENDING,status,
+# GLIDE-SPEC 40: GS40_CAL_001 Physical Execution & Lineage Batch Sheet
+# Document Authority: SOP-GS40-PILOT-001 / SOP-GS40-MFG-001
+# Batch Registration ID: GS40_CAL_001 (Internal Pilot Code: GS40-P001, Trial: DOE-EXP-001)
+# Target Stick Specification: 20g Anhydrous Powder-in-Balm Stick
+# Total Batch Size: 1,000.0 g (1.0 kg Pilot Batch) / 100.0 g Lab Sub-Batch
+# Execution Date: PENDING_LAB_COMMIT
+# Operator: PENDING_SIGNOFF
+
+Section,Component_or_Step,Raw_Material_ID,Active_Basis_wt_pct,Charge_g_per_100g,Charge_g_per_1000g,Actual_Weighed_g,Raw_Material_Lot_No,CoA_Verified,Compounding_Notes
+COMPOSITION,Synthetic Wax,MAT-WAX-SYN-01,15.0,15.00,150.00,,LOT-SYN-WAX-2026A,PENDING,Melting point 88-92C
+COMPOSITION,Candelilla Wax,MAT-WAX-CAN-01,2.0,2.00,20.00,,LOT-CAN-WAX-2026B,PENDING,Melting point 68-72C
+COMPOSITION,PEG-8 Beeswax,MAT-WAX-PEG-01,3.0,3.00,30.00,,LOT-PEG-WAX-2026A,PENDING,Easy wash-off functional wax
+COMPOSITION,MQ Resin 60% Solution (MAT-MQ-01),MAT-MQ-01,12.0 (Active),20.00,200.00,,LOT-MQ-RESIN-2026A,PENDING,60% Active Resin (120g) + 40% Dimethicone Carrier (80g)
+COMPOSITION,Pure Dimethicone Oil (100 cSt),MAT-SIL-DIM-01,22.0 (Pool Total),14.00,140.00,,LOT-DIM-100-2026A,PENDING,140g charged + 80g from MQ solution = 220g Total (22.0%)
+COMPOSITION,Caprylyl Methicone,MAT-SIL-CAP-01,6.0,6.00,60.00,,LOT-CAP-METH-2026A,PENDING,Light volatile carrier
+COMPOSITION,Porous Spherical Silica,MAT-POW-SIL-01,10.0,10.00,100.00,,LOT-SIL-POR-2026A,PENDING,Surface area 350 m2/g, sebum adsorption
+COMPOSITION,Silica Dimethyl Silylate (Aerosil R972),MAT-POW-AER-01,2.0,2.00,20.00,,LOT-SIL-FUM-2026A,PENDING,Yield stress builder, anti-settling
+COMPOSITION,Polymethylsilsesquioxane (Tospearl PMSSQ),MAT-POW-PMS-01,8.0,8.00,80.00,,LOT-PMSSQ-2026A,PENDING,Micro-ball bearing, friction reduction
+COMPOSITION,Boron Nitride Platelets,MAT-POW-BN-01,3.0,3.00,30.00,,LOT-BN-PLT-2026A,PENDING,Solid lubricant, glide promoter
+COMPOSITION,Treated Zinc Oxide,MAT-ACT-ZNO-01,5.0,5.00,50.00,,LOT-ZNO-USP-2026A,PENDING,Triethoxycaprylylsilane treated (anti-chalking)
+COMPOSITION,C12-15 Alkyl Benzoate,MAT-OIL-C1215-01,9.5,9.50,95.00,,LOT-AB-EST-2026A,PENDING,Ester dispersant & plasticizer
+COMPOSITION,Ethylhexylglycerin,MAT-ACT-EHG-01,0.5,0.50,5.00,,LOT-ACT-EHG-2026A,PENDING,Deo booster & preservative enhancer
+COMPOSITION,Soothing Active Blend (Bisabolol+Tocopherol),MAT-ACT-SOOTH-01,2.0,2.00,20.00,,LOT-SOOTH-2026A,PENDING,Active complex & antioxidant
+COMPOSITION,TOTAL_FORMULATION_SUM,N/A,100.0,100.00,1000.00,,CHECK_SUM,YES,Total physical charge matches 100.0%
+
+PROCESS,Phase A Wax/Resin Melting,VESSEL_01,TARGET,88.0 C,88.0 C,,CAL_THERMO_01,YES,Melt waxes and MQ solution until clear
+PROCESS,Phase B Powder Dispersion,HOMO_01,TARGET,2500 RPM,2500 RPM,,CAL_TACH_01,YES,High-shear homogenize powders for 25 min
+PROCESS,Pouring / Filling Temperature,FILL_NOZZLE,TARGET,80.0 C,80.0 C,,CAL_IR_01,YES,Pour into 45C preheated stick molds
+PROCESS,Mold Bed Preheat,MOLD_BED,TARGET,45.0 C,45.0 C,,CAL_BED_01,YES,Prevents thermal shock premature freeze
+PROCESS,Cooling Chamber Rate,CHAMBER_10C,TARGET,2.5 C/min,2.5 C/min,,DATALOGGER_01,YES,Controlled chamber @ 10C for 45 min
+PROCESS,Demolding Core Temperature,DEMOLD_PROBE,TARGET,20.0 C,20.0 C,,CAL_PROBE_01,YES,Demold sticks after reaching 20C core temp
+
+QC_MEASUREMENT,Hardness @ 25C (gf),SOP-QC-HARD-001,750-900 gf,Prior: 781.6 gf,,,TA_XT_PLUS,PENDING,Texture Analyzer 2mm needle probe 1.0 mm/s
+QC_MEASUREMENT,Transfer Payoff @ 10C (g),SOP-QC-TRSF-001,>= 0.040 g,Prior: 0.0430 g,,,BIO_SKIN_RIG,PENDING,BioSkin 4cm2 500gf load 2-stroke reciprocal
+QC_MEASUREMENT,Drop Point (degC),ASTM_D127,60.0-63.5 C,Prior: 62.6 C,,,METTLER_FP83,PENDING,Mettler Toledo FP83 1.0 C/min heating rate
+QC_MEASUREMENT,BioSkin Dynamic CoF,SOP-QC-COF-001,<= 0.180,Prior: 0.158,,,TRIBOMETER_01,PENDING,BioSkin normal load 100gf speed 20mm/s
+QC_MEASUREMENT,30-Min Slurry Settling,SOP-QC-STAB-001,NO_SETTLING,Index <= 1.80,,,VISUAL_INSPECT,PENDING,Zero particulate sedimentation at 80C
+QC_MEASUREMENT,Batch Qualification Status,SOP-GS40-GOV-001,CAL_ANCHOR_N1,PENDING_EXECUTION,,,HEAD_QC,PENDING,First physical calibration anchor
