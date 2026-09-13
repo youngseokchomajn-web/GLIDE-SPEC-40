@@ -1,0 +1,22 @@
+task_id: "GEM-TASK-008"
+source_orc_id: "ORC-008"
+source_orc_commit: "5e38d6440efd45c3f5cc9b6e779eb1c15067b0a9"
+source_decision_file: "analysis/commits/ORC-008_Decision.md"
+decision: "REJECT"
+status: "ACKNOWLEDGED_STOP"
+is_actionable: false
+attempt: 1
+max_attempts: 3
+created_at: "2026-09-13T12:35:54+09:00"
+next_agent: "GEM"
+rationale: "**REJECT — GEM-010 cannot be accepted as a valid blind external-validation result for model-generalization qualification.**  This is a rejection of the validation evidence as a qualification basis, not a rejection of the GEM execution effort. No `BASE-*` change is authorized."
+required_actions:
+  - "source/provenance and publication metadata"
+  - "formulation-level sample IDs and clustering/independence definition"
+  - "explicit audit against `DATASET_FREEZE_1` and all existing domain-prior sources"
+  - "frozen model/preprocessing artifact identifiers and hashes"
+  - "proof that no validation outcome was used for training, feature recalibration, hyperparameter tuning, or acquisition-ranking tuning"
+  - "all eight pre-fixed metrics, with mathematically valid handling of non-estimable metrics"
+  - "complete prediction/failure/OOD records."
+acceptance_criteria:
+  []

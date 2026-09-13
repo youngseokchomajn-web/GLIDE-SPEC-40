@@ -52,10 +52,25 @@ def extract_yaml_from_markdown(file_path):
         text = f.read()
     
     match = re.search(r"```ya?ml\s*\n(.*?)\n```", text, re.DOTALL)
-    if not match:
-        return None
+    if match:
+        yaml_text = match.group(1)
+    else:
+        # Fallback: extract top key:value lines or header block
+        lines = []
+        for line in text.splitlines():
+            s = line.strip()
+            if s.startswith("#") and len(lines) == 0:
+                continue
+            if s.startswith("## "):
+                break
+            if ":" in s or s.startswith("- "):
+                lines.append(line)
+            elif not s and len(lines) > 0:
+                break
+        yaml_text = "\n".join(lines)
+        if not yaml_text.strip():
+            return None
     
-    yaml_text = match.group(1)
     parsed = {}
     current_list_key = None
     
@@ -83,6 +98,29 @@ def extract_yaml_from_markdown(file_path):
                 clean_val = val.strip('"').strip("'")
                 parsed[key] = clean_val
                 
+    # Normalize STATUS to DECISION if DECISION is missing
+    if "STATUS" in parsed and "DECISION" not in parsed:
+        parsed["DECISION"] = parsed["STATUS"]
+    if "ID" in parsed and "ORC_ID" not in parsed:
+        parsed["ORC_ID"] = parsed["ID"]
+
+    # If RATIONALE or REQUIRED_ACTIONS missing, extract from markdown sections
+    if "RATIONALE" not in parsed:
+        m_dec = re.search(r"##\s+Decision\s*\n+(.*?)(?=\n##|\Z)", text, re.DOTALL)
+        if m_dec:
+            parsed["RATIONALE"] = m_dec.group(1).strip().replace("\n", " ")
+    if "REQUIRED_ACTIONS" not in parsed:
+        m_act = re.search(r"##\s+Required Next Action[s]?\s*\n+(.*?)(?=\n##|\Z)", text, re.DOTALL)
+        if m_act:
+            actions = []
+            for line in m_act.group(1).splitlines():
+                line_s = line.strip()
+                if re.match(r"^(\d+\.|\-|\*)\s+", line_s):
+                    clean_act = re.sub(r"^(\d+\.|\-|\*)\s+", "", line_s).strip().rstrip(";")
+                    actions.append(clean_act)
+            if actions:
+                parsed["REQUIRED_ACTIONS"] = actions
+        
     return parsed
 
 def locate_orc_decision_file(files):
