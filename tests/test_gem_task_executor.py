@@ -68,9 +68,9 @@ acceptance_criteria:
         assert success_real is True
         assert reason_real == "TASK_COMPLETED"
 
-        # Verify task is now EVIDENCE_CREATED
+        # Verify task is now COMMITTED
         td = load_gem_task(str(dummy_task))
-        assert td["status"] == "EVIDENCE_CREATED"
+        assert td["status"] == "COMMITTED"
         assert "completed_at" in td
         # Ensure ORC rationale/actions were preserved exactly
         assert td["decision"] == "EXPERIMENT"

@@ -67,8 +67,10 @@ def main():
                     subprocess.run(["git", "pull", "origin", "main"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                     subprocess.run(["python3", ".agent/scripts/dispatch_gem_task.py", "HEAD"], check=True)
                     log_event("✅ GEM Task Dispatch completed successfully.")
+                    # Automatically trigger executor for actionable tasks
+                    subprocess.run(["python3", ".agent/scripts/execute_gem_task.py"], check=False)
                 except Exception as e:
-                    log_event(f"⚠️ GEM Task Dispatch failed: {e}")
+                    log_event(f"⚠️ GEM Task Dispatch/Execution failed: {e}")
             last_known_remote = current_remote
         else:
             # Heartbeat log every 60 iterations (10 minutes)
