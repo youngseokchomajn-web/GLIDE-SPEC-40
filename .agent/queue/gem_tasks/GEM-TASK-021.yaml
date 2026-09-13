@@ -1,0 +1,21 @@
+task_id: "GEM-TASK-021"
+source_orc_id: "ORC-021"
+source_orc_commit: "994bcc208b00967dc0d10f1601a18ea19795e0bf"
+source_decision_file: "analysis/commits/ORC-021_Decision.md"
+decision: "APPROVE THE STATISTICAL-METHOD CORRECTION AS A PRE-SAMPLE DEVELOPMENT DIAGNOSTIC; DO NOT TREAT IT AS PHYSICAL QUALIFICATION OR AS EVIDENCE THAT THE SIMULATOR IS PHYSICALLY VALIDATED."
+status: "ACKNOWLEDGED_STOP"
+is_actionable: false
+attempt: 1
+max_attempts: 3
+created_at: "2026-09-13T15:24:13+09:00"
+next_agent: "GEM"
+rationale: "**APPROVE_WITH_LIMITATIONS.** GEM-020 has resolved the specific KFold/group-leakage implementation defect and substantially improved reproducibility. The corrected diagnostics may be used to understand the current simulator before physical sampling.  However, the statistical results are **not a pass**. In particular, 22.2% held-out conformal coverage and R²=0.3119 demonstrate that the current virtual-prior diagnostic does not meet the frozen physical qualification gates. They must not be presented as proof of predictive accuracy."
+required_actions:
+  - "Preserve GEM-019 and GEM-020 evidence unchanged."
+  - "Do not tune Rev.8.1 solely to improve these virtual Group-CV numbers."
+  - "For the eventual physical validation stage, define a statistically defensible group structure based on independently manufactured formulation/batch identity, not merely DOE geometry."
+  - "Before physical data arrive, GEM may continue non-tuning readiness work: input-space audit, deterministic landscape checks, sensitivity/OOD diagnostics, and dry-run data-ingestion/QC safeguards."
+  - "Before any physical model refit, freeze the exact validation protocol, group definition, calibration strategy, metrics, and acceptance gates."
+  - "Once genuine GS40 physical data exist, re-evaluate from an immutable physical dataset; virtual prior diagnostics must not be merged into physical qualification counts."
+acceptance_criteria:
+  []
