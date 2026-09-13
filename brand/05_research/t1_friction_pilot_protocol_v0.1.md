@@ -18,15 +18,22 @@ T1 is **not** intended to establish clinical efficacy, exact protection duration
 
 ## 2. Why this method architecture
 
-Skin–textile friction is a measurable tribological interaction. Published work has demonstrated repeatable static and dynamic friction measurements using surrogate skin and linearly moving textile interfaces. One 2021 study reported excellent repeatability for static and dynamic friction measurements and showed that the surrogate material itself materially affects the measured coefficient of friction. A 2022 follow-up also found repeatable measurements across human body regions and significant regional differences. These findings support controlled surrogate/interface testing, while also requiring GLIDE-SPEC to avoid treating one friction number as universal across all body areas. citeturn0search0turn0search3
+Skin–textile friction is a measurable tribological interaction. Published work has demonstrated repeatable static and dynamic friction measurements using surrogate skin and linearly moving textile interfaces. A 2021 study measured surrogate-skin/textile friction three times per day across five consecutive days and reported excellent repeatability, while also showing that the surrogate material itself materially affects the measured coefficient of friction. A 2022 follow-up found similarly high repeatability in measurements across human body regions and significant regional differences. These findings support controlled surrogate/interface testing, while also requiring GLIDE-SPEC to avoid treating one friction number as universal across all body areas.
 
-Moisture must be treated as an explicit factor. Human skin hydration has been associated with increased skin–textile friction, and completely wet fabric conditions can produce substantially higher friction than dry textile conditions. citeturn0search10
+Moisture must be treated as an explicit factor. Published skin/textile tribology work shows that hydration and textile moisture can alter measured friction, and a dedicated wet-state study found a substantially different friction profile from dry-state testing. The reported wet-state protocol is useful as evidence that wet testing needs its own controlled method, but its exact timing and magnitude should **not** be adopted as a GLIDE-SPEC standard without pilot validation.
 
 Therefore the T1 pilot deliberately separates:
 
 `product × interface × textile × moisture × motion × time/cycles`
 
 rather than testing product performance in a single dry condition.
+
+### Key references
+
+- Temel, Lloyd & Johnson (2021), *Tribology Letters*, “Evaluating the Design and Repeatability of a Novel Device to Measure Friction of Mechanical Surrogate Skins in Contact with Cotton Textiles.” DOI: https://doi.org/10.1007/s11249-021-01502-1
+- Temel, Johnson & Lloyd (2022), *Tribology Letters*, “Evaluating the Repeatability of Friction Coefficient Measurements and Tactile Perceptions in Skin–Textile Interactions Across Body Regions.” DOI: https://doi.org/10.1007/s11249-021-01560-5
+- Gerhardt et al. (2007), *Wear*, “Tribology of human skin and mechanical skin equivalents in contact with textiles.” DOI: https://doi.org/10.1016/j.wear.2006.11.031
+- Wang, Zhang & Wang (2012), *Tribology Transactions*, “The Standard Friction Test Condition between Woven Fabric and Skin in Wet States.” DOI: https://doi.org/10.1080/10402004.2012.680207
 
 ## 3. Primary endpoints
 
@@ -101,7 +108,7 @@ For stick products, record both mass loss and the defined application area. If d
 
 ## 6. Motion variables
 
-Use a **linear reciprocating motion** because this provides a controlled repeated interface rather than the changing contact velocity associated with uncontrolled rotational movement. Published surrogate-skin/textile work has successfully used linearly moving interfaces and adjustable normal load/velocity. citeturn0search0
+Use a **linear reciprocating motion** because this provides a controlled repeated interface rather than the changing contact velocity associated with uncontrolled rotational movement. Published surrogate-skin/textile work has successfully used linearly moving interfaces and adjustable normal load/velocity.
 
 The following are method-development variables, not product specifications:
 
@@ -136,7 +143,7 @@ A third **M2 — wet/water-exposed** condition should be added after M0/M1 repea
 
 The exact sweat composition, volume, temperature, humidity and conditioning time are method-development parameters. They must be fixed before comparative product testing and then held constant.
 
-The rationale for separating dry and moist states is supported by skin–textile friction literature showing strong dependence of friction on hydration/moisture. citeturn0search10turn0search9
+The rationale for separating dry and moist states is supported by skin–textile friction literature showing strong dependence of friction on hydration/moisture.
 
 ## 8. Pilot sequence
 
@@ -269,7 +276,7 @@ Possible outputs include:
 - variance components;
 - control-chart style run monitoring where useful.
 
-The literature demonstrates that high repeatability is achievable in controlled skin–textile friction measurement, including ICC values around 0.9 or higher in published systems. This is evidence that repeatability should be measured, not evidence that GLIDE-SPEC must adopt a specific ICC cutoff before pilot data exist. citeturn0search0turn0search3
+Published surrogate-skin/textile work demonstrates that high repeatability is achievable in controlled friction measurement. This supports measuring repeatability explicitly; it does **not** establish a mandatory GLIDE-SPEC ICC cutoff before pilot data exist.
 
 ### 13.2 Discrimination
 
@@ -288,7 +295,7 @@ Inspect:
 
 ### 13.3 Static vs dynamic friction
 
-Report static and dynamic friction separately when both are validly measurable. Published work shows that their relationship can depend on the interacting surface material, so they should not automatically be collapsed into one score. citeturn0search0
+Report static and dynamic friction separately when both are validly measurable. Published work shows that their relationship can depend on the interacting surface material, so they should not automatically be collapsed into one score.
 
 ## 14. Method-readiness gates
 
