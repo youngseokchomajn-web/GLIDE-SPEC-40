@@ -1,0 +1,3 @@
+dataset_key,dataset_name,citation,doi,license,provenance,total_measurement_rows,unique_formulations_count,blind_status,eligible_responses,isolation_hash
+VAL_CANDIDATE_HOLD_01,Candidate Unseen Literature Dataset A,TBD (Post-Freeze Unseen),TBD,Open Access,PUBLIC_MEASURED,0,0,LOCKED_BLIND,Hardness / Rheology,PENDING_REGISTRATION
+VAL_CANDIDATE_HOLD_02,Candidate Unseen Literature Dataset B,TBD (Post-Freeze Unseen),TBD,Open Access,PUBLIC_MEASURED,0,0,LOCKED_BLIND,Hardness / Drop Point,PENDING_REGISTRATION

@@ -69,6 +69,7 @@ GLIDE-SPEC 40 Rev.8.1 establishes an active learning simulation pipeline designe
 | **Acquisition Utility** | `src/modeling/calibrated_acquisition.py`| Multi-objective utility: $\text{InfoGain} \times \text{SpecRelevance} \times \text{DomainCoverage}$ | Operational |
 | **Candidate Generator** | `src/doe/virtual_generator.py` | Vectorized Monte Carlo generator with percolation, solid fraction, and binder constraints | Operational |
 | **Pilot Matrix** | `data/doe/pilot_doe_run_matrix_rev1.0.csv` | 18 planned DOE trials (16 Primary orthogonal + 2 Supplemental temperature probes) | Frozen |
+| **External Validation** | `docs/EXTERNAL_VALIDATION_GOVERNANCE.md` | Locked blind validation protocol (`EXTERNAL_VALIDATION_SET_1`) with zero model leakage | Locked Protocol |
 | **Gatekeeper** | `src/modeling/qualification_gate.py` | Rev 2.0 qualification firewall enforcing Zero Synthetic Fallbacks & Exact LOF $F$-test | Operational |
 
 ---
@@ -87,9 +88,18 @@ GLIDE-SPEC 40 Rev.8.1 establishes an active learning simulation pipeline designe
 
 ## 4. Current State Limitations & Invariants
 
-1. **Current Physical GS40 Calibration Count: $N = 0$.**
+1. **Dual Dataset Architecture (Rev.8.1 Topology):**
+   ```text
+   Rev.8.1
+     ├─ DATASET_FREEZE_1 (Model / Domain Prior Construction)
+     └─ EXTERNAL_VALIDATION_SET_1 (Locked Blind Validation)
+   ```
+2. **Current Physical GS40 Calibration Count: $N = 0$.**
    No commercial GS40 stick has yet been manufactured or measured. All current model predictions reflect public literature priors combined with empirical physics assumptions.
-2. **`VIRTUAL_PASS` Scope:**
+3. **`VIRTUAL_PASS` Scope:**
    `VIRTUAL_PASS` denotes high confidence and in-spec behavior under current domain priors. It acts as an internal **physical test waiver candidate**, NOT a commercial release certification.
-3. **P002 Boundary Nature:**
+4. **P002 Boundary Nature:**
    Run `GS40-P002` possesses the highest raw prediction variance but predicts hardness at 668.4 gf (below specification). It functions as a **Boundary Probe**, while `GS40-P001` serves as the primary safe-domain calibration candidate.
+5. **External Validation Failure Evidence:**
+   Any blind validation failure on `EXTERNAL_VALIDATION_SET_1` must be retained as model failure evidence rather than hidden or leaked into training loops.
+

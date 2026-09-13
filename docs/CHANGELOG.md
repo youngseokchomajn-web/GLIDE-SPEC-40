@@ -24,6 +24,14 @@ All notable changes to the GLIDE-SPEC 40 simulation, modeling, and active learni
   - Computed 30-dimensional normalized Euclidean distance matrix: revealed severe redundancy between `GS40-P004` and `GS40-P011` (distance 2.66), vs. orthogonal exploration between `GS40-P001` and `GS40-P004` (distance 10.63).
   - Derived 6 non-dominated Pareto front runs.
   - Formally selected **`GS40-P001` as `GS40_CAL_001`** (Total Utility = 8.77, Rank #1) for single-batch priority manufacturing.
+- **External Validation Governance 도입 (`EXTERNAL_VALIDATION_SET_1`, `docs/EXTERNAL_VALIDATION_GOVERNANCE.md`):**
+  - Rev.8.1 하위 거버넌스로 `DATASET_FREEZE_1`(학습/사전모델 구축용)과 완전히 분리된 `EXTERNAL_VALIDATION_SET_1`(블라인드 외부 일반화 검증) 체계 수립.
+  - 4대 엄격 금지 규정 수립: 모델 학습 금지, 피처 캘리브레이션 금지, 하이퍼파라미터 튜닝 금지, 능동학습 획득 랭킹 튜닝 금지.
+  - 표본 독립성을 raw row 수가 아닌 독립 formulation / experiment 단위로 판정.
+  - 사전에 8대 평가 지표 고정: $R^2$, $\text{RMSE}$, $\text{MAE}$, $\text{bias}$, 90% Prediction-Interval Coverage, PI Width, OOD Classification, Calibration Slope/Intercept.
+  - 응답별 검증 가능성 3단계 분리: Hardness/Rheology 우선 검증, Payoff/CoF SOP 일치 시 조건부 검증, Sedimentation 별도 프로토콜 분리.
+  - 인식론적 한계 고정: 모델 검증용이며 GS40 제품 출시 적격성으로 해석 불가 ($N(\text{GS40 physical}) = 0$ 유지).
+  - 실패 데이터 영구 보존: 외부 검증 결과가 불량하더라도 은폐하거나 모델에 재투입하지 않고 Model Failure Evidence로 영구 보존.
 - **Automated Testing Suite:**
   - Added `tests/test_audit_governance_and_provenance.py` and `tests/test_1m_landscape_pipeline.py`.
   - Full suite expanded to 55 tests passing 100% green in 4.08s.

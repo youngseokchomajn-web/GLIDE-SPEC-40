@@ -118,3 +118,35 @@ Physical testing cycles must automatically cease when all of the following condi
 2. **Conformal Prediction Interval Width:** Hardness PI width $\le 100.0\text{ gf}$, Transfer PI width $\le 0.008\text{ g}$.
 3. **Composite Domain Coverage:** Formulation resides safely within the empirical hyperbox and Mahalanobis domain ($D_{\text{composite}} \le 1.0$).
 4. **Acquisition Utility Threshold:** Expected Information Gain score of the next candidate falls below the cost threshold ($\text{Utility} < 1.0$).
+
+---
+
+## 4. Locked Blind External Validation Governance (`EXTERNAL_VALIDATION_SET_1`)
+
+- **Governing Specification:** [`docs/EXTERNAL_VALIDATION_GOVERNANCE.md`](file:///Users/youngseok/Desktop/GLIDE_SPEC_40/docs/EXTERNAL_VALIDATION_GOVERNANCE.md) (SOP-GS40-VAL-001)
+- **Candidate Registry:** [`data/EXTERNAL_VALIDATION_SET_1_SPEC.csv`](file:///Users/youngseok/Desktop/GLIDE_SPEC_40/data/EXTERNAL_VALIDATION_SET_1_SPEC.csv)
+
+### Rev.8.1 Version & Dataset Topology
+기존 Rev.8.1 Freeze를 임의 변경하지 않고, 아래의 엄격한 2원화 거버넌스 분기 구조를 유지합니다:
+
+```text
+Rev.8.1
+  │
+  ├─ DATASET_FREEZE_1
+  │    └─ Purpose: Model & Domain Prior Construction (Training / Feature Scaling)
+  │    └─ Status: 8 Public Datasets Frozen
+  │
+  └─ EXTERNAL_VALIDATION_SET_1
+       └─ Purpose: Locked Blind External Generalization Testing
+       └─ Status: Strictly Blind / Zero Information Leakage
+```
+
+### Core Enforcement Rules:
+1. **완전한 분리 (Complete Segregation):** `DATASET_FREEZE_1`과 원천 격리되며, 현재 모델 fitting에 일체 사용되지 않은 신규 미공개/사후 공개 문헌 데이터만 후보로 등록 가능.
+2. **4대 금지 (Zero Leakage):** Training 금지, Feature calibration 금지, Hyperparameter tuning 금지, Acquisition ranking tuning 금지.
+3. **표본 독립성 (Formulation-Level Independence):** 행(Row) 수가 아닌 독자 배합/실험 클러스터 단위로 자유도 및 독립성 산정.
+4. **사전 고정 지표 (Pre-Fixed Metrics):** $R^2$, $\text{RMSE}$, $\text{MAE}$, $\text{bias}$, $90\%$ Prediction-Interval Coverage, PI Width, OOD Classification 정합성, Calibration 기울기/절편 사전 고정.
+5. **응답별 검증 분리:** Hardness/Rheology 우선 검증, Payoff/CoF는 SOP 완전 일치 시 조건부 검증, Sedimentation 별도 검증.
+6. **인식론적 한계 불변:** 모델 일반화 성능 검증용이며 GS40 완제품 합격 판정이 아님. $N(\text{GS40 physical}) = 0$ 유지.
+7. **실패 증거 영구 보존 (Model Failure Evidence):** 외부 검증 결과가 불량하더라도 은폐하거나 모델에 재투입하지 않고 모델의 물리적 한계 증거로 영구 보존.
+

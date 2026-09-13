@@ -113,6 +113,30 @@ class TestAuditGovernanceAndProvenance(unittest.TestCase):
         pareto_ids = [r[0]["batch_id"] for r in pareto_runs]
         self.assertIn("GS40-P001", pareto_ids, "GS40-P001 must be on the non-dominated Pareto front")
 
+    def test_external_validation_governance(self):
+        """Verify EXTERNAL_VALIDATION_SET_1 governance policy, locked metrics, and zero leakage invariants."""
+        ext_val_doc = ROOT_DIR / "docs" / "EXTERNAL_VALIDATION_GOVERNANCE.md"
+        ext_val_csv = ROOT_DIR / "data" / "EXTERNAL_VALIDATION_SET_1_SPEC.csv"
+        gov_doc = ROOT_DIR / "docs" / "MODEL_GOVERNANCE.md"
+
+        self.assertTrue(ext_val_doc.exists(), "EXTERNAL_VALIDATION_GOVERNANCE.md must exist")
+        self.assertTrue(ext_val_csv.exists(), "EXTERNAL_VALIDATION_SET_1_SPEC.csv must exist")
+
+        content = ext_val_doc.read_text(encoding="utf-8")
+        self.assertIn("DATASET_FREEZE_1", content)
+        self.assertIn("EXTERNAL_VALIDATION_SET_1", content)
+        self.assertIn("Training", content)
+        self.assertIn("Feature Calibration", content)
+        self.assertIn("Hyperparameter Tuning", content)
+        self.assertIn("Acquisition Ranking Tuning", content)
+        self.assertIn("90% PI Coverage", content)
+        self.assertIn("Model Failure Evidence", content)
+        self.assertTrue("N(GS40 physical) = 0" in content or "N(\\text{GS40 physical}) = 0" in content)
+
+        gov_content = gov_doc.read_text(encoding="utf-8")
+        self.assertIn("EXTERNAL_VALIDATION_SET_1", gov_content)
+
 
 if __name__ == "__main__":
     unittest.main()
+
