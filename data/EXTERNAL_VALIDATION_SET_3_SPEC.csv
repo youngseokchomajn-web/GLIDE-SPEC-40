@@ -1,0 +1,2 @@
+dataset_key,dataset_name,citation,doi,pmcid,license,provenance,total_measurement_rows,unique_formulations_count,blind_status,eligible_responses,isolation_hash
+EXTERNAL_VALIDATION_SET_3,"Rice Bran Oil Oleogels Structured with Beeswax, Carnauba Wax, and Their Blends","Yassoralipour et al., Gels 2026, 12(6), 532",10.3390/gels12060532,PMC13298235,CC-BY-4.0,PUBLIC_MEASURED,10,10,LOCKED_BLIND,"Hardness (N / gf), Adhesiveness (mJ), Cohesiveness",20c9694c12085b4b
