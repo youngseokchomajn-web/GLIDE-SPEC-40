@@ -1,11 +1,10 @@
 # GLIDE-SPEC 40: GS40_CAL_001 Physical Execution & Lineage Batch Sheet
 # Document Authority: SOP-GS40-PILOT-001 / SOP-GS40-MFG-001 / SOP-GS40-GOV-001
 # Batch Registration ID: GS40_CAL_001 (Internal Pilot Code: GS40-P001, Trial: DOE-EXP-001)
-# Target Stick Specification: 20g Anhydrous Powder-in-Balm Stick
-# Total Batch Size: 1,000.0 g (1.0 kg Pilot Batch) / 100.0 g Lab Sub-Batch
-# Execution Date: PENDING_LAB_COMMIT
-# Lead Compounding Operator: PENDING_SIGNOFF
-# QC Lead Analyst: PENDING_SIGNOFF
+# Target Stick Specification: 20g Solid Stick Anti-Chafing Product
+# Physical execution status: PENDING_LAB_COMMIT
+# IMPORTANT: This sheet contains execution targets and REAL_PILOT actual-measurement fields only. Historical/virtual prior predictions are stored separately in data/doe/pilot_doe_virtual_prior_baseline.csv and MUST NOT be entered as actual measurements.
+# Batch scale: 1,000.0 g (1.0 kg pilot batch). Any smaller lab-scale execution requires an explicit new batch/scale registration and must not silently overwrite this batch definition.
 
 Section,Parameter_or_Component,Material_or_Step_ID,Supplier_TradeName,Active_Basis_wt_pct,Target_Charge_g_per_1000g,Actual_Weighed_g,Lot_Number,CoA_Verified,Active_Content_Pct,Device_ID,Compounding_Notes
 COMPOSITION,Synthetic Wax,MAT-WAX-SYN-01,Koster Keunen / Synthetic Wax,15.0,150.00,,,PENDING,100.0%,BALANCE_01,Melting point 88-92C
@@ -33,20 +32,23 @@ PROCESS,Cooling Chamber Rate,CHAMBER_10C,Controlled Chamber,TARGET,2.5 C/min,,,,
 PROCESS,Demolding Core Temperature,DEMOLD_PROBE,Core Temperature,TARGET,20.0 C,,,,CAL_PROBE_01,Demold sticks after reaching 20C core temp
 PROCESS,Curing & Conditioning,CHAMBER_25C,Conditioning,TARGET,24.0 Hours,,,,TIMER_01,Condition at 25.0C / 50% RH for 24h before testing
 
-QC_RAW_MEASUREMENT,Hardness Replicate 1,SOP-QC-HARD-001,Stick #1 Center,Prior: 781.6 gf,,,,TA_XT_PLUS,Needle 2.0mm, speed 1.0mm/s, depth 2.0mm
-QC_RAW_MEASUREMENT,Hardness Replicate 2,SOP-QC-HARD-001,Stick #2 Center,Prior: 781.6 gf,,,,TA_XT_PLUS,Needle 2.0mm, speed 1.0mm/s, depth 2.0mm
-QC_RAW_MEASUREMENT,Hardness Replicate 3,SOP-QC-HARD-001,Stick #3 Center,Prior: 781.6 gf,,,,TA_XT_PLUS,Needle 2.0mm, speed 1.0mm/s, depth 2.0mm
-QC_RAW_MEASUREMENT,Hardness Replicate 4,SOP-QC-HARD-001,Stick #4 Center,Prior: 781.6 gf,,,,TA_XT_PLUS,Needle 2.0mm, speed 1.0mm/s, depth 2.0mm
-QC_RAW_MEASUREMENT,Hardness Replicate 5,SOP-QC-HARD-001,Stick #5 Center,Prior: 781.6 gf,,,,TA_XT_PLUS,Needle 2.0mm, speed 1.0mm/s, depth 2.0mm
-QC_SUMMARY_RESPONSE,Hardness Mean (gf),SOP-QC-HARD-001,Mean of 5 Replicates,750.0 - 900.0 gf,,,,CALC_SHEET,Core Calibration Response 1
-QC_SUMMARY_RESPONSE,Hardness Std Dev (gf),SOP-QC-HARD-001,SD of 5 Replicates,Repeatability Check,,,,CALC_SHEET,Repeatability CV = (SD/Mean)*100
+QC_RAW_MEASUREMENT,Hardness Replicate 1,SOP-QC-HARD-001,Stick #1 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution
+QC_RAW_MEASUREMENT,Hardness Replicate 2,SOP-QC-HARD-001,Stick #2 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution
+QC_RAW_MEASUREMENT,Hardness Replicate 3,SOP-QC-HARD-001,Stick #3 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution
+QC_RAW_MEASUREMENT,Hardness Replicate 4,SOP-QC-HARD-001,Stick #4 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution
+QC_RAW_MEASUREMENT,Hardness Replicate 5,SOP-QC-HARD-001,Stick #5 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution
+QC_SUMMARY_RESPONSE,Hardness Mean (gf),SOP-QC-HARD-001,Mean of 5 Replicates,ACTUAL,,,,PENDING,100.0%,CALC_SHEET,Calculated from actual raw replicates only
+QC_SUMMARY_RESPONSE,Hardness Std Dev (gf),SOP-QC-HARD-001,SD of 5 Replicates,ACTUAL,,,,PENDING,100.0%,CALC_SHEET,Calculated from actual raw replicates only
 
-QC_RAW_MEASUREMENT,Transfer Payoff Replicate 1,SOP-QC-TRSF-001,BioSkin Sheet #1,Prior: 0.0430 g,,,,BIO_SKIN_RIG,4cm2, 500gf load, 2-stroke reciprocal @ 10C
-QC_RAW_MEASUREMENT,Transfer Payoff Replicate 2,SOP-QC-TRSF-001,BioSkin Sheet #2,Prior: 0.0430 g,,,,BIO_SKIN_RIG,4cm2, 500gf load, 2-stroke reciprocal @ 10C
-QC_RAW_MEASUREMENT,Transfer Payoff Replicate 3,SOP-QC-TRSF-001,BioSkin Sheet #3,Prior: 0.0430 g,,,,BIO_SKIN_RIG,4cm2, 500gf load, 2-stroke reciprocal @ 10C
-QC_SUMMARY_RESPONSE,Transfer Payoff Mean (g),SOP-QC-TRSF-001,Mean of 3 Replicates,>= 0.0400 g,,,,CALC_SHEET,Core Calibration Response 2
+QC_RAW_MEASUREMENT,Transfer Payoff Replicate 1,SOP-QC-TRSF-001,BioSkin Sheet #1,ACTUAL,,,,PENDING,100.0%,BIO_SKIN_RIG,Record raw measured g only after physical execution; 4cm2, 500gf load, 2-stroke reciprocal @ 10C
+QC_RAW_MEASUREMENT,Transfer Payoff Replicate 2,SOP-QC-TRSF-001,BioSkin Sheet #2,ACTUAL,,,,PENDING,100.0%,BIO_SKIN_RIG,Record raw measured g only after physical execution; 4cm2, 500gf load, 2-stroke reciprocal @ 10C
+QC_RAW_MEASUREMENT,Transfer Payoff Replicate 3,SOP-QC-TRSF-001,BioSkin Sheet #3,ACTUAL,,,,PENDING,100.0%,BIO_SKIN_RIG,Record raw measured g only after physical execution; 4cm2, 500gf load, 2-stroke reciprocal @ 10C
+QC_SUMMARY_RESPONSE,Transfer Payoff Mean (g),SOP-QC-TRSF-001,Mean of 3 Replicates,ACTUAL,,,,PENDING,100.0%,CALC_SHEET,Calculated from actual raw replicates only
 
-QC_RAW_MEASUREMENT,Drop Point Observed (degC),ASTM_D127,Mettler FP83 Cell,60.0 - 63.5 C,,,,METTLER_FP83,Heating rate 1.0 C/min, standard cup
-QC_SUMMARY_RESPONSE,Drop Point Mean (degC),ASTM_D127,Calibrated Temp,60.0 - 63.5 C,,,,CALC_SHEET,Core Calibration Response 3
+QC_RAW_MEASUREMENT,Drop Point Observed (degC),ASTM_D127,Mettler FP83 Cell,ACTUAL,,,,PENDING,100.0%,METTLER_FP83,Record actual observed temperature only after physical execution; heating rate 1.0 C/min, standard cup
+QC_SUMMARY_RESPONSE,Drop Point Mean (degC),ASTM_D127,Actual observed value,ACTUAL,,,,PENDING,100.0%,CALC_SHEET,Derived from actual observation only
 
-QC_STATUS,Batch Qualification Status,SOP-GS40-GOV-001,CAL_001_ANCHOR_N1,PENDING_EXECUTION,,,,HEAD_QC,First physical calibration anchor point
+MODEL_LINKAGE,Virtual Prior Reference,pilot_doe_virtual_prior_baseline.csv,GS40-P001,NOT_AN_ACTUAL_MEASUREMENT,,,,N/A,N/A,N/A,Prior predictions remain isolated from REAL_PILOT actuals
+MODEL_LINKAGE,GLIDE Prediction Snapshot,MODEL_VERSION_REQUIRED,GS40-P001,PREDICTION_ONLY,,,,N/A,N/A,N/A,Store immutable prediction/model version before physical measurement
+MODEL_LINKAGE,Residual / Error,ACTUAL_MINUS_PREDICTION,GS40-P001,DERIVED_AFTER_MEASUREMENT,,,,N/A,N/A,N/A,Calculate only after actual measurement is recorded
+QC_STATUS,Batch Qualification Status,SOP-GS40-GOV-001,CAL_001_ANCHOR_N1,PENDING_EXECUTION,,,,HEAD_QC,First physical validation anchor; not Production Model qualification
