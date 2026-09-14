@@ -54,6 +54,6 @@ QC_RAW_MEASUREMENT,Appearance / Bloom / Agglomeration,SOP-QC-VIS-001,Standard vi
 QC_RAW_MEASUREMENT,Density,SOP-QC-DENS-001,25C density method,ACTUAL,,,,PENDING,100.0%,DENSITY_01,Record actual density if retained as a release/development response
 
 MODEL_LINKAGE,Virtual Prior Reference,pilot_doe_virtual_prior_baseline.csv,GS40-P001,NOT_AN_ACTUAL_MEASUREMENT,,,,N/A,N/A,N/A,Prior predictions remain isolated from REAL_PILOT actuals
-MODEL_LINKAGE,GLIDE Prediction Snapshot,MODEL_VERSION_REQUIRED,GS40-P001,PREDICTION_ONLY,,,,N/A,N/A,N/A,Create immutable model/version + input snapshot before physical manufacture
+MODEL_LINKAGE,GLIDE Prediction Snapshot,GS40_P001_PREDICTION_SNAPSHOT.csv,GS40-P001,PREDICTION_ONLY,,,,N/A,N/A,N/A,Immutable prediction snapshot (GS40_P001_PRED_001) frozen before physical manufacture
 MODEL_LINKAGE,Residual / Error,ACTUAL_MINUS_PREDICTION,GS40-P001,DERIVED_AFTER_MEASUREMENT,,,,N/A,N/A,N/A,Calculate only after actual measurement is recorded
 QC_STATUS,Batch Qualification Status,SOP-GS40-GOV-001,CAL_001_ANCHOR_N1,PENDING_MATERIAL_SPEC_CONFIRMATION,,,,HEAD_QC,First physical validation anchor; not Production Model qualification

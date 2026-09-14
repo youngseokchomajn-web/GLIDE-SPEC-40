@@ -1,0 +1,25 @@
+snapshot_id,GS40_P001_PRED_001
+batch_id,GS40_CAL_001
+trial_id,DOE-EXP-001
+status,FROZEN_PRE_MANUFACTURE
+model_version,GS40SurrogateEngine_v8.1_Ensemble
+code_commit_sha,97e497a3647e2dd1a3681ab44bd5eade7c2a0ca8
+input_schema_version,GS40_INPUT_SCHEMA_v1.0
+formula_version,REV7.3_DEVELOPMENT_BASELINE
+synthetic_wax_wt_pct,15.0
+dimethicone_pool_wt_pct,22.0
+caprylyl_methicone_wt_pct,6.0
+fill_temperature_c,80.0
+batch_scale_g,1000.0
+prediction_created_at,2026-09-14T21:10:00+09:00
+prediction_created_by,gemini-3.8-flash (Antigravity Agent)
+hardness_pred_gf,781.638
+hardness_pred_sd_gf,7.947
+transfer_pred_g,0.045
+cof_pred,0.156
+thermal_transition_pred_c,62.578
+prediction_input_hash,7a168d91a166be327b256d9f1f05dbc99ec19fdddf2228ec72ecd712f147a44f
+snapshot_sha256,58bb8a3408276b993fae57a9fb73232563c1c4f16d362a018ac9a81d5ee99b58
+immutable_after_execution,TRUE
+actual_measurements_may_be_written_here,FALSE
+notes,"Snapshot generated from GS40SurrogateEngine (v8.1 Multi-Response Ensemble: ElasticNet, RF, ExtraTrees, GBR, GP) calibrated with GroupConformalCalibrator and CompositeOODDetector. Hardness 90% Conformal Interval: [775.3, 788.0] gf (q=0.8022). Composite OOD Score: 2.41 (LOW). Virtual Prior Baseline Reference (Layer 1.2): Hardness=785.1gf, Transfer=0.0429, DropPoint=62.56C, CoF=0.157. Production M4 status: AWAITING_PILOT_DATA (UNQUALIFIED, 0 physical runs). Physical manufacture remains strictly DO NOT MANUFACTURE YET pending material lot CoA verification."
