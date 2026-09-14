@@ -1,54 +1,59 @@
 # GLIDE-SPEC 40: GS40_CAL_001 Physical Execution & Lineage Batch Sheet
 # Document Authority: SOP-GS40-PILOT-001 / SOP-GS40-MFG-001 / SOP-GS40-GOV-001
 # Batch Registration ID: GS40_CAL_001 (Internal Pilot Code: GS40-P001, Trial: DOE-EXP-001)
-# Target Stick Specification: 20g Solid Stick Anti-Chafing Product
-# Physical execution status: PENDING_LAB_COMMIT
+# Target Stick Specification: 20g solid stick anti-chafing product
+# Physical execution status: PENDING_MATERIAL_SPEC_CONFIRMATION
 # IMPORTANT: This sheet contains execution targets and REAL_PILOT actual-measurement fields only. Historical/virtual prior predictions are stored separately in data/doe/pilot_doe_virtual_prior_baseline.csv and MUST NOT be entered as actual measurements.
 # Batch scale: 1,000.0 g (1.0 kg pilot batch). Any smaller lab-scale execution requires an explicit new batch/scale registration and must not silently overwrite this batch definition.
+# HANDOFF GATE: Supplier/grade/trade-name entries below are candidate specifications, not verified physical lots. Before manufacture, actual supplier, grade, INCI, CoA, lot, active/solids content and carrier must be recorded. No substitution is allowed without a new versioned batch/formula record.
 
 Section,Parameter_or_Component,Material_or_Step_ID,Supplier_TradeName,Active_Basis_wt_pct,Target_Charge_g_per_1000g,Actual_Weighed_g,Lot_Number,CoA_Verified,Active_Content_Pct,Device_ID,Compounding_Notes
-COMPOSITION,Synthetic Wax,MAT-WAX-SYN-01,Koster Keunen / Synthetic Wax,15.0,150.00,,,PENDING,100.0%,BALANCE_01,Melting point 88-92C
-COMPOSITION,Candelilla Wax,MAT-WAX-CAN-01,Strahl & Pitsch / Candelilla Wax,2.0,20.00,,,PENDING,100.0%,BALANCE_01,Melting point 68-72C
-COMPOSITION,PEG-8 Beeswax,MAT-WAX-PEG-01,Gattefosse / Apifil,3.0,30.00,,,PENDING,100.0%,BALANCE_01,Wash-off functional wax
-COMPOSITION,MQ Resin 60% Solution,MAT-MQ-01,Dowsil MQ-1600 / TMS 803,12.0 (Active),200.00,,,PENDING,60.0% (Verify CoA),BALANCE_01,Active Resin 120g + Dimethicone Carrier 80g
-COMPOSITION,Pure Dimethicone Oil (100 cSt),MAT-SIL-DIM-01,Shin-Etsu KF-96A-100cs,22.0 (Pool Total),140.00,,,PENDING,100.0%,BALANCE_01,140g charged + 80g from MQ = 220g pool (22.0%)
-COMPOSITION,Caprylyl Methicone,MAT-SIL-CAP-01,Dowsil FZ-3196,6.0,60.00,,,PENDING,100.0%,BALANCE_01,Light volatile carrier
-COMPOSITION,Porous Spherical Silica,MAT-POW-SIL-01,AGC Si-Tech / Sunsphere H-51,10.0,100.00,,,PENDING,100.0%,BALANCE_01,Surface area 350 m2/g, sebum adsorption
-COMPOSITION,Silica Dimethyl Silylate,MAT-POW-AER-01,Evonik / Aerosil R972,2.0,20.00,,,PENDING,100.0%,BALANCE_01,Yield stress builder, anti-settling
-COMPOSITION,PMSSQ (Polymethylsilsesquioxane),MAT-POW-PMS-01,Momentive / Tospearl 145A,8.0,80.00,,,PENDING,100.0%,BALANCE_01,Micro-ball bearing, friction reduction
-COMPOSITION,Boron Nitride Platelets,MAT-POW-BN-01,Saint-Gobain / Tres BN PUHP3002,3.0,30.00,,,PENDING,100.0%,BALANCE_01,Solid lubricant, glide promoter
-COMPOSITION,Treated Zinc Oxide,MAT-ACT-ZNO-01,Kobo / ZNO-C-NJE2,5.0,50.00,,,PENDING,100.0%,BALANCE_01,Triethoxycaprylylsilane treated (anti-chalking)
-COMPOSITION,C12-15 Alkyl Benzoate,MAT-OIL-C1215-01,Innospec / Finsolv TN,9.5,95.00,,,PENDING,100.0%,BALANCE_01,Ester dispersant & plasticizer
-COMPOSITION,Ethylhexylglycerin,MAT-ACT-EHG-01,Schulke / Sensiva SC 50,0.5,5.00,,,PENDING,100.0%,BALANCE_01,Deo booster & preservative enhancer
-COMPOSITION,Soothing Blend (Bisabolol+Tocopherol),MAT-ACT-SOOTH-01,Symrise / Dragosantol 100,2.0,20.00,,,PENDING,100.0%,BALANCE_01,Active complex & antioxidant
-COMPOSITION,TOTAL_PHYSICAL_BATCH_CHARGE,N/A,TARGET_1000G,100.0,1000.00,,,PENDING,100.0%,BALANCE_01,Gross compounding check
+COMPOSITION,Synthetic Wax,MAT-WAX-SYN-01,Koster Keunen / Synthetic Wax (candidate),15.0,150.00,,,PENDING,100.0%,BALANCE_01,Final grade/melting-point spec and actual lot required before manufacture
+COMPOSITION,Candelilla Wax,MAT-WAX-CAN-01,Strahl & Pitsch / Candelilla Wax (candidate),2.0,20.00,,,PENDING,100.0%,BALANCE_01,Final grade/melting-point spec and actual lot required before manufacture
+COMPOSITION,PEG-8 Beeswax,MAT-WAX-PEG-01,Gattefosse / Apifil (candidate),3.0,30.00,,,PENDING,100.0%,BALANCE_01,Final grade/INCI and actual lot required before manufacture
+COMPOSITION,MQ Resin 60% Solution,MAT-MQ-01,Candidate: Dowsil MQ-1600 / TMS 803,12.0 (Active),200.00,,,PENDING,60.0% (VERIFY CoA),BALANCE_01,Do not assume candidate trade name; verify actual INCI, solids %, carrier, grade and lot. Charge conversion must use verified CoA.
+COMPOSITION,Pure Dimethicone Oil (100 cSt),MAT-SIL-DIM-01,Shin-Etsu KF-96A-100cs (candidate),22.0 (Pool Total),140.00,,,PENDING,100.0%,BALANCE_01,140g direct charge + verified MQ carrier contribution; recompute carrier offset from actual CoA before weighing
+COMPOSITION,Caprylyl Methicone,MAT-SIL-CAP-01,Dowsil FZ-3196 (candidate),6.0,60.00,,,PENDING,100.0%,BALANCE_01,Final grade/INCI and actual lot required before manufacture
+COMPOSITION,Porous Spherical Silica,MAT-POW-SIL-01,AGC Si-Tech / Sunsphere H-51 (candidate),10.0,100.00,,,PENDING,100.0%,BALANCE_01,Verify D50/D90, BET, oil absorption, moisture and actual lot
+COMPOSITION,Silica Dimethyl Silylate,MAT-POW-AER-01,Evonik / Aerosil R972 (candidate),2.0,20.00,,,PENDING,100.0%,BALANCE_01,Verify grade, particle/dispersion spec, moisture and actual lot
+COMPOSITION,PMSSQ (Polymethylsilsesquioxane),MAT-POW-PMS-01,Momentive / Tospearl 145A (candidate),8.0,80.00,,,PENDING,100.0%,BALANCE_01,Verify particle size/morphology, purity and actual lot
+COMPOSITION,Boron Nitride Platelets,MAT-POW-BN-01,Saint-Gobain / Tres BN PUHP3002 (candidate),3.0,30.00,,,PENDING,100.0%,BALANCE_01,Verify grade, purity, particle size/morphology and actual lot
+COMPOSITION,Treated Zinc Oxide,MAT-ACT-ZNO-01,Kobo / ZNO-C-NJE2 (candidate),5.0,50.00,,,PENDING,100.0%,BALANCE_01,Verify exact INCI, surface treatment, ZnO content, particle size and actual lot
+COMPOSITION,C12-15 Alkyl Benzoate,MAT-OIL-C1215-01,Innospec / Finsolv TN (candidate),9.5,95.00,,,PENDING,100.0%,BALANCE_01,Verify grade/INCI and actual lot
+COMPOSITION,Ethylhexylglycerin,MAT-ACT-EHG-01,Schulke / Sensiva SC 50 (candidate),0.5,5.00,,,PENDING,100.0%,BALANCE_01,Verify exact grade/INCI and actual lot
+COMPOSITION,Soothing Blend,MAT-ACT-SOOTH-01,Composition and supplier TBD,2.0,20.00,,,PENDING,100.0%,BALANCE_01,Rev.7.3 lists Bisabolol + Stearyl Glycyrrhetinate + Tocopherol + Rosemary Extract; do not substitute the two-component shorthand without a versioned formula decision
+COMPOSITION,TOTAL_PHYSICAL_BATCH_CHARGE,N/A,TARGET_1000G,100.0,1000.00,,,PENDING,100.0%,BALANCE_01,Gross compounding check; final carrier-offset calculation must reconcile to 1000.00g
 
-PROCESS,Phase A Wax/Resin Melting,VESSEL_01,Hotplate Melt,TARGET,88.0 C,,,,CAL_THERMO_01,Melt waxes and MQ solution until clear
-PROCESS,Phase B Powder Dispersion,HOMO_01,High-Shear Dispersion,TARGET,2500 RPM,,,,CAL_TACH_01,Homogenize powders for 25 min
-PROCESS,Phase C Vacuum Deaeration,VACUUM_01,Bubble Elimination,TARGET,-0.08 MPa,,,,VAC_GAUGE_01,Pull vacuum for 5 min to remove entrapped air
-PROCESS,Pouring / Filling Temperature,FILL_NOZZLE,Direct Dispensing,TARGET,80.0 C,,,,CAL_IR_01,Pour into 45C preheated stick molds
-PROCESS,Mold Bed Preheat,MOLD_BED,Bed Heating,TARGET,45.0 C,,,,CAL_BED_01,Prevents thermal shock premature freeze
-PROCESS,Cooling Chamber Rate,CHAMBER_10C,Controlled Chamber,TARGET,2.5 C/min,,,,DATALOGGER_01,Controlled chamber @ 10C for 45 min
-PROCESS,Demolding Core Temperature,DEMOLD_PROBE,Core Temperature,TARGET,20.0 C,,,,CAL_PROBE_01,Demold sticks after reaching 20C core temp
-PROCESS,Curing & Conditioning,CHAMBER_25C,Conditioning,TARGET,24.0 Hours,,,,TIMER_01,Condition at 25.0C / 50% RH for 24h before testing
+PROCESS,Phase A Wax/Resin Melting,VESSEL_01,Hotplate Melt,TARGET,88.0 C,,,,CAL_THERMO_01,Initial process candidate; record actual melt temperature/time and endpoint appearance
+PROCESS,Phase B Powder Dispersion,HOMO_01,High-Shear Dispersion,TARGET,2500 RPM,,,,CAL_TACH_01,Initial process candidate: record actual RPM, duration and dispersion endpoint
+PROCESS,Phase C Vacuum Deaeration,VACUUM_01,Bubble Elimination,TARGET,-0.08 MPa,,,,VAC_GAUGE_01,Initial process candidate: record actual vacuum and duration
+PROCESS,Pouring / Filling Temperature,FILL_NOZZLE,Direct Dispensing,TARGET,80.0 C,,,,CAL_IR_01,Initial process candidate; record actual nozzle/core fill temperature immediately before fill
+PROCESS,Mold Bed Preheat,MOLD_BED,Bed Heating,TARGET,45.0 C,,,,CAL_BED_01,Initial process candidate; record actual mold temperature
+PROCESS,Cooling Chamber Rate,CHAMBER_10C,Controlled Chamber,TARGET,2.5 C/min,,,,DATALOGGER_01,Initial process candidate: record actual chamber profile, not estimated rate only
+PROCESS,Demolding Core Temperature,DEMOLD_PROBE,Core Temperature,TARGET,20.0 C,,,,CAL_PROBE_01,Record actual core temperature at demold
+PROCESS,Curing & Conditioning,CHAMBER_25C,Conditioning,TARGET,24.0 Hours,,,,TIMER_01,Condition at 25.0C / 50% RH for 24h before testing; record actual time/conditions
 
-QC_RAW_MEASUREMENT,Hardness Replicate 1,SOP-QC-HARD-001,Stick #1 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution
-QC_RAW_MEASUREMENT,Hardness Replicate 2,SOP-QC-HARD-001,Stick #2 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution
-QC_RAW_MEASUREMENT,Hardness Replicate 3,SOP-QC-HARD-001,Stick #3 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution
-QC_RAW_MEASUREMENT,Hardness Replicate 4,SOP-QC-HARD-001,Stick #4 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution
-QC_RAW_MEASUREMENT,Hardness Replicate 5,SOP-QC-HARD-001,Stick #5 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution
+QC_RAW_MEASUREMENT,Hardness Replicate 1,SOP-QC-HARD-001,Stick #1 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution; SOP must capture probe/depth/speed/conditioning
+QC_RAW_MEASUREMENT,Hardness Replicate 2,SOP-QC-HARD-001,Stick #2 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution; same SOP conditions
+QC_RAW_MEASUREMENT,Hardness Replicate 3,SOP-QC-HARD-001,Stick #3 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution; same SOP conditions
+QC_RAW_MEASUREMENT,Hardness Replicate 4,SOP-QC-HARD-001,Stick #4 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution; same SOP conditions
+QC_RAW_MEASUREMENT,Hardness Replicate 5,SOP-QC-HARD-001,Stick #5 Center,ACTUAL,,,,PENDING,100.0%,TA_XT_PLUS,Record raw measured gf only after physical execution; same SOP conditions
 QC_SUMMARY_RESPONSE,Hardness Mean (gf),SOP-QC-HARD-001,Mean of 5 Replicates,ACTUAL,,,,PENDING,100.0%,CALC_SHEET,Calculated from actual raw replicates only
 QC_SUMMARY_RESPONSE,Hardness Std Dev (gf),SOP-QC-HARD-001,SD of 5 Replicates,ACTUAL,,,,PENDING,100.0%,CALC_SHEET,Calculated from actual raw replicates only
 
-QC_RAW_MEASUREMENT,Transfer Payoff Replicate 1,SOP-QC-TRSF-001,BioSkin Sheet #1,ACTUAL,,,,PENDING,100.0%,BIO_SKIN_RIG,Record raw measured g only after physical execution; 4cm2, 500gf load, 2-stroke reciprocal @ 10C
-QC_RAW_MEASUREMENT,Transfer Payoff Replicate 2,SOP-QC-TRSF-001,BioSkin Sheet #2,ACTUAL,,,,PENDING,100.0%,BIO_SKIN_RIG,Record raw measured g only after physical execution; 4cm2, 500gf load, 2-stroke reciprocal @ 10C
-QC_RAW_MEASUREMENT,Transfer Payoff Replicate 3,SOP-QC-TRSF-001,BioSkin Sheet #3,ACTUAL,,,,PENDING,100.0%,BIO_SKIN_RIG,Record raw measured g only after physical execution; 4cm2, 500gf load, 2-stroke reciprocal @ 10C
+QC_RAW_MEASUREMENT,Transfer Payoff Replicate 1,SOP-QC-TRSF-001,BioSkin Sheet #1,ACTUAL,,,,PENDING,100.0%,BIO_SKIN_RIG,Record raw measured g only after physical execution; 4cm2, 500gf load, 2-stroke reciprocal @ 10C; SOP must define contact time and conditioning
+QC_RAW_MEASUREMENT,Transfer Payoff Replicate 2,SOP-QC-TRSF-001,BioSkin Sheet #2,ACTUAL,,,,PENDING,100.0%,BIO_SKIN_RIG,Same standardized conditions; preserve raw result
+QC_RAW_MEASUREMENT,Transfer Payoff Replicate 3,SOP-QC-TRSF-001,BioSkin Sheet #3,ACTUAL,,,,PENDING,100.0%,BIO_SKIN_RIG,Same standardized conditions; preserve raw result
 QC_SUMMARY_RESPONSE,Transfer Payoff Mean (g),SOP-QC-TRSF-001,Mean of 3 Replicates,ACTUAL,,,,PENDING,100.0%,CALC_SHEET,Calculated from actual raw replicates only
 
-QC_RAW_MEASUREMENT,Drop Point Observed (degC),ASTM_D127,Mettler FP83 Cell,ACTUAL,,,,PENDING,100.0%,METTLER_FP83,Record actual observed temperature only after physical execution; heating rate 1.0 C/min, standard cup
+QC_RAW_MEASUREMENT,Drop Point Observed (degC),ASTM_D127,Mettler FP83 Cell,ACTUAL,,,,PENDING,100.0%,METTLER_FP83,Record actual observed temperature only after physical execution; method must be confirmed for this stick matrix
 QC_SUMMARY_RESPONSE,Drop Point Mean (degC),ASTM_D127,Actual observed value,ACTUAL,,,,PENDING,100.0%,CALC_SHEET,Derived from actual observation only
 
+QC_RAW_MEASUREMENT,Glide / Friction CoF,SOP-QC-COF-001,BioSkin tribology rig,ACTUAL,,,,PENDING,100.0%,BIO_SKIN_RIG,Required model-response linkage if CoF is used; record raw friction trace/summary and full test conditions
+QC_RAW_MEASUREMENT,Appearance / Bloom / Agglomeration,SOP-QC-VIS-001,Standard visual inspection,ACTUAL,,,,PENDING,100.0%,CAMERA_01,Record standardized images/observations for powder bloom, cracking, sweating, agglomeration and surface defects
+QC_RAW_MEASUREMENT,Density,SOP-QC-DENS-001,25C density method,ACTUAL,,,,PENDING,100.0%,DENSITY_01,Record actual density if retained as a release/development response
+
 MODEL_LINKAGE,Virtual Prior Reference,pilot_doe_virtual_prior_baseline.csv,GS40-P001,NOT_AN_ACTUAL_MEASUREMENT,,,,N/A,N/A,N/A,Prior predictions remain isolated from REAL_PILOT actuals
-MODEL_LINKAGE,GLIDE Prediction Snapshot,MODEL_VERSION_REQUIRED,GS40-P001,PREDICTION_ONLY,,,,N/A,N/A,N/A,Store immutable prediction/model version before physical measurement
+MODEL_LINKAGE,GLIDE Prediction Snapshot,MODEL_VERSION_REQUIRED,GS40-P001,PREDICTION_ONLY,,,,N/A,N/A,N/A,Create immutable model/version + input snapshot before physical manufacture
 MODEL_LINKAGE,Residual / Error,ACTUAL_MINUS_PREDICTION,GS40-P001,DERIVED_AFTER_MEASUREMENT,,,,N/A,N/A,N/A,Calculate only after actual measurement is recorded
-QC_STATUS,Batch Qualification Status,SOP-GS40-GOV-001,CAL_001_ANCHOR_N1,PENDING_EXECUTION,,,,HEAD_QC,First physical validation anchor; not Production Model qualification
+QC_STATUS,Batch Qualification Status,SOP-GS40-GOV-001,CAL_001_ANCHOR_N1,PENDING_MATERIAL_SPEC_CONFIRMATION,,,,HEAD_QC,First physical validation anchor; not Production Model qualification
