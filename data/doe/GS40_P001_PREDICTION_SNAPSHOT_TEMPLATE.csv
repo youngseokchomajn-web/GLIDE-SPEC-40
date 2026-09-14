@@ -1,0 +1,25 @@
+snapshot_id,GS40_P001_PRED_001
+batch_id,GS40_CAL_001
+trial_id,DOE-EXP-001
+status,REQUIRED_BEFORE_MANUFACTURE
+model_version,REQUIRED
+code_commit_sha,REQUIRED
+input_schema_version,REQUIRED
+formula_version,REV7.3_DEVELOPMENT_BASELINE
+synthetic_wax_wt_pct,15.0
+dimethicone_pool_wt_pct,22.0
+caprylyl_methicone_wt_pct,6.0
+fill_temperature_c,80.0
+batch_scale_g,1000.0
+prediction_created_at,REQUIRED
+prediction_created_by,REQUIRED
+hardness_pred_gf,REQUIRED_FROM_SIMULATOR
+hardness_pred_sd_gf,REQUIRED_FROM_SIMULATOR
+transfer_pred_g,REQUIRED_FROM_SIMULATOR
+cof_pred,REQUIRED_FROM_SIMULATOR
+thermal_transition_pred_c,REQUIRED_FROM_SIMULATOR
+prediction_input_hash,REQUIRED
+snapshot_sha256,REQUIRED
+immutable_after_execution,TRUE
+actual_measurements_may_be_written_here,FALSE
+notes,Snapshot must be generated from the exact simulator/model commit used for P001 and frozen before physical manufacture. Actual QC values belong only in the REAL_PILOT execution record.
