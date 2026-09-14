@@ -4,6 +4,25 @@ All notable changes to the GLIDE-SPEC 40 simulation, modeling, and active learni
 
 ---
 
+## [Manufacturer-Simulator Data Interface] - 2026-09-14
+### Added
+- Added `docs/MANUFACTURER_SIMULATOR_DATA_INTERFACE_REV1.md`.
+- Defined a common data boundary between manufacturer sample development and the GLIDE simulator.
+- Added identifiers for sample, formulation, batch, manufacturer, package and process so formulation changes and manufacturing repeats remain traceable.
+- Defined priority formulation, powder-loading, process, physical-property, friction/use-feel and environmental fields for sample data collection.
+- Defined the intended linkage `sample_id → formulation/process inputs → GLIDE prediction → actual measurement → residual/error`.
+- Separated development data, independent validation data and later real-use data to reduce leakage and preserve credible model evaluation.
+- Required raw measurements and test conditions to be preserved where available rather than storing only summarized scores.
+- Added a minimum executable dataset for the first manufacturer samples without requiring an unnecessarily large data package.
+- Added version-control rules linking formulation, test-method, data-schema and model versions.
+
+### Decision
+- Manufacturer samples will be treated as potential external validation data for GLIDE, not merely as product-development artifacts.
+- No calibration or qualification claim will be made until sufficient real measurements are available and the relevant data split is explicitly defined.
+- The actual code input schema is not assumed to be identical to this planning interface; implementation changes require separate version tracking.
+
+---
+
 ## [Manufacturer Execution Plan] - 2026-09-14
 ### Added
 - Added `docs/MANUFACTURER_EXECUTION_PLAN_REV1.md`.
