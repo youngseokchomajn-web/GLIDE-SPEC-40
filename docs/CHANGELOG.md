@@ -4,6 +4,25 @@ All notable changes to the GLIDE-SPEC 40 simulation, modeling, and active learni
 
 ---
 
+## [Manufacturer Execution Plan] - 2026-09-14
+### Added
+- Added `docs/MANUFACTURER_EXECUTION_PLAN_REV1.md`.
+- Converted the manufacturer work from public-web screening to an execution sequence: **6-company RFQ → comparable response collection → 2–3 technical candidates → 2–3 sample developments → user testing → formulation/process revision → pilot → first commercial production review**.
+- Defined the first RFQ disclosure boundary: 20 g solid stick, anti-chafing use case, anhydrous wax/oil/silicone direction, dispersed fine particulate materials, smooth glide and relatively dry finish; detailed formulation/batch composition remains withheld until basic feasibility is confirmed.
+- Added separate checks for **content MOQ vs. package/component MOQ**, rather than treating a single advertised MOQ as the actual launch constraint.
+- Added a requirement to identify **1–3 previous products closest in physical behavior** to GLIDE-SPEC 40 as stronger evidence than a generic claim of manufacturing capability.
+- Defined sample evaluation criteria covering glide, friction, sweat/moisture, transfer to clothing, residue, tack/shine, powderiness, whitening, agglomeration, stick hardness and mechanical integrity.
+- Defined pilot/first-production sequence and retained flexibility to use approximately 1,000 units as the first commercial batch if 500-unit production is impractical.
+- Connected manufacturer development with the parallel GLIDE simulator validation track: public data → prediction → independent validation → error analysis → model improvement; actual sample measurements may later be used for calibration/qualification where appropriate.
+- Added manufacturer exclusion criteria covering weak technical evidence, infeasible sampling, excessive package MOQ, inadequate sample quality/repeatability and incompatible IP/ownership terms.
+
+### Decision
+- Stop expanding the manufacturer list unless new evidence materially changes the candidate pool; **execute the first RFQ wave first**.
+- Do not disclose the full Rev.7.3 formulation in the first contact.
+- Do not lock the final manufacturer or first-production quantity from website claims or quotations alone; require technical review and sample evidence first.
+
+---
+
 ## [Manufacturer Candidate Screening] - 2026-09-14
 ### Added
 - Added `docs/MANUFACTURER_CANDIDATE_SCREENING_REV1.md`.
