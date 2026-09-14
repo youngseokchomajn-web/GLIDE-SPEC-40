@@ -4,6 +4,24 @@ All notable changes to the GLIDE-SPEC 40 simulation, modeling, and active learni
 
 ---
 
+## [Manufacturer Candidate Screening] - 2026-09-14
+### Added
+- Added `docs/MANUFACTURER_CANDIDATE_SCREENING_REV1.md`.
+- Completed a first public-evidence screening of domestic OEM/ODM candidates for the 20 g solid-stick anti-chafing product.
+- Prioritized **Laonhase, Heib Lab, Hankook Cosmetics Manufacturing, Monami Cosmetics, MLS and Cosmo C&T** for first-round technical/RFQ contact.
+- Added secondary candidates including Hankook Cosmo, Jeongin, Oxygen Development/Eyesome and Hanform.
+- Added large ODM technology references **Kolmar Korea** and **COSMAX** as technical-capability references, not assumed low-MOQ suppliers.
+- Explicitly separated direct manufacturers from sourcing/matching platforms.
+- Recorded negative evidence where a public MOQ is materially above the current 1,000–3,000 unit launch strategy.
+- Added a standardized RFQ checklist covering 20 g stick filling, fine-powder dispersion, anhydrous/oil/wax/silicone systems, pilot production, stock packaging, development cost, 500/1,000/2,000/3,000/5,000-unit pricing and lead time.
+
+### Decision
+- The first RFQ wave will focus on technical feasibility, not advertised MOQ or headline unit price.
+- Public claims remain **unverified until the manufacturer confirms them for GLIDE-SPEC 40**.
+- The first production quantity remains open pending technical review, pilot samples and comparable quotations.
+
+---
+
 ## [Manufacturer Sourcing Plan] - 2026-09-14
 ### Added
 - Added `docs/MANUFACTURER_SOURCING_PLAN_REV1.md`.
