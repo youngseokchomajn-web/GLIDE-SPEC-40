@@ -4,6 +4,22 @@ All notable changes to the GLIDE-SPEC 40 simulation, modeling, and active learni
 
 ---
 
+## [P001 Execution Sheet Provenance Fix] - 2026-09-14
+### Changed
+- Updated `data/doe/GS40_CAL_001_EXECUTION_SHEET.csv` so the physical P001 execution sheet contains only execution targets and REAL_PILOT actual-measurement fields.
+- Removed historical `Prior:` values from physical QC measurement rows to prevent virtual predictions from being mistaken for measured results.
+- Kept virtual prior predictions isolated in `data/doe/pilot_doe_virtual_prior_baseline.csv`.
+- Added explicit model-linkage fields for virtual prior, immutable prediction snapshot and post-measurement residual/error.
+- Clarified that P001 is a first physical validation anchor and is not, by itself, Production Model qualification.
+- Clarified that the registered P001 batch is a 1.0 kg pilot batch; any different physical scale requires explicit new batch registration rather than silently changing P001.
+
+### Decision
+- P001 actual measurements must be entered only after physical execution and must preserve raw replicates and test conditions.
+- Virtual prior values may inform prediction and experiment selection but must never populate REAL_PILOT actual fields.
+- After P001 actual data are available, model error/uncertainty and EIG will be recalculated before deciding whether another physical experiment is justified.
+
+---
+
 ## [Manufacturer-Simulator Data Interface] - 2026-09-14
 ### Added
 - Added `docs/MANUFACTURER_SIMULATOR_DATA_INTERFACE_REV1.md`.
@@ -102,4 +118,4 @@ All notable changes to the GLIDE-SPEC 40 simulation, modeling, and active learni
 - **Dataset Freeze 1 & Independent Sample Audit (`data/DATASET_FREEZE_1.csv`, `docs/DATASET_INDEPENDENT_SAMPLE_AUDIT.md`):**
   - Audited 8 public peer-reviewed datasets isolating raw longitudinal/thermal rows from independent formulation clusters.
   - Clarified that 384 data points in Huynh (2020) correspond to repeated aging/thermal sweeps, mathematically justifying `GroupKFold`.
-  - ...
+  - Preserved the historical Rev.8.1 engineering record below unchanged for traceability.
