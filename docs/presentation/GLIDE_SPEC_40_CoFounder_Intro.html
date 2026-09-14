@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLIDE-SPEC 40 — Co-Founder Introduction</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    :root {
+      --bg-color: #FFFFFF;
+      --card-bg: #F9FAFB;
+      --card-border: #E5E7EB;
+      --accent-tint: #F1F5F9;
+      --accent-color: #1E3A8A;
+      --text-main: #111827;
+      --text-body: #374151;
+      --text-muted: #6B7280;
+      --text-light: #9CA3AF;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      background-color: #0F172A;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-body);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 0 60px 0;
+      min-height: 100vh;
+    }
+
+    .toolbar {
+      position: fixed;
+      bottom: 20px;
+      z-index: 100;
+      display: flex;
+      gap: 12px;
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 8px 16px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #F9FAFB;
+      font-size: 13px;
+    }
+
+    .toolbar button {
+      background: none;
+      border: none;
+      color: #F3F4F6;
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 4px 10px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .toolbar button:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .slide-deck {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      width: 100%;
+      max-width: 1200px;
+      align-items: center;
+    }
+
+    .slide {
+      background: var(--bg-color);
+      width: 1200px;
+      height: 675px; /* 16:9 */
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+      padding: 44px 56px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    /* Top Header */
+    .slide-header {
+      margin-bottom: 12px;
+    }
+
+    .slide-meta {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text-light);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .slide-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      margin-bottom: 4px;
+    }
+
+    .slide-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 400;
+      line-height: 1.35;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--card-border);
+      margin-top: 10px;
+    }
+
+    /* Content Area */
+    .slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+
+    /* Slide Footer */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: var(--text-light);
+      border-top: 1px solid var(--card-border);
+      padding-top: 10px;
+    }
+
+    /* Common Card Styling */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 16px 20px;
+    }
+
+    .card-accent {
+      background: var(--accent-tint);
+      border: 1px solid var(--accent-color);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .grid-7 {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .feature-item {
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+
+    .callout-box {
+      background: var(--accent-tint);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 10px 16px;
+    }
+
+    .diagram-img {
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      background: #FFFFFF;
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+
+    /* Slide 1 Specific */
+    .title-slide {
+      justify-content: center;
+      align-items: flex-start;
+      padding: 72px 88px;
+    }
+
+    .title-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+    }
+
+    .title-main {
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+
+    .title-sub {
+      font-size: 19px;
+      font-weight: 500;
+      color: var(--text-body);
+      margin-bottom: 20px;
+    }
+
+    .title-divider {
+      width: 80px;
+      height: 2px;
+      background: var(--text-main);
+      margin-bottom: 20px;
+    }
+
+    .title-desc {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .title-target {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: transparent;
+        padding: 0;
+      }
+      .toolbar {
+        display: none !important;
+      }
+      .slide-deck {
+        gap: 0;
+      }
+      .slide {
+        box-shadow: none;
+        border-radius: 0;
+        page-break-after: always;
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <span>GLIDE-SPEC 40 (총 8슬라이드 · 테크니컬 다이어그램 포함)</span>
+    <button onclick="window.print()">인쇄 / PDF 저장</button>
+  </div>
+
+  <div class="slide-deck">
+
+    <!-- SLIDE 1 -->
+    <div class="slide title-slide" id="slide-1">
+      <div class="title-tag">PROJECT INTRODUCTION</div>
+      <h1 class="title-main">GLIDE-SPEC 40</h1>
+      <div class="title-sub">Technical Anti-Chafing Stick</div>
+      <div class="title-divider"></div>
+      <div class="title-desc">20g Powder-in-Balm Stick</div>
+      <div class="title-target">Marathon &nbsp;·&nbsp; Trail &nbsp;·&nbsp; Long-distance &nbsp;·&nbsp; Military Ruck March</div>
+
+      <div style="position: absolute; bottom: 36px; left: 88px; font-size: 10.5px; color: var(--text-light); line-height: 1.6;">
+        Development baseline: Rev.7.3 &nbsp;|&nbsp; Engineering status: Phase C — Physical Pilot Execution<br>
+        Co-founder discussion baseline
+      </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide" id="slide-2">
+      <div class="slide-header">
+        <div class="slide-meta">02 / PROBLEM</div>
+        <h2 class="slide-title">장시간 활동에서 반복되는 피부 마찰 문제</h2>
+        <div class="slide-subtitle">제품 개발에서 해결해야 할 것은 단순한 윤활감이 아니라 실제 사용 중의 균형입니다.</div>
+        <div class="divider"></div>
+      </div>
+
+      <div class="slide-content">
+        <div style="display: grid; grid-template-columns: 4.8fr 6.6fr; gap: 20px; align-items: stretch;">
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="card" style="padding: 12px 16px;">
+              <div style="font-size: 12.5px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">주요 사용 부위</div>
+              <div style="font-size: 11.5px; color: var(--text-body);">• 허벅지 안쪽 &nbsp;·&nbsp; 사타구니 &nbsp;·&nbsp; 겨드랑이 &nbsp;·&nbsp; 발 & 뒤꿈치</div>
+            </div>
+            <div class="card" style="padding: 12px 16px;">
+              <div style="font-size: 12.5px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">개발에서 보는 사용성 요건</div>
+              <div style="font-size: 11.5px; color: var(--text-body);">• 마찰 감소 &nbsp;·&nbsp; 지속성 &nbsp;·&nbsp; 사용감(보송함) &nbsp;·&nbsp; 의류 전이 최소화</div>
+            </div>
+            <div class="card" style="padding: 12px 16px;">
+              <div style="font-size: 12.5px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">타깃 활동 환경</div>
+              <div style="font-size: 11.5px; color: var(--text-body);">• 러닝 풀코스 &nbsp;·&nbsp; 트레일러닝 &nbsp;·&nbsp; 장거리 보행 &nbsp;·&nbsp; 20kg 군장 행군</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <img src="images/diagram_friction_interface.png" alt="마찰 계면 손상 메커니즘" class="diagram-img" style="max-height: 250px;">
+            <div class="callout-box" style="text-align: center;">
+              <strong style="font-size: 12px;">핵심: 반복 마찰을 줄이면서도 땀·움직임·의류 접촉을 견디는 것.</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>GLIDE-SPEC 40 · Co-founder discussion</span>
+        <span>02 / 08</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide" id="slide-3">
+      <div class="slide-header">
+        <div class="slide-meta">03 / PRODUCT</div>
+        <h2 class="slide-title">제품은 4개의 기능 시스템으로 설계</h2>
+        <div class="slide-subtitle">Rev.7.3은 최종 생산 Formula가 아니라 Pilot으로 연결하기 위한 개발 기준선입니다.</div>
+        <div class="divider"></div>
+      </div>
+
+      <div class="slide-content">
+        <div class="grid-4" style="margin-bottom: 12px;">
+          <div class="card" style="padding: 12px 14px;">
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-main);">Powder</div>
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent-color); margin-bottom: 4px;">→ 마찰 저감 · 표면감</div>
+            <div style="font-size: 10.5px; color: var(--text-body); line-height: 1.35;">구상 파우더가 표면 마찰을 낮추고 땀·유분을 흡착</div>
+          </div>
+
+          <div class="card" style="padding: 12px 14px;">
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-main);">Wax</div>
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent-color); margin-bottom: 4px;">→ 스틱 구조 · 사용성</div>
+            <div style="font-size: 10.5px; color: var(--text-body); line-height: 1.35;">상온 형상을 지지하고 도포량과 경도를 제어</div>
+          </div>
+
+          <div class="card" style="padding: 12px 14px;">
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-main);">Silicone</div>
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent-color); margin-bottom: 4px;">→ Spread · Slip</div>
+            <div style="font-size: 10.5px; color: var(--text-body); line-height: 1.35;">얇고 매끄럽게 펴지도록 초기 슬립과 감촉 형성</div>
+          </div>
+
+          <div class="card" style="padding: 12px 14px;">
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-main);">Resin</div>
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent-color); margin-bottom: 4px;">→ 지속성 · 필름</div>
+            <div style="font-size: 10.5px; color: var(--text-body); line-height: 1.35;">땀·수분에 견디는 표면막을 형성해 윤활층 유지</div>
+          </div>
+        </div>
+
+        <img src="images/diagram_4system_mechanism.png" alt="4대 시스템 단면 메커니즘" class="diagram-img" style="max-height: 240px; margin: 0 auto; width: 85%;">
+
+        <div style="font-size: 10px; color: var(--text-muted); margin-top: 8px; text-align: center;">
+          * 세부 원료 목록과 개별 배합비는 이 자료에서 생략하고, 시스템별 기능과 물성 제어에 집중합니다.
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>GLIDE-SPEC 40 · Co-founder discussion</span>
+        <span>03 / 08</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide" id="slide-4">
+      <div class="slide-header">
+        <div class="slide-meta">04 / DEVELOPMENT APPROACH</div>
+        <h2 class="slide-title">제품보다 개발 과정에 더 큰 차이가 있다</h2>
+        <div class="slide-subtitle">원료 → 제조 → QC → 데이터가 이어지는 구조를 먼저 만든다.</div>
+        <div class="divider"></div>
+      </div>
+
+      <div class="slide-content">
+        <img src="images/diagram_engineering_loop.png" alt="데이터 기반 엔지니어링 프로세스 루프" class="diagram-img" style="max-height: 220px; margin-bottom: 12px;">
+
+        <div class="card" style="padding: 14px 20px;">
+          <div style="font-size: 13px; font-weight: 700; color: var(--accent-color); margin-bottom: 6px;">개발 원칙</div>
+          <ul class="feature-list" style="font-size: 11.5px;">
+            <li class="feature-item">• 원료 Lot 실측치 / 제조 공정 변수(온도·속도) / QC 측정값을 표준 스키마로 함께 기록</li>
+            <li class="feature-item">• 정량 QC(경도, 전이도)와 통계적 실험계획법(DOE)을 통해 배치 간 차이와 오차를 설명</li>
+            <li class="feature-item">• 실측 데이터가 쌓이면 다음 Formula를 시행착오 없이 체계적으로 최적화하는 폐루프 구축</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>GLIDE-SPEC 40 · Co-founder discussion</span>
+        <span>04 / 08</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide" id="slide-5">
+      <div class="slide-header">
+        <div class="slide-meta">05 / CURRENT STATUS</div>
+        <h2 class="slide-title">현재는 실제 Pilot을 준비하는 단계</h2>
+        <div class="slide-subtitle">엔지니어링 프레임워크는 구축됐고, 물리적 제조와 통계적 Qualification이 남아 있습니다.</div>
+        <div class="divider"></div>
+      </div>
+
+      <div class="slide-content">
+        <div class="grid-2" style="margin-bottom: 12px;">
+          <div class="card" style="padding: 12px 16px;">
+            <div style="font-size: 12.5px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">완료된 엔지니어링 자산</div>
+            <ul class="feature-list" style="font-size: 11px;">
+              <li class="feature-item">• Rev.7.3 baseline 확정 &nbsp;|&nbsp; 원료/배합 데이터 구조 &nbsp;|&nbsp; QC 측정 스키마</li>
+              <li class="feature-item">• DOE + Regression / Qualification &nbsp;|&nbsp; Optimization & Revision tracking</li>
+              <li class="feature-item">• 기초 시스템 테스트: <strong>31 / 31 unit tests pass</strong></li>
+            </ul>
+          </div>
+
+          <div class="card" style="padding: 12px 16px;">
+            <div style="font-size: 12.5px; font-weight: 700; color: var(--accent-color); margin-bottom: 4px;">현재 진행 위치 (Phase C)</div>
+            <div style="font-size: 11.5px; color: var(--text-body);">실제 원료를 계량·제조하고 QC 실측값을 확보하는 단계</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+              다음: 실제 원료 입고 &nbsp;→&nbsp; 18-run Pilot &nbsp;→&nbsp; QC 실측 &nbsp;→&nbsp; 통계적 Qualification
+            </div>
+          </div>
+        </div>
+
+        <img src="images/diagram_project_stage_gate.png" alt="프로젝트 마일스톤 게이트" class="diagram-img" style="max-height: 200px;">
+      </div>
+
+      <div class="slide-footer">
+        <span>GLIDE-SPEC 40 · Co-founder discussion</span>
+        <span>05 / 08</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide" id="slide-6">
+      <div class="slide-header">
+        <div class="slide-meta">06 / NEXT STEPS</div>
+        <h2 class="slide-title">이제부터는 실제 실행이 중요하다</h2>
+        <div class="slide-subtitle">Pilot 데이터가 확보되어야 제품과 Production Model을 함께 판단할 수 있습니다.</div>
+        <div class="divider"></div>
+      </div>
+
+      <div class="slide-content">
+        <div class="grid-7" style="margin-bottom: 16px;">
+          <div class="card" style="padding: 14px 10px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent-color);">01</div>
+            <div style="font-size: 12px; font-weight: 700; margin: 4px 0;">원료 공급사</div>
+            <div style="font-size: 10px; color: var(--text-muted);">CoA / 샘플 / Grade 확보</div>
+          </div>
+          <div class="card" style="padding: 14px 10px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent-color);">02</div>
+            <div style="font-size: 12px; font-weight: 700; margin: 4px 0;">제조·Pilot</div>
+            <div style="font-size: 10px; color: var(--text-muted);">소량 제조·시험 생산 파트너</div>
+          </div>
+          <div class="card" style="padding: 14px 10px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent-color);">03</div>
+            <div style="font-size: 12px; font-weight: 700; margin: 4px 0;">18-run Pilot</div>
+            <div style="font-size: 10px; color: var(--text-muted);">설계된 18개 배치 실행</div>
+          </div>
+          <div class="card" style="padding: 14px 10px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent-color);">04</div>
+            <div style="font-size: 12px; font-weight: 700; margin: 4px 0;">QC + 테스트</div>
+            <div style="font-size: 10px; color: var(--text-muted);">물성 실측 + 실제 필드 사용</div>
+          </div>
+          <div class="card" style="padding: 14px 10px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent-color);">05</div>
+            <div style="font-size: 12px; font-weight: 700; margin: 4px 0;">분석·최적화</div>
+            <div style="font-size: 10px; color: var(--text-muted);">회귀 / Formula refinement</div>
+          </div>
+          <div class="card" style="padding: 14px 10px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent-color);">06</div>
+            <div style="font-size: 12px; font-weight: 700; margin: 4px 0;">Confirmation</div>
+            <div style="font-size: 10px; color: var(--text-muted);">최종 재현성 검증 Run</div>
+          </div>
+          <div class="card" style="padding: 14px 10px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent-color);">07</div>
+            <div style="font-size: 12px; font-weight: 700; margin: 4px 0;">초기 생산</div>
+            <div style="font-size: 10px; color: var(--text-muted);">3,000개 목표 (COGS ~₩2,950)</div>
+          </div>
+        </div>
+
+        <div style="font-size: 11px; color: var(--text-muted); text-align: center;">
+          ※ Target 값은 실제 측정값이 아닙니다. Pilot 결과에 따라 수정될 수 있습니다.
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>GLIDE-SPEC 40 · Co-founder discussion</span>
+        <span>06 / 08</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 7 -->
+    <div class="slide" id="slide-7">
+      <div class="slide-header">
+        <div class="slide-meta">07 / BUSINESS DIRECTION</div>
+        <h2 class="slide-title">첫 제품에서 시작해 기능성 제품으로 확장</h2>
+        <div class="slide-subtitle">확정된 사업계획이 아니라, 첫 제품의 검증 이후 함께 발전시킬 장기 방향입니다.</div>
+        <div class="divider"></div>
+      </div>
+
+      <div class="slide-content">
+        <div class="grid-3" style="margin-bottom: 16px;">
+          <div class="card" style="padding: 22px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent-color); margin-bottom: 4px;">01</div>
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">GLIDE-SPEC 40</h3>
+            <p style="font-size: 12px; line-height: 1.5; color: var(--text-body);">
+              첫 제품 검증<br>초기 생산 목표 3,000개<br><br>
+              • 마라토너/행군 타깃의 명확한 효능 입증<br>
+              • 극단적 마찰 환경에서 코어 팬덤 구축
+            </p>
+          </div>
+
+          <div class="card" style="padding: 22px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent-color); margin-bottom: 4px;">02</div>
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">Sports / Outdoor Functional</h3>
+            <p style="font-size: 12px; line-height: 1.5; color: var(--text-body);">
+              기능성 라인업 확장<br>러닝 · 등산 · 사이클 · 군용<br><br>
+              • 땀/수분 제어, 쿨링, 피부 보호 제형<br>
+              • 구축된 배합 데이터베이스 재활용
+            </p>
+          </div>
+
+          <div class="card" style="padding: 22px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--accent-color); margin-bottom: 4px;">03</div>
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">Data-based Development</h3>
+            <p style="font-size: 12px; line-height: 1.5; color: var(--text-body);">
+              재사용 가능한 개발 구조<br>포뮬레이션 플랫폼 자산화<br><br>
+              • 원료-공정-QC 데이터베이스 자산화<br>
+              • 신제품 개발 주기 및 R&D 비용 획기적 절감
+            </p>
+          </div>
+        </div>
+
+        <div style="background: var(--card-bg); border-left: 3px solid var(--accent-color); padding: 10px 16px;">
+          <div style="font-size: 11.5px; color: var(--text-body);">
+            시장 규모나 매출 전망은 아직 넣지 않습니다. 첫 제품의 실제 제조·사용·판매 검증이 먼저입니다.
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>GLIDE-SPEC 40 · Co-founder discussion</span>
+        <span>07 / 08</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 8 -->
+    <div class="slide" id="slide-8">
+      <div class="slide-header">
+        <div class="slide-meta">08 / COFOUNDER</div>
+        <h2 class="slide-title">지금부터 필요한 것은 실제 실행</h2>
+        <div class="slide-subtitle">현재 기술 개발 기준과 데이터 구조를 실제 제품과 사업으로 연결할 파트너가 필요합니다.</div>
+        <div class="divider"></div>
+      </div>
+
+      <div class="slide-content">
+        <div class="grid-2" style="margin-bottom: 16px;">
+          <div class="card" style="padding: 20px;">
+            <h3 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">필요한 실행 역량</h3>
+            <ul class="feature-list" style="font-size: 12px;">
+              <li class="feature-item">• 제조사 / 원료사 네트워크 (소통 및 견적 협상)</li>
+              <li class="feature-item">• Pilot 제조 및 샘플 현장 관리</li>
+              <li class="feature-item">• 사용자 필드 테스트 / 시장 검증 (러닝 크루 / 군 장병)</li>
+              <li class="feature-item">• 초기 판매 및 유통 채널 (크라우드펀딩 / D2C)</li>
+              <li class="feature-item">• 사업 운영 및 전체 마일스톤 일정 관리</li>
+            </ul>
+          </div>
+
+          <div class="card" style="padding: 20px;">
+            <h3 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">함께 결정할 것</h3>
+            <ul class="feature-list" style="font-size: 12px;">
+              <li class="feature-item">• 역할 분담 (R&D/시스템 vs 사업개발/운영)</li>
+              <li class="feature-item">• 제조 방식 (자체 연구소 조제 vs 외주 OEM)</li>
+              <li class="feature-item">• 초기 자금과 예산 배분 계획</li>
+              <li class="feature-item">• 초기 시장 진입 방식 (러너 커뮤니티 vs 군수/아웃도어)</li>
+              <li class="feature-item">• 첫 생산(3,000개 목표) 및 판매 계획 확정</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout-box" style="text-align: center;">
+          <span style="font-size: 13.5px; font-weight: 700; color: var(--text-main);">
+            “이제 이 프로젝트를 실제 제품과 사업으로 만들어가는 단계입니다.”
+          </span>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>GLIDE-SPEC 40 · Co-founder discussion</span>
+        <span>08 / 08</span>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
