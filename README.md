@@ -1,5 +1,14 @@
 # GLIDE-SPEC 40 (초경량 테크니컬 건식 윤활 밤)
-## Formulation Simulator & Development System (v1.0 Production Baseline)
+## Physical Product Development & Qualification System
+
+> **PRODUCT DEFINITION LOCK — DO NOT MISCLASSIFY**  
+> **GLIDE-SPEC 40은 소프트웨어가 아니라 실제 판매를 위한 물리적 소비자 제품입니다.**  
+> **제품:** 20 g Powder-in-Balm Technical Anti-Chafing Stick  
+> **주기능:** 장시간 신체활동 중 마찰 감소 및 쓸림(Chafing) 방지  
+> **주요 사용:** 러닝·마라톤/트레일 및 군장 행군 등 장시간 활동  
+> **초기 생산 목표:** 3,000개  
+> **명시적 제외:** Simulator / Simulation Software / Simulation Service / Formulation-Prediction SaaS / AI Formulation Platform  
+> 저장소의 시뮬레이터·회귀·DOE·벤치마크·Qualification 코드는 **물리 제품을 개발·최적화·검증하기 위한 개발 도구**이며 상용 제품 자체가 아닙니다. 상세 정의는 [`PRODUCT_DEFINITION_LOCK.md`](./PRODUCT_DEFINITION_LOCK.md)를 기준으로 합니다.
 
 > **Official Project Stage:** `Phase C — Physical Pilot Execution / Statistical Qualification Pending`  
 > **Engineering Framework Status:** `Frozen at Commit e71f2b0; Qualification Engine Operational`  
